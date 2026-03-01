@@ -18,7 +18,7 @@ interface UserModalProps {
 }
 
 const UserModal = ({ visible, setVisible }: UserModalProps) => {
-  const { accessToken, updateAccessToken } = useGlobalContext();
+  const { accessToken, updateAccessToken, updateModules } = useGlobalContext();
   const [dispEmail, setDispEmail] = useState("");
   const [processing, setProcessing] = useState(false);
 
@@ -60,6 +60,7 @@ const UserModal = ({ visible, setVisible }: UserModalProps) => {
     await SecureStore.deleteItemAsync(storageKeys.passkey);
     await SecureStore.deleteItemAsync(storageKeys.token);
     updateAccessToken("");
+    updateModules([]);
 
     navigation.navigate(routeNames.signup);
 
