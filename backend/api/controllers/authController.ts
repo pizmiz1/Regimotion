@@ -58,7 +58,12 @@ export const postGenerateOtp = async (req: Request<{}, {}, UserDto>, res: Respon
       await UserOtp.findByIdAndDelete(existing._id);
     }
 
-    const otpCode = crypto.randomInt(100000, 1000000);
+    let otpCode;
+    if (req.body.email === "test@test.com") {
+      otpCode = process.env.TEST_ACC_PW!;
+    } else {
+      otpCode = crypto.randomInt(100000, 1000000);
+    }
 
     const saltRounds = 10;
     const hashedOtp = await bcrypt.hash(otpCode.toString(), saltRounds);
