@@ -133,7 +133,7 @@ const SplashScreen = () => {
     <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary }}>
       <StatusBar style="light" />
       <Animated.Image
-        style={{ width: "0%", height: "35%", aspectRatio: 1, marginBottom: "20%", transform: [{ scale: scaleAnim }], opacity: opacityAnim }}
+        style={{ width: "0%", height: "50%", aspectRatio: 1, marginBottom: "10%", transform: [{ scale: scaleAnim }], opacity: opacityAnim }}
         source={require("./../assets/logo-clear.png")}
       ></Animated.Image>
       <Text style={{ fontFamily: "Main-Font", fontSize: 20, color: colors.lightest_grey, opacity: initialAnim ? 0 : 1 }}>Hang tight{dots}</Text>

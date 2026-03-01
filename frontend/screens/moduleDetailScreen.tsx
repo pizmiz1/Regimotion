@@ -30,12 +30,12 @@ const ModuleDetailScreen = () => {
   const [blurActive, setBlurActive] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
   const [disableScroll, setDisableScroll] = useState(false);
   const [adding, setAdding] = useState(false);
   const [deleteTrigger, setDeleteTrigger] = useState(false);
   const [exerciseActive, setExerciseActive] = useState(false);
 
+  const activeIndex = useRef(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const lottieAnimRef = useRef<LottieView>(null);
   const firstRender = useRef(true);
@@ -67,7 +67,7 @@ const ModuleDetailScreen = () => {
 
     const indexToSet = finished ? module.exercises.length : index;
 
-    setActiveIndex(indexToSet);
+    activeIndex.current = indexToSet;
 
     if (firstRender.current) {
       moveAnim.setValue(indexToSet * 80);
@@ -178,7 +178,7 @@ const ModuleDetailScreen = () => {
         } else {
           animations.push(
             Animated.timing(viewOpacities[index], {
-              toValue: index < activeIndex ? 0.4 : 1,
+              toValue: index < activeIndex.current ? 0.4 : 1,
               duration: 400,
               useNativeDriver: true,
             }),
@@ -190,7 +190,7 @@ const ModuleDetailScreen = () => {
     if (finish) {
       Animated.parallel(animations).start(() => {
         Animated.spring(moveAnim, {
-          toValue: (activeIndex + 1) * 80,
+          toValue: (activeIndex.current + 1) * 80,
           useNativeDriver: true,
           friction: 8,
           tension: 40,
@@ -214,15 +214,15 @@ const ModuleDetailScreen = () => {
   };
 
   const completePress = async () => {
-    const finished = activeIndex + 1 === module.exercises.length;
+    const finished = activeIndex.current + 1 === module.exercises.length;
 
     const animations = [
-      Animated.timing(viewOpacities[activeIndex], {
+      Animated.timing(viewOpacities[activeIndex.current], {
         toValue: 0.4,
         duration: 400,
         useNativeDriver: true,
       }),
-      Animated.timing(circleOpacities[activeIndex], {
+      Animated.timing(circleOpacities[activeIndex.current], {
         toValue: 1,
         duration: 400,
         useNativeDriver: true,
@@ -240,7 +240,7 @@ const ModuleDetailScreen = () => {
     } else {
       animations.push(
         Animated.spring(moveAnim, {
-          toValue: (activeIndex + 1) * 80,
+          toValue: (activeIndex.current + 1) * 80,
           useNativeDriver: true,
           friction: 8,
           tension: 40,
@@ -248,36 +248,27 @@ const ModuleDetailScreen = () => {
       );
     }
 
-    Animated.parallel(animations).start(() => {
+    Animated.parallel(animations, { stopTogether: false }).start(() => {
       if (finished) {
-        Animated.spring(moveAnim, {
-          toValue: (activeIndex + 1) * 80,
+        setDisableScroll(true);
+        Animated.timing(lottieAnim, {
+          toValue: 1,
+          duration: 400,
+          delay: 200,
           useNativeDriver: true,
-          friction: 8,
-          tension: 40,
-        }).start();
+        }).start(() => {
+          lottieAnimRef.current!.play();
+        });
       }
     });
 
-    if (finished) {
-      setDisableScroll(true);
-      Animated.timing(lottieAnim, {
-        toValue: 1,
-        duration: 400,
-        delay: 200,
-        useNativeDriver: true,
-      }).start(() => {
-        lottieAnimRef.current!.play();
-      });
-    }
-
-    module.exercises[activeIndex].completed = true;
+    module.exercises[activeIndex.current].completed = true;
     module.progress = module.progress + 100 / module.exercises.length;
 
     const success = await patchModule(module);
 
     if (success) {
-      setActiveIndex(activeIndex + 1);
+      activeIndex.current = activeIndex.current + 1;
     }
   };
 
@@ -413,7 +404,7 @@ const ModuleDetailScreen = () => {
             circleOpacity={circleOpacities[index]}
             last={index === module.exercises.length - 1 && !adding}
             hideActive={doneAnim}
-            active={activeIndex === index && exerciseActive}
+            active={activeIndex.current === index && exerciseActive}
             deleteCallback={(index: number) => {
               circleOpacities.splice(index, 1);
               viewOpacities.splice(index, 1);
@@ -468,7 +459,7 @@ const ModuleDetailScreen = () => {
             transform: [{ translateY: moveAnim }, { scale: moveScale }],
           }}
         >
-          <TouchableOpacity onPress={completePress} disabled={activeIndex + 1 > module.exercises.length || adding}>
+          <TouchableOpacity onPress={completePress} disabled={activeIndex.current + 1 > module.exercises.length || adding}>
             <Animated.View
               style={{
                 width: 30,

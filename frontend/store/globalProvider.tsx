@@ -29,11 +29,12 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
       return false;
     }
 
-    let newModules = [];
-    const index = modules.findIndex((curr) => curr.id === updatedModule.id);
-    modules[index] = response.data!;
-    newModules = modules;
-    setModules(newModules);
+    const newModules = [...modules];
+    const index = newModules.findIndex((curr) => curr.id === updatedModule.id);
+    if (index !== -1) {
+      newModules[index] = response.data!;
+      setModules(newModules);
+    }
 
     return true;
   };
