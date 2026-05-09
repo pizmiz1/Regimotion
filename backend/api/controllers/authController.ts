@@ -144,12 +144,22 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
     const hasedPasskey = await bcrypt.hash(passkey, saltRounds);
 
     const newUser = new User({ email: req.body.email, passkey: hasedPasskey });
-    const newUserSettings = new UserSettings({ userEmail: req.body.email, enableCompleteAnimation: true });
 
     await session.withTransaction(async () => {
       await UserOtp.findByIdAndDelete(userOtp._id, { session });
       await newUser.save({ session });
-      await newUserSettings.save({ session });
+
+      const existingUserSettings = await UserSettings.findOne({ userEmail: req.body.email });
+      if (!existingUserSettings) {
+        const newUserSettings = new UserSettings({
+          userEmail: req.body.email,
+          userName: "new monkey",
+          userColor: "red",
+          enableCompleteAnimation: true,
+          enableHoldComplete: false,
+        });
+        await newUserSettings.save({ session });
+      }
     });
 
     const accessDto: AccessDto = { email: req.body.email, passkey: passkey };

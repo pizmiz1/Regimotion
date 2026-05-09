@@ -5,6 +5,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { ModuleDto } from "../../../shared/moduledto";
 import { ComponentProps } from "react";
 import * as Progress from "react-native-progress";
+import { useGlobalContext } from "../../store/globalContext";
 
 interface ModuleProps {
   module: ModuleDto;
@@ -17,6 +18,8 @@ interface ModuleProps {
 }
 
 const Module = ({ module, style, onPress, disabled = false, blank = false, progress, dailyMod }: ModuleProps) => {
+  const { userSettings, accessToken, updateAccessToken, patchModule } = useGlobalContext();
+
   let color1;
   let color2 = module.color;
   if (blank) {
@@ -34,6 +37,20 @@ const Module = ({ module, style, onPress, disabled = false, blank = false, progr
     color1 = "#333438";
     color2 = "#333438";
   }
+
+  const holdComplete = async () => {
+    const prevProgress = module.progress;
+
+    module.exercises.forEach((curr) => (curr.completed = true));
+    module.progress = 100;
+
+    const success = await patchModule(module);
+
+    if (!success) {
+      module.exercises.forEach((curr) => (curr.completed = false));
+      module.progress = prevProgress;
+    }
+  };
 
   const dayDisplayer = () => {
     let dayDisplay = "";
@@ -206,7 +223,12 @@ const Module = ({ module, style, onPress, disabled = false, blank = false, progr
 
   return (
     <View>
-      <TouchableOpacity onPress={onPress} disabled={disabled} style={{ overflow: "hidden" }}>
+      <TouchableOpacity
+        onPress={onPress}
+        disabled={disabled}
+        style={{ overflow: "hidden" }}
+        onLongPress={userSettings.enableHoldComplete ? holdComplete : undefined}
+      >
         {ModuleContent()}
       </TouchableOpacity>
     </View>

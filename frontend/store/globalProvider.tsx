@@ -14,7 +14,13 @@ interface GlobalProviderProps {
 const GlobalProvider = ({ children }: GlobalProviderProps) => {
   const [accessToken, setAccessToken] = useState("");
   const [modules, setModules] = useState<ModuleDto[]>([]);
-  const [userSettings, setUserSettings] = useState<UserSettingsDto>({ userEmail: "", enableCompleteAnimation: false });
+  const [userSettings, setUserSettings] = useState<UserSettingsDto>({
+    userEmail: "",
+    userName: "",
+    userColor: "",
+    enableCompleteAnimation: true,
+    enableHoldComplete: false,
+  });
 
   const updateAccessToken = (newAccesstoken: string) => {
     setAccessToken(newAccesstoken);
@@ -46,7 +52,7 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
   };
 
   const patchUserSettings = async (updatedUserSettings: UserSettingsDto): Promise<boolean> => {
-    const response: JsonDto<ModuleDto> = await patch("/userSettings", updatedUserSettings, {
+    const response: JsonDto<UserSettingsDto> = await patch("/userSettings", updatedUserSettings, {
       accessToken: accessToken,
       updateAccessToken: updateAccessToken,
     });
@@ -55,7 +61,7 @@ const GlobalProvider = ({ children }: GlobalProviderProps) => {
       return false;
     }
 
-    setUserSettings(updatedUserSettings);
+    setUserSettings({ ...updatedUserSettings });
 
     return true;
   };
