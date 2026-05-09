@@ -20,7 +20,6 @@ interface PageContainerProps {
   header: string;
   setBlurActive: (active: boolean) => void;
   backButton?: boolean;
-  backButtonRoute?: string;
   backButtonDisabled?: boolean;
   backButtonStyle?: ViewStyle;
   disableScroll?: boolean;
@@ -36,7 +35,6 @@ const PageContainer = ({
   header,
   setBlurActive,
   backButton,
-  backButtonRoute,
   backButtonDisabled,
   backButtonStyle,
   disableScroll,
@@ -90,7 +88,7 @@ const PageContainer = ({
 
   const headerButtonPress = () => {
     if (backButton) {
-      navigation.navigate(backButtonRoute as never);
+      navigation.goBack();
     } else if (userButton) {
       navigation.navigate(routeNames.account as never);
     }

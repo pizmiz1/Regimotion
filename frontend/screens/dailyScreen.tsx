@@ -162,7 +162,7 @@ const DailyScreen = () => {
                   module={module}
                   onPress={() => {
                     // @ts-ignore
-                    navigation.navigate(routeNames.moduleDetail, { moduleId: module.id, prevRoute: routeNames.daily });
+                    navigation.navigate(routeNames.moduleDetail, { moduleId: module.id });
                   }}
                   progress={module.progress}
                   dailyMod={true}

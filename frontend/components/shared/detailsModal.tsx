@@ -193,7 +193,7 @@ const DetailsModal = ({ visible, setVisible, module }: DetailsModalProps) => {
 
       updateModules(newModules);
       // @ts-ignore
-      navigation.navigate(routeNames.moduleDetail, { moduleId: response.data.id, prevRoute: routeNames.module });
+      navigation.navigate(routeNames.moduleDetail, { moduleId: response.data.id });
     }
 
     closeModal(false);

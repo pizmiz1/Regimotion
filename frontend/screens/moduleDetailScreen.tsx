@@ -17,7 +17,7 @@ import ReorderExercise from "../components/moduleDetail/reorderExercise";
 const ModuleDetailScreen = () => {
   const route = useRoute();
   // @ts-ignore
-  const { moduleId, prevRoute }: { moduleId: string; prevRoute: string } = route.params;
+  const { moduleId }: { moduleId: string } = route.params;
 
   const { modules, patchModule, userSettings } = useGlobalContext();
   const module = modules.find((x) => x.id === moduleId)!;
@@ -359,7 +359,6 @@ const ModuleDetailScreen = () => {
       header={module.name}
       setBlurActive={setBlurActive}
       backButton={true}
-      backButtonRoute={prevRoute}
       backButtonDisabled={editing}
       backButtonStyle={{ opacity: editing ? 0.4 : 1 }}
       disableScroll={disableScroll}
@@ -391,7 +390,7 @@ const ModuleDetailScreen = () => {
         visible={modalVisible}
         setVisible={(deleted: boolean) => {
           if (deleted) {
-            navigation.navigate(prevRoute as never);
+            navigation.goBack();
           } else {
             setEditing(false);
           }

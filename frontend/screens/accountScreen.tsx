@@ -148,7 +148,6 @@ const AccountScreen = () => {
       header="Account"
       setBlurActive={setBlurActive}
       backButton={true}
-      backButtonRoute={routeNames.daily}
       backButtonDisabled={loading}
       backButtonStyle={{ opacity: loading ? 0.6 : 1 }}
     >

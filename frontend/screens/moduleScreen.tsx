@@ -28,7 +28,7 @@ const ModuleScreen = () => {
   }, [blurActive]);
 
   return (
-    <PageContainer header="Modules" setBlurActive={setBlurActive} backButton={true} backButtonRoute={routeNames.daily}>
+    <PageContainer header="Modules" setBlurActive={setBlurActive} backButton={true}>
       <DetailsModal
         visible={modalVisible}
         setVisible={(deleted: boolean) => {
@@ -68,7 +68,7 @@ const ModuleScreen = () => {
             module={module}
             onPress={() => {
               // @ts-ignore
-              navigation.navigate(routeNames.moduleDetail, { moduleId: module.id, prevRoute: routeNames.module });
+              navigation.navigate(routeNames.moduleDetail, { moduleId: module.id });
             }}
             dailyMod={false}
           />
