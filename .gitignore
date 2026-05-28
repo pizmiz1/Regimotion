@@ -2,6 +2,13 @@
 
 # dependencies
 node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
 
 # Expo
 .expo/
@@ -12,6 +19,16 @@ ips.tsx
 
 # Node/Express
 .env
+
+# next.js
+.next/
+out/
+
+# production
+build/
+
+# vercel
+.vercel
 
 # Native
 .kotlin/
@@ -39,6 +56,7 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+next-env.d.ts
 
 # generated native folders
 /ios
