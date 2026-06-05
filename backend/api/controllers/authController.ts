@@ -12,6 +12,7 @@ import mailgun, { Options } from "nodemailer-mailgun-transport";
 import Module from "../schema/module.js";
 import UserSettings from "../schema/userSettings.js";
 import mongoose from "mongoose";
+import OldPasskey from "../schema/oldPasskey.js";
 
 const mailgunAuth: Options = {
   auth: {
@@ -22,30 +23,54 @@ const mailgunAuth: Options = {
 
 const transporter = nodemailer.createTransport(mailgun(mailgunAuth));
 
-export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto<string>>) => {
+export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto<AccessDto>>) => {
+  const session = await mongoose.startSession();
+
   try {
-    const users = await User.find({ email: req.body.email });
+    const email = req.body.email;
+    const passKey = req.body.passkey;
 
-    if (users.length === 0) {
-      return res.status(401).json({ error: "User not found" });
-    }
+    const hashedPasskey = crypto.createHash("sha256").update(passKey).digest("hex");
 
-    let match = false;
+    const user = await User.findOne({ email: email, passkey: hashedPasskey });
 
-    for (const user of users) {
-      match = await bcrypt.compare(req.body.passkey, user.passkey);
-      if (match) {
-        break;
+    if (!user) {
+      const previousUsed = await OldPasskey.findOne({ passkey: hashedPasskey });
+
+      // CRITICAL - Auth Breach
+      if (previousUsed) {
+        console.log("!!!!!!! CRITICAL AUTH BREACH - WIPING SESSIONS !!!!!!!");
+
+        await session.withTransaction(async () => {
+          await User.deleteMany({ email: email }, { session });
+        });
+
+        return res.status(403).json({ error: "Malicious activity detected" });
       }
+
+      // Must re-login
+      return res.status(403).json({ error: "Invalid user" });
     }
 
-    if (!match) {
-      return res.status(403).json({ error: "Invalid passkey" });
-    }
+    // Success
+    const oldPasskey = user.passkey;
+    const newOldPasskey = new OldPasskey({
+      email: email,
+      passkey: oldPasskey,
+    });
+
+    const passkeys = generateHashedPasskey();
+
+    user.passkey = passkeys.hashedPasskey;
 
     const token = jwt.sign(req.body, process.env.JWT_SECRET_KEY!, { expiresIn: process.env.JWT_EXPIRES_IN! as any });
 
-    res.status(200).json({ data: token });
+    await session.withTransaction(async () => {
+      await newOldPasskey.save({ session });
+      await user.save({ session });
+    });
+
+    res.status(200).json({ data: { email: email, passkey: passkeys.passkey, accessToken: token } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
@@ -131,19 +156,9 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
       return res.status(403).json({ error: "Invalid otp" });
     }
 
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~";
-    let passkey = "";
+    const passkeys = generateHashedPasskey();
 
-    const randomBytes = crypto.randomBytes(16);
-
-    for (let i = 0; i < 16; i++) {
-      passkey += charset[randomBytes[i] % charset.length];
-    }
-
-    const saltRounds = 10;
-    const hasedPasskey = await bcrypt.hash(passkey, saltRounds);
-
-    const newUser = new User({ email: req.body.email, passkey: hasedPasskey });
+    const newUser = new User({ email: req.body.email, passkey: passkeys.hashedPasskey });
 
     await session.withTransaction(async () => {
       await UserOtp.findByIdAndDelete(userOtp._id, { session });
@@ -162,7 +177,7 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
       }
     });
 
-    const accessDto: AccessDto = { email: req.body.email, passkey: passkey };
+    const accessDto: AccessDto = { email: req.body.email, passkey: passkeys.passkey };
 
     res.status(200).json({ data: accessDto });
   } catch (err) {
@@ -243,4 +258,21 @@ export const postDeleteAccount = async (req: Request<{}, {}, AccessDto>, res: Re
   } finally {
     await session.endSession();
   }
+};
+
+interface passkeyReturnType {
+  passkey: string;
+  hashedPasskey: string;
+}
+
+const generateHashedPasskey = (): passkeyReturnType => {
+  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~";
+  let passkey = "";
+  const randomBytes = crypto.randomBytes(16);
+  for (let i = 0; i < 16; i++) {
+    passkey += charset[randomBytes[i] % charset.length];
+  }
+  const hashedPasskey = crypto.createHash("sha256").update(passkey).digest("hex");
+
+  return { passkey: passkey, hashedPasskey: hashedPasskey };
 };
