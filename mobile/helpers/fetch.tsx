@@ -3,7 +3,6 @@ import { JsonDto } from "../../shared/jsondto";
 import * as SecureStore from "expo-secure-store";
 import storageKeys from "../constants/storageKeys";
 import { AccessDto } from "../../shared/accessdto";
-import { errorAlert } from "./alert";
 import { AccessTokenType } from "../types/accessTokenType";
 import { ips } from "../constants/ips";
 
@@ -14,7 +13,7 @@ const silentAccess = async (
   accessToken: string,
   updateAccessToken: (newAccessToken: string) => void,
   firstLoad?: boolean,
-): Promise<string | undefined> => {
+): Promise<string | undefined | boolean> => {
   const decodedToken = jwtDecode(accessToken);
   const currentTime = Date.now() / 1000;
   const expired = decodedToken.exp! < currentTime;
@@ -24,17 +23,20 @@ const silentAccess = async (
     const passkey = await SecureStore.getItemAsync(storageKeys.passkey);
 
     const accessTokenBody: AccessDto = { email: email!, passkey: passkey! };
-    const response: JsonDto<string> = await post("/auth/accessToken", accessTokenBody);
+    const response: JsonDto<AccessDto> = await post("/auth/accessToken", accessTokenBody);
 
     if (response.error) {
-      errorAlert(response.error);
+      return false;
+    }
+
+    if (!response.data?.accessToken) {
       return;
     }
 
-    const token = response.data!;
-    await SecureStore.setItemAsync(storageKeys.token, token);
-    updateAccessToken(token);
-    return token;
+    await SecureStore.setItemAsync(storageKeys.passkey, response.data!.passkey);
+    await SecureStore.setItemAsync(storageKeys.token, response.data!.accessToken);
+    updateAccessToken(response.data!.accessToken);
+    return response.data!.accessToken;
   } else if (firstLoad) {
     updateAccessToken(accessToken);
   }
@@ -82,6 +84,9 @@ export const get = async (path: string, accessTokenType: AccessTokenType, params
   }
 
   const newToken = await silentAccess(accessTokenType.accessToken, accessTokenType.updateAccessToken, firstLoad);
+  if (newToken === false) {
+    return { error: "Error validating token" };
+  }
   const response = await fetch(apiUrl, {
     method: "GET",
     headers: {

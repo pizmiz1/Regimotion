@@ -120,6 +120,7 @@ const SplashScreen = () => {
       const response: JsonDto<any> = await get("/", { accessToken: token, updateAccessToken: updateAccessToken }, undefined, true);
       if (response.error) {
         errorAlert(response.error);
+        navigation.navigate(routeNames.signup);
         return;
       }
 

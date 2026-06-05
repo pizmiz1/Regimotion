@@ -89,7 +89,7 @@ const SignupScreen = () => {
         email: email,
         passkey: response.data!.passkey,
       };
-      const accessResponse: JsonDto<string> = await post("/auth/accessToken", accessBody);
+      const accessResponse: JsonDto<AccessDto> = await post("/auth/accessToken", accessBody);
 
       if (accessResponse.error) {
         errorAlert(accessResponse.error);
@@ -97,11 +97,17 @@ const SignupScreen = () => {
         return;
       }
 
-      await SecureStore.setItemAsync(storageKeys.email, email);
-      await SecureStore.setItemAsync(storageKeys.passkey, response.data!.passkey);
-      await SecureStore.setItemAsync(storageKeys.token, accessResponse.data!);
+      if (!accessResponse.data!.accessToken) {
+        errorAlert("Access Token Undefined");
+        resetState();
+        return;
+      }
 
-      updateAccessToken(accessResponse.data!);
+      await SecureStore.setItemAsync(storageKeys.email, email);
+      await SecureStore.setItemAsync(storageKeys.passkey, accessResponse.data!.passkey);
+      await SecureStore.setItemAsync(storageKeys.token, accessResponse.data!.accessToken);
+
+      updateAccessToken(accessResponse.data!.accessToken);
 
       setLoading(false);
       resetState();
