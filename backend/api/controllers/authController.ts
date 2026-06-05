@@ -190,27 +190,15 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
 
 export const postSignOut = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto<any>>) => {
   try {
-    const users = await User.find({ email: req.user!.email });
+    const hashedPasskey = crypto.createHash("sha256").update(req.body.passkey).digest("hex");
 
-    if (users.length === 0) {
-      return res.status(401).json({ error: "User not found" });
+    const user = await User.findOne({ email: req.user!.email, passkey: hashedPasskey });
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid user" });
     }
 
-    let matchedUser;
-
-    for (const user of users) {
-      const match = await bcrypt.compare(req.body.passkey, user.passkey);
-      if (match) {
-        matchedUser = user;
-        break;
-      }
-    }
-
-    if (!matchedUser) {
-      return res.status(403).json({ error: "Invalid passkey" });
-    }
-
-    await matchedUser.deleteOne();
+    await user.deleteOne();
 
     res.status(200).json({});
   } catch (err) {
@@ -223,28 +211,18 @@ export const postDeleteAccount = async (req: Request<{}, {}, AccessDto>, res: Re
   const session = await mongoose.startSession();
 
   try {
-    const users = await User.find({ email: req.user!.email });
+    const hashedPasskey = crypto.createHash("sha256").update(req.body.passkey).digest("hex");
 
-    if (users.length === 0) {
-      return res.status(401).json({ error: "User not found" });
+    const user = await User.findOne({ email: req.user!.email, passkey: hashedPasskey });
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid user" });
     }
 
-    let validUser;
-
-    for (const user of users) {
-      const match = await bcrypt.compare(req.body.passkey, user.passkey);
-      if (match) {
-        validUser = user;
-        break;
-      }
-    }
-
-    if (!validUser) {
-      return res.status(403).json({ error: "Invalid passkey" });
-    }
+    const allUsers = await User.find({ email: req.user!.email });
 
     await session.withTransaction(async () => {
-      for (const user of users) {
+      for (const user of allUsers) {
         await user.deleteOne({ session });
       }
       await Module.deleteMany({ userEmail: req.user!.email }, { session });
