@@ -41,8 +41,18 @@ export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Resp
       if (previousUsed) {
         console.log("!!!!!!! CRITICAL AUTH BREACH - WIPING SESSIONS !!!!!!!");
 
+        const allUsers = await User.find({ email: req.user!.email });
+
         await session.withTransaction(async () => {
-          await User.deleteMany({ email: email }, { session });
+          for (const user of allUsers) {
+            const newOldPasskey = new OldPasskey({
+              email: user.email,
+              passkey: user.passkey,
+            });
+
+            await newOldPasskey.save({ session });
+            await user.deleteOne({ session });
+          }
         });
 
         return res.status(403).json({ error: "Malicious activity detected" });
@@ -74,6 +84,8 @@ export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Resp
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
+  } finally {
+    await session.endSession();
   }
 };
 
@@ -189,6 +201,8 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
 };
 
 export const postSignOut = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto<any>>) => {
+  const session = await mongoose.startSession();
+
   try {
     const hashedPasskey = crypto.createHash("sha256").update(req.body.passkey).digest("hex");
 
@@ -198,12 +212,22 @@ export const postSignOut = async (req: Request<{}, {}, AccessDto>, res: Response
       return res.status(401).json({ error: "Invalid user" });
     }
 
-    await user.deleteOne();
+    const newOldPasskey = new OldPasskey({
+      email: req.user!.email,
+      passkey: hashedPasskey,
+    });
+
+    await session.withTransaction(async () => {
+      await newOldPasskey.save({ session });
+      await user.deleteOne({ session });
+    });
 
     res.status(200).json({});
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
+  } finally {
+    await session.endSession();
   }
 };
 
@@ -223,6 +247,12 @@ export const postDeleteAccount = async (req: Request<{}, {}, AccessDto>, res: Re
 
     await session.withTransaction(async () => {
       for (const user of allUsers) {
+        const newOldPasskey = new OldPasskey({
+          email: user.email,
+          passkey: user.passkey,
+        });
+
+        await newOldPasskey.save({ session });
         await user.deleteOne({ session });
       }
       await Module.deleteMany({ userEmail: req.user!.email }, { session });
