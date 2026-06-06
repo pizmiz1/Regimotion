@@ -5,10 +5,17 @@ interface UserDtoBackend extends UserDto {
   passkey: string;
 }
 
-const userSchema = new mongoose.Schema<UserDtoBackend>({
-  email: { type: String, required: true },
-  passkey: { type: String, required: true, unique: true },
-});
+const userSchema = new mongoose.Schema<UserDtoBackend>(
+  {
+    email: { type: String, required: true },
+    passkey: { type: String, required: true, unique: true },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+userSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 5184000 }); // 60 Days if not updated
 
 const User = mongoose.model("User", userSchema);
 
