@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema<UserDtoBackend>(
   },
 );
 
-userSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 5184000 }); // 60 Days if not updated
+userSchema.index({ updatedAt: 1 }, { expireAfterSeconds: 15552000 }); // 180 Days if not updated
 
 const User = mongoose.model("User", userSchema);
 
