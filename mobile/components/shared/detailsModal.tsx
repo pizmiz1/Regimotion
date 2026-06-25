@@ -1,5 +1,5 @@
 import { ComponentProps, useContext, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Animated, FlatList, Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, Animated, FlatList, Modal, Pressable, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
 import { useGlobalContext } from "../../store/globalContext";
 import colors from "../../constants/colors";
 import Input from "./input";
@@ -42,6 +42,8 @@ const DetailsModal = ({ visible, setVisible, module }: DetailsModalProps) => {
   const [icon, setIcon] = useState("");
   const [saving, setSaving] = useState(false);
   const [color, setColor] = useState("");
+
+  const { height: screenHeight } = useWindowDimensions();
 
   const navigation = useNavigation();
 
@@ -392,7 +394,12 @@ const DetailsModal = ({ visible, setVisible, module }: DetailsModalProps) => {
           </View>
 
           <Text style={{ color: "white", fontFamily: "Main-Font", fontWeight: "500", fontSize: 20, marginTop: 15 }}>Icon</Text>
-          <View style={{ marginTop: 5, height: 150 }}>
+          <View
+            style={{
+              marginTop: 5,
+              height: screenHeight < 700 ? 150 : 310,
+            }}
+          >
             <FlatList
               ref={flatListRef}
               data={availableIcons}
