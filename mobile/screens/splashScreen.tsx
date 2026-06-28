@@ -124,6 +124,7 @@ const SplashScreen = () => {
         return;
       }
 
+      // Testing
       navigation.navigate(routeNames.daily);
     };
 

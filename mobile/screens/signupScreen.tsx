@@ -1,9 +1,8 @@
 import { ActivityIndicator, Keyboard, Text, TouchableWithoutFeedback, View } from "react-native";
 import colors from "../constants/colors";
 import Input from "../components/shared/input";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Button from "../components/shared/button";
-import { OtpInput } from "react-native-otp-entry";
 import { LinearGradient } from "expo-linear-gradient";
 import { OtpDto } from "../../shared/otpdto";
 import { UserDto } from "../../shared/userdto";
@@ -17,6 +16,7 @@ import { useGlobalContext } from "../store/globalContext";
 import { useNavigation } from "@react-navigation/native";
 import routeNames from "../constants/routeNames";
 import { opacityLayout } from "../helpers/layouts";
+import { OTPInput, OTPInputRef } from "input-otp-native";
 
 const SignupScreen = () => {
   const { updateAccessToken } = useGlobalContext();
@@ -27,6 +27,8 @@ const SignupScreen = () => {
   const [otp, setOtp] = useState("");
   const [resetEmailInput, setResetEmailInput] = useState(false);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
+
+  const otpRef = useRef<OTPInputRef>(null);
 
   const navigation = useNavigation();
 
@@ -39,7 +41,7 @@ const SignupScreen = () => {
     setLoading(false);
   };
 
-  const submit = async () => {
+  const submit = async (fullOtpValue?: string) => {
     if (!verifyingOtp) {
       if (!emailValid) {
         return;
@@ -70,12 +72,13 @@ const SignupScreen = () => {
 
       setVerifyingOtp(true);
     } else {
+      otpRef.current?.blur();
       opacityLayout();
       setLoading(true);
 
       const body: OtpDto = {
         email: email,
-        otp: otp,
+        otp: fullOtpValue,
       };
       const response: JsonDto<AccessDto> = await post("/auth/verifyOtp", body);
 
@@ -173,19 +176,43 @@ const SignupScreen = () => {
           {verifyingOtp ? "Otp" : "Email"}
         </Text>
         {verifyingOtp ? (
-          <OtpInput
-            autoFocus={false}
-            numberOfDigits={6}
-            onTextChange={setOtp}
-            theme={{
-              pinCodeTextStyle: { color: "white" },
-              pinCodeContainerStyle: { borderColor: colors.lighter_grey },
-              filledPinCodeContainerStyle: { borderColor: "white" },
-              containerStyle: { width: "90%", opacity: loading ? 0.4 : 1 },
-            }}
-            focusColor="white"
-            disabled={loading}
-            blurOnFilled={true}
+          <OTPInput
+            ref={otpRef}
+            maxLength={6}
+            value={otp}
+            onChange={setOtp}
+            editable={!loading}
+            onComplete={submit}
+            render={({ slots }) => (
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 12,
+                  width: "100%",
+                }}
+              >
+                {slots.map((slot, index) => {
+                  return (
+                    <View
+                      key={index}
+                      style={{
+                        width: 48,
+                        height: 54,
+                        borderRadius: 8,
+                        borderWidth: 1,
+                        borderColor: slot.isActive || slot.char !== null ? "white" : colors.lighter_grey,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        backgroundColor: slot.isActive ? "rgba(255,255,255,0.05)" : "transparent",
+                        opacity: loading ? 0.4 : 1,
+                      }}
+                    >
+                      <Text style={{ color: "white", fontSize: 18, fontWeight: "bold" }}>{slot.char}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
           />
         ) : (
           <View style={{ width: "70%" }}>

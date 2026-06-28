@@ -2,11 +2,10 @@
   "expo": {
     "name": "Regimotion",
     "slug": "Regimotion",
-    "version": "5.0",
+    "version": "6.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.linedo.Regimotion",
@@ -14,9 +13,7 @@
         "ITSAppUsesNonExemptEncryption": false
       }
     },
-    "android": {
-      "edgeToEdgeEnabled": true
-    },
+    "android": {},
     "plugins": [["expo-font"], "expo-asset"],
     "extra": {
       "eas": {

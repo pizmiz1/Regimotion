@@ -128,6 +128,7 @@ const ModuleDetailScreen = () => {
         break;
     }
 
+    setReorderExercises(module.exercises);
     setMarkerStates();
   }, [module.exercises.length, module]);
 
@@ -366,7 +367,7 @@ const ModuleDetailScreen = () => {
       keyboardPadding={200}
       reordering={reordering}
       screenOverlay={
-        <Animated.View style={{ ...StyleSheet.absoluteFillObject, position: "absolute", opacity: lottieAnim }}>
+        <Animated.View style={{ ...StyleSheet.absoluteFill, position: "absolute", opacity: lottieAnim }}>
           <LottieView
             ref={lottieAnimRef}
             source={require("./../assets/Success.lottie")}
@@ -484,7 +485,7 @@ const ModuleDetailScreen = () => {
         )}
       </View>
 
-      <View style={{ borderBottomColor: colors.border_grey, borderBottomWidth: StyleSheet.hairlineWidth, width: "100%", marginTop: 5 }} />
+      <View style={{ borderBottomColor: colors.border_grey, borderBottomWidth: 0.8, width: "100%", marginTop: 5 }} />
 
       <View style={{ paddingHorizontal: "5%" }}>
         {reordering ? (

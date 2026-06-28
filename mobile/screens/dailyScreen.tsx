@@ -1,4 +1,4 @@
-import { ActivityIndicator, Animated, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Animated, Easing, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from "../constants/colors";
 import { useEffect, useRef, useState } from "react";
@@ -16,6 +16,7 @@ import { errorAlert } from "../helpers/alert";
 import { MaterialIconButton } from "../components/shared/iconButton";
 import PageContainer from "../components/shared/pageContainer";
 import { UserSettingsDto } from "../../shared/usersettingsdto";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const DailyScreen = () => {
   const { modules, accessToken, updateAccessToken, updateModules, updateUserSettings } = useGlobalContext();
@@ -26,6 +27,7 @@ const DailyScreen = () => {
   const [loading, setLoading] = useState(modules.length === 0);
 
   const headerOpacity = useRef(new Animated.Value(0)).current;
+  const iconOpacity = useRef(new Animated.Value(0)).current;
 
   const date = new Date();
 
@@ -97,6 +99,23 @@ const DailyScreen = () => {
     }).start();
   }, [blurActive]);
 
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(iconOpacity, {
+          toValue: 1,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(iconOpacity, {
+          toValue: 0,
+          duration: 1500,
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, [iconOpacity]);
+
   if (loading)
     return (
       <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.secondary }}>
@@ -154,7 +173,7 @@ const DailyScreen = () => {
               }}
             />
           </View>
-          {todaysModules.length > 0 && (
+          {todaysModules.length > 0 ? (
             <View style={{ flexDirection: "row", gap: 20, flexWrap: "wrap", marginTop: 20 }}>
               {todaysModules.map((module) => (
                 <Module
@@ -168,6 +187,28 @@ const DailyScreen = () => {
                   dailyMod={true}
                 />
               ))}
+            </View>
+          ) : (
+            <View style={{ flex: 1, alignItems: "center" }}>
+              <View style={{ marginTop: 120, width: 100, height: 100, justifyContent: "center", alignItems: "center", position: "absolute" }}>
+                <Animated.View
+                  style={{
+                    experimental_backgroundImage:
+                      "radial-gradient(circle at center, rgba(104, 85, 213, 0.85) 0%, rgba(104, 85, 213, 0.35) 18%, rgba(104, 85, 213, 0.1) 32%, rgba(104, 85, 213, 0.03) 42%, rgba(0, 0, 0, 0) 50%)",
+                    filter: [{ blur: 35 }],
+                    borderRadius: "50%",
+                    width: 260,
+                    height: 260,
+                    position: "absolute",
+                    opacity: iconOpacity,
+                  }}
+                />
+              </View>
+              <MaterialCommunityIcons name="weather-night" size={100} color="white" style={{ marginTop: 120 }} />
+              <Text style={{ color: "white", fontSize: 40, fontWeight: 600, textAlign: "center" }}>Nothing Here</Text>
+              <Text style={{ color: colors.light_grey, fontSize: 20, textAlign: "center", marginTop: 5 }}>
+                It looks like you have no modules for today!
+              </Text>
             </View>
           )}
         </>
