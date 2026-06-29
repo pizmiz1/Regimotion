@@ -1,7 +1,7 @@
 import { Alert, Animated, Text, View } from "react-native";
 import { useRef, useEffect, useState } from "react";
 import colors from "./../constants/colors";
-import { useNavigation } from "@react-navigation/native";
+import { StackActions, useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { useGlobalContext } from "../store/globalContext";
@@ -105,14 +105,14 @@ const SplashScreen = () => {
       const passkey = await SecureStore.getItemAsync(storageKeys.passkey);
 
       if (!email || !passkey) {
-        navigation.navigate(routeNames.signup);
+        navigation.dispatch(StackActions.replace(routeNames.signup));
         return;
       }
 
       const token = await SecureStore.getItemAsync(storageKeys.token);
 
       if (!token) {
-        navigation.navigate(routeNames.signup);
+        navigation.dispatch(StackActions.replace(routeNames.signup));
         return;
       }
 
@@ -120,12 +120,11 @@ const SplashScreen = () => {
       const response: JsonDto<any> = await get("/", { accessToken: token, updateAccessToken: updateAccessToken }, undefined, true);
       if (response.error) {
         errorAlert(response.error);
-        navigation.navigate(routeNames.signup);
+        navigation.dispatch(StackActions.replace(routeNames.signup));
         return;
       }
 
-      // Testing
-      navigation.navigate(routeNames.daily);
+      navigation.dispatch(StackActions.replace(routeNames.daily));
     };
 
     load();

@@ -33,7 +33,7 @@ const ModuleScreen = () => {
         visible={modalVisible}
         setVisible={(deleted: boolean) => {
           if (deleted) {
-            navigation.navigate(routeNames.daily);
+            navigation.goBack();
           }
           setModalVisible(false);
         }}

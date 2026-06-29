@@ -13,7 +13,7 @@ import storageKeys from "../constants/storageKeys";
 import { JsonDto } from "../../shared/jsondto";
 import { AccessDto } from "../../shared/accessdto";
 import { useGlobalContext } from "../store/globalContext";
-import { useNavigation } from "@react-navigation/native";
+import { StackActions, useNavigation } from "@react-navigation/native";
 import routeNames from "../constants/routeNames";
 import { opacityLayout } from "../helpers/layouts";
 import { OTPInput, OTPInputRef } from "input-otp-native";
@@ -115,7 +115,7 @@ const SignupScreen = () => {
       setLoading(false);
       resetState();
 
-      navigation.navigate(routeNames.daily);
+      navigation.dispatch(StackActions.replace(routeNames.daily));
     }
   };
 

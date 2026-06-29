@@ -19,11 +19,9 @@ const AppNav = () => {
     screens: {
       Splash: {
         screen: SplashScreen,
-        options: { gestureEnabled: false },
       },
       Signup: {
         screen: SignupScreen,
-        options: { animation: "fade", gestureEnabled: false },
       },
       Daily: {
         screen: DailyScreen,
