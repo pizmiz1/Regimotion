@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View, ViewStyle } from "react-native";
+import { Text, TouchableOpacity, View, ViewStyle } from "react-native";
 import colors from "../../constants/colors";
 import { LinearGradient } from "expo-linear-gradient";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -18,7 +18,7 @@ interface ModuleProps {
 }
 
 const Module = ({ module, style, onPress, disabled = false, blank = false, progress, dailyMod }: ModuleProps) => {
-  const { userSettings, accessToken, updateAccessToken, patchModule } = useGlobalContext();
+  const { userSettings, patchModule } = useGlobalContext();
 
   let color1;
   let color2 = module.color;
@@ -122,6 +122,7 @@ const Module = ({ module, style, onPress, disabled = false, blank = false, progr
             borderRadius: 20,
             alignItems: "center",
             padding: "5%",
+            opacity: module.progress === 100 ? 0.5 : 1,
             ...style,
           }}
         >
