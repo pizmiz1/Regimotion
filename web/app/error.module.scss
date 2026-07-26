@@ -1,0 +1,38 @@
+@use "./../constants/variables" as *;
+@use "./../constants/mixins" as *;
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: $color-secondary;
+  gap: 5rem;
+}
+
+.header_text {
+  font-size: 20rem;
+  font-weight: bold;
+  line-height: 0.8;
+}
+
+.description_text {
+  font-size: 2rem;
+  color: $color-light-grey;
+}
+
+.no_btn {
+  margin-bottom: 19rem;
+}
+
+.home_btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.5rem;
+
+  margin-bottom: 10rem;
+
+  @include button-primary;
+}

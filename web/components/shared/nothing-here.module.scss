@@ -1,0 +1,107 @@
+@use "./../../constants/variables" as *;
+@use "./../../constants/mixins" as *;
+
+.container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    pointer-events: none;
+
+    background:
+      linear-gradient(to bottom, rgba(11, 12, 16, 0) 30%, rgba(11, 12, 16, 0.55) 65%, rgba(11, 12, 16, 0.92) 100%),
+      radial-gradient(circle at center 60%, rgba(11, 12, 16, 0.9) 0%, rgba(11, 12, 16, 0.6) 35%, rgba(11, 12, 16, 0) 65%);
+  }
+}
+
+.card_container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 3rem;
+  max-height: 65rem;
+}
+
+.card {
+  @include card_base;
+
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  background-color: rgba(33, 34, 35, 0.6);
+}
+
+.overlayContent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 60rem;
+  padding: 20px;
+}
+
+.dashedCard {
+  position: relative;
+  width: 12rem;
+  height: 12rem;
+  border: 2px dashed rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  margin-bottom: 1.5rem;
+}
+
+.questionMark {
+  font-size: 5rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.plusBadge {
+  position: absolute;
+  bottom: -5px;
+  right: -5px;
+  width: 3.7rem;
+  height: 3.7rem;
+  background-color: white;
+  color: #0b0c0e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.title {
+  font-size: 5rem;
+  font-weight: bold;
+  margin-bottom: 1.2rem;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.description {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  color: $color-light-grey;
+  line-height: 1.6;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}

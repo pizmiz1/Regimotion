@@ -1,0 +1,73 @@
+@use "./../../constants/variables" as *;
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 12rem;
+}
+
+.iconWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30rem;
+  height: 25rem;
+  margin-bottom: -2.5rem;
+}
+
+.ambientGlow {
+  position: absolute;
+  width: 25rem;
+  height: 25rem;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(104, 85, 213, 0.45) 0%, rgba(104, 85, 213, 0.05) 70%, transparent 100%);
+  filter: blur(28px);
+  pointer-events: none;
+  z-index: 1;
+
+  animation: backgroundGlowFade 3s ease-in-out infinite alternate;
+}
+
+.icon {
+  position: relative;
+  z-index: 2;
+  stroke: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 0 16px rgba(104, 85, 213, 0.55));
+
+  animation: iconFillFade 3s ease-in-out infinite alternate;
+}
+
+.title {
+  font-size: 6rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  margin-top: 1.2rem;
+}
+
+.description {
+  font-size: 2.8rem;
+  color: $color-light-grey;
+  line-height: 1.6;
+  text-align: center;
+}
+
+@keyframes backgroundGlowFade {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes iconFillFade {
+  0% {
+    fill: rgba(104, 85, 213, 0.25);
+  }
+  100% {
+    fill: rgba(104, 85, 213, 0);
+  }
+}

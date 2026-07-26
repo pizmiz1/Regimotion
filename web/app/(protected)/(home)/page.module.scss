@@ -1,0 +1,12 @@
+@use "./../../../constants/variables" as *;
+
+.container {
+  margin-top: 4rem;
+}
+
+.card_container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 3rem;
+}

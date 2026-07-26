@@ -1,29 +1,55 @@
-@use "./constants/variables" as *;
-
-* {
-  margin: 0;
-  padding: 0;
-}
+@use "./../constants/variables" as *;
 
 *,
 *::before,
 *::after {
+  margin: 0;
+  padding: 0;
   box-sizing: inherit;
 }
 
 html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) $color-secondary;
+
   box-sizing: border-box;
   font-size: 62.5%; // 1rem = 10px
 
   @media only screen and (max-width: $bp-2) {
-    font-size: 57.5%;
+    font-size: 57.5%; // 1rem = 9.2px
   }
 
   @media only screen and (max-width: $bp-3) {
-    font-size: 50%;
+    font-size: 50%; // 1rem = 8px
   }
 
   @media only screen and (max-width: $bp-4) {
-    font-size: 47.5%;
+    font-size: 47.5%; // 1rem = 7.6px
   }
+}
+
+button {
+  all: unset;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: $color-off-white;
+}
+
+p,
+span,
+li {
+  color: $color-off-white;
+}
+
+a {
+  color: $color-off-white;
+  text-decoration: none;
 }

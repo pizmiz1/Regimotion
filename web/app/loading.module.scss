@@ -1,0 +1,34 @@
+@use "./../constants/variables" as *;
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: $color-secondary;
+
+  video {
+    width: 30rem;
+    height: 30rem;
+    object-fit: contain;
+    image-rendering: optimizeQuality;
+  }
+
+  span {
+    font-size: 8rem;
+    animation: fadeLoop 3s infinite ease-in-out;
+  }
+}
+
+@keyframes fadeLoop {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}

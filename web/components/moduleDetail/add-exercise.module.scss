@@ -1,0 +1,29 @@
+@use "./../../constants/variables" as *;
+@use "./../../constants/mixins" as *;
+
+.container {
+  min-height: 12.2rem;
+}
+
+.divider {
+  height: 0.8px;
+  width: 100%;
+  background-color: $color-light-grey;
+}
+
+.exercise_container {
+  margin-left: 10rem;
+}
+
+.add_btn_container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  .add_btn {
+    font-size: 3.5rem;
+    padding: 2rem 0;
+
+    @include button-primary-text;
+  }
+}

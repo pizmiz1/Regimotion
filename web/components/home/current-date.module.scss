@@ -1,0 +1,29 @@
+@use "./../../constants/variables" as *;
+@use "./../../constants/mixins" as *;
+
+.header {
+  font-size: 12rem;
+  line-height: 1;
+}
+
+.date {
+  font-size: 3rem;
+  color: $color-light-grey;
+}
+
+.skeleton_header {
+  border-radius: 8px;
+  width: 47rem;
+  height: 11.6rem;
+  margin-bottom: 1rem;
+
+  @include shimmer;
+}
+
+.skeleton_date {
+  border-radius: 8px;
+  width: 25rem;
+  height: 3rem;
+
+  @include shimmer;
+}

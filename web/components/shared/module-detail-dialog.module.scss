@@ -1,0 +1,454 @@
+@use "./../../constants/variables" as *;
+@use "./../../constants//mixins" as *;
+@use "sass:color";
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.8rem;
+
+  @include button-primary;
+}
+
+.modalDialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+
+  background-color: #2a272c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  padding: 3rem;
+  box-sizing: border-box;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset;
+
+  width: 105rem;
+  height: fit-content;
+
+  opacity: 0;
+  transform: translateY(0.75rem) scale(0.98);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    overlay 180ms allow-discrete,
+    display 180ms allow-discrete;
+  will-change: opacity, transform;
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    transition:
+      background-color 180ms ease,
+      overlay 180ms allow-discrete,
+      display 180ms allow-discrete;
+  }
+
+  &[data-state="open"] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+
+    &::backdrop {
+      background-color: rgba(14, 12, 15, 0.6);
+      backdrop-filter: blur(2px);
+    }
+  }
+
+  &[data-state="closing"] {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.98);
+
+    &::backdrop {
+      background-color: rgba(0, 0, 0, 0);
+      backdrop-filter: blur(0px);
+    }
+  }
+}
+
+.header_container {
+  display: flex;
+  justify-content: space-between;
+
+  .close_btn_container {
+    flex-basis: 33%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+
+    .close_btn {
+      color: $color-lighter-grey;
+      padding-left: 1.2rem;
+
+      &:hover:not(:disabled) {
+        color: $color-light-grey;
+      }
+    }
+  }
+
+  .header_text {
+    flex-basis: 33%;
+    font-size: 5.5rem;
+    font-weight: 600;
+    text-align: center;
+
+    @include text-ellipsis;
+
+    &.new {
+      font-size: 5.2rem;
+    }
+  }
+
+  .delete_container {
+    flex-basis: 33%;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    overflow: hidden;
+
+    .delete_btn {
+      position: absolute;
+      left: 2;
+      color: orangered;
+      padding-right: 1.2rem;
+      transition:
+        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        color 0.2s ease-out,
+        opacity 0.2s linear,
+        opacity 0.25s ease;
+      transform: translateX(0);
+      opacity: 1;
+      z-index: 2;
+
+      &:hover:not(:disabled) {
+        color: red;
+      }
+
+      &.slide_out {
+        transform: translateX(-100%);
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      &.hidden {
+        @include hidden;
+      }
+    }
+
+    .delete_confirm_container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      white-space: nowrap;
+      transition:
+        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.25s ease;
+      transform: translateX(-100%);
+      opacity: 0;
+
+      &.slide_in {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      span {
+        font-size: 2rem;
+        color: orangered;
+      }
+
+      .delete_btn_container {
+        display: flex;
+        margin-top: 3px;
+        gap: 1rem;
+        align-items: flex-start;
+
+        .no_btn {
+          font-size: 1.5rem;
+          @include button-secondary;
+          padding: 0.6rem 2.2rem;
+        }
+
+        .yes_btn {
+          font-size: 1.5rem;
+          @include button-warning;
+          padding: 0.6rem 2.2rem;
+        }
+      }
+    }
+  }
+
+  .header_btn {
+    cursor: pointer;
+    transition:
+      color 0.2s ease-out,
+      opacity 0.2s linear;
+
+    &:active:not(:disabled) {
+      transform: scale(0.9);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.form {
+  display: flex;
+  width: 100%;
+  overflow-y: auto;
+  flex-direction: column;
+  padding-top: 1rem;
+}
+
+.error_wrapper {
+  position: relative;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin-bottom: 0;
+
+  transition:
+    max-height 0.25s ease-out,
+    opacity 0.25s ease-out;
+
+  &.active {
+    max-height: 3rem;
+    opacity: 1;
+    margin-bottom: 1.8rem;
+  }
+
+  .error_text {
+    font-size: 3rem;
+    color: orangered;
+    margin: 0;
+  }
+}
+
+.section_container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.8rem;
+}
+
+.section_label {
+  color: white;
+  font-size: 3rem;
+}
+
+.name_container {
+  input {
+    width: 100%;
+    padding: 1.4rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    color: white;
+    font-size: 2.3rem;
+    outline: none;
+    font-weight: 500;
+    transition: border-color 0.2s ease;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.25);
+    }
+
+    &:focus:not(:disabled) {
+      border-color: rgba(123, 97, 255, 0.5);
+    }
+
+    &:disabled {
+      background: rgba(255, 255, 255, 0.01);
+      color: rgba(255, 255, 255, 0.4);
+      border-color: rgba(255, 255, 255, 0.03);
+      cursor: not-allowed;
+    }
+  }
+}
+
+.name_label_container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: baseline;
+
+  span {
+    color: $color-light-grey;
+    font-size: 2rem;
+    margin-right: 2px;
+  }
+}
+
+.color_picker {
+  display: flex;
+  width: 100%;
+  gap: 2rem;
+
+  .color_option {
+    cursor: pointer;
+
+    .color_input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+
+      &:disabled + .color_swatch {
+        opacity: 0.2;
+        cursor: not-allowed;
+      }
+
+      // Accessibility
+      &:focus-visible + .color_swatch {
+        box-shadow: 0 0 0 3px rgba($color-blue-compliment, 0.5);
+      }
+    }
+
+    .color_swatch {
+      display: block;
+      width: 6.2rem;
+      height: 6.2rem;
+      border-radius: 4px;
+      border: 2px solid transparent;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      opacity: 0.4;
+      transition: all 0.2s ease;
+
+      &.swatch_primary {
+        background-color: $color-primary;
+      }
+      &.swatch_orange {
+        background-color: $color-orange-compliment;
+      }
+      &.swatch_blue {
+        background-color: $color-blue-compliment;
+      }
+
+      &:hover {
+        opacity: 0.7;
+      }
+
+      &.selected {
+        border: 1.4px solid white;
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.icon_container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.3rem;
+
+  // TODO - Maybe use these when doing reactive styling/breakpoints
+  // max-height: 16rem;
+  // overflow: auto;
+
+  .radio_input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .icon_label {
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.3);
+    padding: 1.3rem;
+    border-radius: 3px;
+
+    transition: all 0.2s ease;
+
+    &:has(.radio_input:disabled) {
+      opacity: 0.2;
+      cursor: not-allowed;
+    }
+
+    &:not(:has(.radio_input:disabled)):not(:has(.radio_input:checked)):hover {
+      background-color: rgba(255, 255, 255, 0.6);
+    }
+
+    &.selected {
+      background-color: white;
+    }
+  }
+}
+
+.days_container {
+  display: flex;
+  width: 85%;
+  justify-content: space-around;
+  padding: 1.5rem;
+  border-radius: 3rem;
+  background-color: $color-dark-grey;
+
+  transition: opacity 0.2s ease;
+
+  &:has(.radio_input:disabled) {
+    opacity: 0.2;
+  }
+
+  .radio_input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .icon_label {
+    cursor: pointer;
+    padding: 1.3rem;
+    border-radius: 3px;
+    color: white;
+    font-size: 2.4rem;
+    font-weight: 300;
+    width: 5.5rem;
+    height: 5.5rem;
+    border-radius: 50%;
+    text-align: center;
+
+    transition: all 0.2s ease;
+
+    &:has(.radio_input:disabled) {
+      cursor: not-allowed;
+    }
+
+    &:not(:has(.radio_input:disabled)):not(:has(.radio_input:checked)):hover {
+      background-color: $color-dark-primary;
+    }
+
+    &.selected {
+      background-color: $color-primary;
+    }
+  }
+}
+
+.btn_container {
+  display: flex;
+  justify-content: flex-end;
+  align-self: flex-end;
+  gap: 2.3rem;
+
+  margin-bottom: 0;
+
+  .reset_btn {
+    font-size: 2.2rem;
+
+    @include button-secondary;
+  }
+
+  .submit_btn {
+    font-size: 2.2rem;
+
+    @include button-primary;
+  }
+}

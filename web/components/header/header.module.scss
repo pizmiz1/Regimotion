@@ -1,0 +1,88 @@
+@use "./../../constants/variables" as *;
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding-bottom: 2rem;
+}
+
+.logo {
+  &_link {
+    cursor: pointer;
+  }
+
+  &_icon {
+    opacity: 0.8;
+    transition: all 0.2s;
+
+    &:hover {
+      opacity: 1;
+    }
+    &:active {
+      transform: scale(0.85);
+    }
+  }
+}
+
+.links {
+  &_container {
+    display: flex;
+    gap: 5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    a {
+      position: relative;
+      text-decoration: none;
+      padding: 0.5rem 0;
+      font-size: 2.8rem;
+      display: inline-block;
+
+      opacity: 0.8;
+      transition: all 0.3s ease;
+
+      &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        width: 2.5rem;
+        left: 50%;
+        margin-left: -1rem;
+        height: 2.5px;
+        background-color: $color-primary;
+        border-radius: 2px;
+
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.3s ease;
+      }
+
+      &:hover {
+        color: white;
+        opacity: 1;
+
+        &::after {
+          transform: scaleX(1);
+          transform-origin: left;
+        }
+      }
+
+      &:active {
+        transform: scale(0.95);
+      }
+
+      &.active {
+        color: white;
+        opacity: 1;
+
+        &::after {
+          transform: scaleX(1);
+          transform-origin: center;
+        }
+      }
+    }
+  }
+}

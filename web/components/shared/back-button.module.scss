@@ -1,0 +1,12 @@
+@use "./../../constants/variables" as *;
+@use "./../../constants/mixins" as *;
+
+.back_btn {
+  display: flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.8rem;
+
+  @include button-secondary;
+}

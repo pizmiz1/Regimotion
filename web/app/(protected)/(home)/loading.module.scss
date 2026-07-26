@@ -1,0 +1,30 @@
+@use "./../../../constants/variables" as *;
+@use "./../../../constants/mixins" as *;
+
+.skeleton_header {
+  border-radius: 8px;
+  width: 47rem;
+  height: 11.6rem;
+  margin-bottom: 1rem;
+
+  @include shimmer;
+}
+
+.skeleton_date {
+  border-radius: 8px;
+  width: 25rem;
+  height: 3rem;
+
+  @include shimmer;
+}
+
+.skeleton_container {
+  margin-top: 4rem;
+}
+
+.skeleton_card_container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 3rem;
+}
