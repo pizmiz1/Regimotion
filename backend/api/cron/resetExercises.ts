@@ -1,12 +1,11 @@
 import cron from "node-cron";
 import Module from "../schema/module.js";
 
-const everyMinuteCron = "* * * * *";
-const midnightCron = "0 0 * * *";
+const nineAMCron = "0 9 * * *";
 
 export const resetExercisesCron = () => {
   cron.schedule(
-    midnightCron,
+    nineAMCron,
     async () => {
       console.log("Reset exercises starting...");
 
@@ -61,7 +60,7 @@ export const resetExercisesCron = () => {
       }
     },
     {
-      timezone: "America/New_York",
+      timezone: "UTC",
     },
   );
 };
