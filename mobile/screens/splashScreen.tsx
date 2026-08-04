@@ -1,4 +1,4 @@
-import { Alert, Animated, Text, View } from "react-native";
+import { Animated, Text, View } from "react-native";
 import { useRef, useEffect, useState } from "react";
 import colors from "./../constants/colors";
 import { StackActions, useNavigation } from "@react-navigation/native";
@@ -11,7 +11,6 @@ import storageKeys from "../constants/storageKeys";
 import routeNames from "../constants/routeNames";
 import { errorAlert } from "../helpers/alert";
 import { JsonDto } from "../../shared/jsondto";
-import { Asset } from "expo-asset";
 
 const SplashScreen = () => {
   const { updateAccessToken } = useGlobalContext();

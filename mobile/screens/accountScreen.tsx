@@ -1,6 +1,6 @@
-import { Animated, Image, Switch, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Image, Text, TouchableOpacity, View } from "react-native";
 import PageContainer from "../components/shared/pageContainer";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import routeNames from "../constants/routeNames";
 import { useGlobalContext } from "../store/globalContext";
 import { deleteAlert, errorAlert } from "../helpers/alert";
@@ -32,14 +32,6 @@ const AccountScreen = () => {
   const [localAnimalColor, setLocalAnimalColor] = useState(userSettings.userColor);
 
   const loadingOpacity = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(loadingOpacity, {
-      toValue: loading ? 0.6 : 1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  }, [loading]);
 
   const animalPress = async () => {
     const animalNames = Object.keys(animals) as Array<keyof typeof animals>;
@@ -142,6 +134,12 @@ const AccountScreen = () => {
 
     setSwitchesDisabled(false);
   };
+
+  Animated.timing(loadingOpacity, {
+    toValue: loading ? 0.6 : 1,
+    duration: 200,
+    useNativeDriver: true,
+  }).start();
 
   return (
     <PageContainer

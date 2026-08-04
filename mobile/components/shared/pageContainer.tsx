@@ -12,7 +12,7 @@ import { opacityLayoutEaseOut } from "../../helpers/layouts";
 import { MaterialIconButton } from "./iconButton";
 import { useNavigation } from "@react-navigation/native";
 import { NestableScrollContainer } from "react-native-draggable-flatlist";
-import { ScrollView } from "react-native-gesture-handler";
+import { ScrollView, RefreshControl } from "react-native-gesture-handler";
 import routeNames from "../../constants/routeNames";
 
 interface PageContainerProps {
@@ -28,6 +28,8 @@ interface PageContainerProps {
   keyboardPadding?: number;
   userButton?: boolean;
   reordering?: boolean;
+  refreshing?: boolean;
+  onRefresh?: () => Promise<void>;
 }
 
 const PageContainer = ({
@@ -43,6 +45,8 @@ const PageContainer = ({
   keyboardPadding,
   userButton,
   reordering,
+  refreshing,
+  onRefresh,
 }: PageContainerProps) => {
   const [blurActive, setBlurActiveLocal] = useState(false);
 
@@ -129,6 +133,11 @@ const PageContainer = ({
         scrollEnabled={!disableScroll}
         keyboardShouldPersistTaps="handled"
         ref={scrollViewRef}
+        refreshControl={
+          refreshing !== undefined && onRefresh !== undefined ? (
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.lightest_grey} />
+          ) : undefined
+        }
       >
         {backButton || userButton ? (
           <Animated.View style={{ height: 40, opacity: buttonOpacity }}>

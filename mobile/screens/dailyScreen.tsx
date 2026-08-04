@@ -23,8 +23,8 @@ const DailyScreen = () => {
 
   const [blurActive, setBlurActive] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [todaysModules, setTodaysModules] = useState<ModuleDto[]>([]);
   const [loading, setLoading] = useState(modules.length === 0);
+  const [refreshing, setRefreshing] = useState(false);
 
   const headerOpacity = useRef(new Animated.Value(0)).current;
   const iconOpacity = useRef(new Animated.Value(0)).current;
@@ -33,73 +33,50 @@ const DailyScreen = () => {
 
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const load = async () => {
-      const responseModule: JsonDto<ModuleDto[]> = await get("/module", { accessToken: accessToken, updateAccessToken: updateAccessToken });
-      if (responseModule.error) {
-        errorAlert(responseModule.error);
-        return;
-      }
-
-      const responseUserSettings: JsonDto<UserSettingsDto> = await get("/userSettings", {
-        accessToken: accessToken,
-        updateAccessToken: updateAccessToken,
-      });
-      if (responseUserSettings.error) {
-        errorAlert(responseUserSettings.error);
-        return;
-      }
-
-      updateModules(responseModule.data!);
-      updateUserSettings(responseUserSettings.data!);
-      opacityLayout();
-      setLoading(false);
-    };
-
-    if (modules.length === 0) {
-      load();
+  const load = async () => {
+    const responseModule: JsonDto<ModuleDto[]> = await get("/module", { accessToken: accessToken, updateAccessToken: updateAccessToken });
+    if (responseModule.error) {
+      errorAlert(responseModule.error);
+      return;
     }
+
+    const responseUserSettings: JsonDto<UserSettingsDto> = await get("/userSettings", {
+      accessToken: accessToken,
+      updateAccessToken: updateAccessToken,
+    });
+    if (responseUserSettings.error) {
+      errorAlert(responseUserSettings.error);
+      return;
+    }
+
+    updateModules(responseModule.data!);
+    updateUserSettings(responseUserSettings.data!);
+    opacityLayout();
+    setLoading(false);
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await load();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
   }, []);
 
-  useEffect(() => {
-    const today = date.toLocaleDateString("en-US", { weekday: "long" });
+  const dayMapping = ["sun", "mon", "tues", "wed", "thur", "fri", "sat"] as const;
+  const currentDayKey = dayMapping[date.getDay()];
+  const todaysModules = modules.filter((curr) => curr.days[currentDayKey]);
+  const anyModulesToday = todaysModules.length > 0;
 
-    switch (today) {
-      case "Monday":
-        setTodaysModules(modules.filter((curr) => curr.days.mon));
-        return;
-      case "Tuesday":
-        setTodaysModules(modules.filter((curr) => curr.days.tues));
-        return;
-      case "Wednesday":
-        setTodaysModules(modules.filter((curr) => curr.days.wed));
-        return;
-      case "Thursday":
-        setTodaysModules(modules.filter((curr) => curr.days.thur));
-        return;
-      case "Friday":
-        setTodaysModules(modules.filter((curr) => curr.days.fri));
-        return;
-      case "Saturday":
-        setTodaysModules(modules.filter((curr) => curr.days.sat));
-        return;
-      case "Sunday":
-        setTodaysModules(modules.filter((curr) => curr.days.sun));
-        return;
-      default:
-        return;
-    }
-  }, [modules]);
-
-  useEffect(() => {
-    Animated.timing(headerOpacity, {
-      toValue: blurActive ? 0 : 1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  }, [blurActive]);
-
-  useEffect(() => {
+  if (anyModulesToday) {
     Animated.loop(
       Animated.sequence([
         Animated.timing(iconOpacity, {
@@ -114,7 +91,13 @@ const DailyScreen = () => {
         }),
       ]),
     ).start();
-  }, [iconOpacity]);
+  }
+
+  Animated.timing(headerOpacity, {
+    toValue: blurActive ? 0 : 1,
+    duration: 200,
+    useNativeDriver: true,
+  }).start();
 
   if (loading)
     return (
@@ -128,6 +111,8 @@ const DailyScreen = () => {
       header={modules.length > 0 ? date.toLocaleDateString("en-US", { weekday: "long" }) : ""}
       setBlurActive={setBlurActive}
       userButton={true}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
     >
       <DetailsModal
         visible={modalVisible}
@@ -173,7 +158,7 @@ const DailyScreen = () => {
               }}
             />
           </View>
-          {todaysModules.length > 0 ? (
+          {anyModulesToday ? (
             <View style={{ flexDirection: "row", gap: 20, flexWrap: "wrap", marginTop: 20 }}>
               {todaysModules.map((module) => (
                 <Module
