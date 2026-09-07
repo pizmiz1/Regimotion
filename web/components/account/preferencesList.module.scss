@@ -1,0 +1,35 @@
+@use "./../../constants/mixins" as *;
+@use "./../../constants/variables" as *;
+
+.container {
+  @media only screen and (max-width: $bp-4) {
+    width: 100%;
+  }
+
+  .header_text {
+    color: $color-light-grey;
+    font-size: 3rem;
+  }
+
+  .list_container {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    background-color: #333438;
+    border-radius: 35;
+    padding: 3rem;
+    gap: 3rem;
+
+    @media only screen and (max-width: $bp-4) {
+      width: 100%;
+      min-width: 40rem;
+    }
+
+    .divider {
+      height: 1px;
+      width: 100%;
+      background-color: $color-medium-grey;
+    }
+  }
+}

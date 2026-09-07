@@ -1,0 +1,54 @@
+@use "./../../constants/mixins" as *;
+@use "./../../constants/variables" as *;
+@use "sass:color";
+
+.switchContainer {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 4.7rem;
+  width: 8.4rem;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition:
+    background-color 0.2s ease-in-out,
+    opacity 0.2s ease-in-out;
+
+  &.trackFalse {
+    background-color: $color-medium-grey;
+
+    &:hover:not(:disabled) {
+      background-color: color.adjust($color-medium-grey, $lightness: -5%);
+    }
+  }
+  &.trackTrue {
+    background-color: #22c55e;
+
+    &:hover:not(:disabled) {
+      background-color: color.adjust(#22c55e, $lightness: -5%);
+    }
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+.thumb {
+  display: inline-block;
+  height: 3.5rem;
+  width: 3.5rem;
+  border-radius: 50%;
+  background-color: #ffffff;
+  transition: transform 0.2s ease-in-out;
+
+  &.thumbFalse {
+    transform: translateX(0.5rem);
+  }
+  &.thumbTrue {
+    transform: translateX(4.4rem);
+  }
+}

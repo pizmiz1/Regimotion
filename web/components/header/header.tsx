@@ -11,7 +11,7 @@ const Header = () => {
   return (
     <header className={styles.container}>
       <Link href="/" className={styles.logo_link}>
-        <Image src="/logo-clear.svg" alt="Regimotion Logo" width={80} height={80} priority className={styles.logo_icon} />
+        <Image src="/logo-clear.svg" alt="Regimotion Logo" fill sizes="(max-width: 34.375em) 60px, 80px" priority className={styles.logo_icon} />
       </Link>
 
       <nav>

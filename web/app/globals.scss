@@ -26,6 +26,10 @@ html {
   @media only screen and (max-width: $bp-4) {
     font-size: 47.5%; // 1rem = 7.6px
   }
+
+  @media only screen and (max-width: $bp-6) {
+    font-size: 45%; // 1rem = 7.6px
+  }
 }
 
 button {

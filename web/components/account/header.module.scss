@@ -1,0 +1,93 @@
+@use "./../../constants/mixins" as *;
+@use "./../../constants/variables" as *;
+
+.header_container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 3rem;
+
+  .header_info_container {
+    display: flex;
+    align-items: center;
+
+    .icon_container {
+      background-color: var(--animal-bg-color, #cccccc);
+      border-radius: 50;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      display: flex;
+      padding: 2rem;
+
+      @media only screen and (max-width: $bp-4) {
+        border-radius: 9999rem;
+      }
+
+      .icon {
+        height: 12.8rem;
+        width: 12.8rem;
+
+        @media only screen and (max-width: $bp-5) {
+          height: 10rem;
+          width: 10rem;
+        }
+
+        @media only screen and (max-width: $bp-6) {
+          height: 8rem;
+          width: 8rem;
+        }
+      }
+    }
+
+    .text_container {
+      margin-left: 3rem;
+
+      .header {
+        font-size: 10rem;
+        line-height: 1.1;
+        text-transform: capitalize;
+        margin-left: -0.5rem;
+
+        @media only screen and (max-width: $bp-4) {
+          font-size: 7rem;
+        }
+
+        @media only screen and (max-width: $bp-5) {
+          font-size: 5rem;
+          margin-left: 0;
+        }
+
+        @media only screen and (max-width: $bp-6) {
+          font-size: 3rem;
+        }
+      }
+
+      .sub_header {
+        font-size: 3rem;
+        color: $color-lighter-grey;
+
+        @media only screen and (max-width: $bp-5) {
+          font-size: 2.4rem;
+        }
+
+        @media only screen and (max-width: $bp-6) {
+          font-size: 2rem;
+        }
+      }
+    }
+  }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 2.1rem;
+
+    @include button-primary;
+
+    // Override mixin
+    padding: 1.2rem 2.5rem;
+  }
+}

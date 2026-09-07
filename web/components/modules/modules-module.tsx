@@ -17,10 +17,6 @@ const dayMap: { key: keyof DaysDto; label: string }[] = [
   { key: "sun", label: "Sun" },
 ];
 
-export const ModulesModuleSkeleton = () => {
-  return <div className={styles.card_skeleton}></div>;
-};
-
 export const ModulesModule = ({ module }: ModulesModuleProps) => {
   let hoverColor = "rgba(22, 23, 34, 0.9)";
 
@@ -57,7 +53,7 @@ export const ModulesModule = ({ module }: ModulesModuleProps) => {
 
   return (
     <Link
-      href={`/moduleDetail/${module.id}`}
+      href={`/moduleDetail/${module.id}?r=${Date.now()}&prev=modules`}
       className={styles.card}
       style={
         {

@@ -6,6 +6,10 @@
   display: flex;
   gap: 8rem;
 
+  @media only screen and (max-width: $bp-6) {
+    gap: 5.5rem;
+  }
+
   &.adding {
     opacity: 0.1;
   }
@@ -26,7 +30,7 @@
     background-color: $color-light-grey;
     opacity: 1;
 
-    transition: opacity 0.3s linear;
+    transition: opacity 0.25s linear;
 
     &.completed {
       opacity: 0.3;
@@ -74,8 +78,13 @@
     padding: 2rem 0rem;
     width: 50%;
     opacity: 1;
+    overflow: hidden;
 
-    transition: opacity 0.3s linear;
+    transition: opacity 0.25s linear;
+
+    @media only screen and (max-width: $bp-6) {
+      width: 100%;
+    }
 
     &.completed {
       opacity: 0.3;
@@ -120,6 +129,10 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+
+      @media only screen and (max-width: $bp-6) {
+        font-size: 4rem;
+      }
     }
 
     .exercise_detail_container {
@@ -173,6 +186,10 @@
     flex: 1;
     justify-content: flex-end;
     align-items: center;
+
+    @media only screen and (max-width: $bp-6) {
+      @include hidden;
+    }
 
     .primary_btn {
       color: $color-primary;

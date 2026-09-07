@@ -9,4 +9,9 @@
   font-size: 1.8rem;
 
   @include button-secondary;
+
+  .icon {
+    width: 2.4rem;
+    height: 2.4rem;
+  }
 }

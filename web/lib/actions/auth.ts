@@ -9,8 +9,11 @@ import { cookieKeys } from "@/constants/cookieKeys";
 import { post } from "../helpers/fetch";
 import { AccessDto } from "../../../shared/accessdto";
 import { redirect } from "next/navigation";
+import { updateTag } from "next/cache";
+import { dataTags } from "@/constants/dataTags";
 
-export const generateOtp = async (prevState: JsonDto<boolean>, formData: FormData): Promise<JsonDto<boolean>> => {
+// Form Actions
+export const generateOtpForm = async (prevState: JsonDto<boolean>, formData: FormData): Promise<JsonDto<boolean>> => {
   const email = formData.get("email") as string;
 
   // Validation
@@ -47,7 +50,7 @@ export const generateOtp = async (prevState: JsonDto<boolean>, formData: FormDat
   }
 };
 
-export const verifyOtp = async (prevState: JsonDto<undefined>, formData: FormData): Promise<JsonDto<undefined>> => {
+export const verifyOtpForm = async (prevState: JsonDto<undefined>, formData: FormData): Promise<JsonDto<undefined>> => {
   const email = formData.get("email") as string;
   const otp = formData.get("otp") as string;
 
@@ -128,4 +131,57 @@ export const verifyOtp = async (prevState: JsonDto<undefined>, formData: FormDat
       error: "Server error",
     };
   }
+};
+
+// Regular Actions
+const signOutOrDeleteAccount = async (route: string): Promise<JsonDto<boolean>> => {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get(cookieKeys.accessToken)?.value;
+
+    const decodedEmail = jwt.verify(cookieStore.get(cookieKeys.email)?.value!, process.env.JWT_SECRET_KEY!) as { email: string };
+    const decodedPasskey = jwt.verify(cookieStore.get(cookieKeys.passkey)?.value!, process.env.JWT_SECRET_KEY!) as { passkey: string };
+    const email = decodedEmail.email;
+    const passkey = decodedPasskey.passkey;
+
+    const body: AccessDto = {
+      email: email!,
+      passkey: passkey!,
+    };
+
+    const response: JsonDto<any> = await post(route, body, accessToken!);
+
+    if (response.error) {
+      return {
+        data: false,
+        error: response.error,
+      };
+    }
+
+    // Clear cache
+    updateTag(dataTags.modules);
+    updateTag(dataTags.userSettings);
+
+    cookieStore.delete(cookieKeys.accessToken);
+    cookieStore.delete(cookieKeys.email);
+    cookieStore.delete(cookieKeys.passkey);
+
+    return {
+      data: true,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      data: false,
+      error: "Unable to sign out",
+    };
+  }
+};
+
+export const signOut = async (): Promise<JsonDto<boolean>> => {
+  return await signOutOrDeleteAccount("/auth/signOut");
+};
+
+export const deleteAccount = async (): Promise<JsonDto<boolean>> => {
+  return await signOutOrDeleteAccount("/auth/deleteAccount");
 };

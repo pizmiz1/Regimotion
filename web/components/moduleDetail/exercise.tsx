@@ -1,53 +1,121 @@
 "use client";
 
-import { Check, Circle, Grip, List, Pencil, Trash, X } from "lucide-react";
-import { ExerciseDto } from "../../../shared/moduledto";
+import { Check, Grip, Pencil, Trash, X } from "lucide-react";
+import { ExerciseDto, ModuleDto } from "../../../shared/moduledto";
 import styles from "./exercise.module.scss";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { JsonDto } from "../../../shared/jsondto";
 
 interface ExerciseProps {
+  addExerciseForm: boolean;
   exercise?: ExerciseDto;
   completed?: boolean;
-  disableActive?: (state: boolean) => void;
+  setEditingExercise?: (state: boolean) => void;
   last?: boolean;
   adding?: boolean;
-  addExerciseForm: boolean;
   setAdding?: (state: boolean) => void;
   reordering?: boolean;
+  onUpdate?: (updatedExercise: ExerciseDto) => Promise<JsonDto<ModuleDto>>;
+  onDelete?: (exerciseId: string) => Promise<JsonDto<ModuleDto>>;
+  onAdd?: (newExercise: ExerciseDto) => Promise<JsonDto<ModuleDto>>;
 }
 
-const Exercise = ({ exercise, completed, disableActive, last, adding, addExerciseForm, setAdding, reordering }: ExerciseProps) => {
+const Exercise = ({
+  addExerciseForm,
+  exercise,
+  completed,
+  setEditingExercise,
+  last,
+  adding,
+  setAdding,
+  reordering,
+  onUpdate,
+  onDelete,
+  onAdd,
+}: ExerciseProps) => {
   const [editing, setEditing] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [name, setName] = useState(exercise ? exercise.name : "");
-  const [text1, setText1] = useState(exercise ? exercise.text1 : "");
-  const [text2, setText2] = useState(exercise ? exercise.text2 : "");
+  const [name, setName] = useState("");
+  const [text1, setText1] = useState("");
+  const [text2, setText2] = useState<string | undefined>("");
 
-  const nameRef = useRef<HTMLInputElement>(null);
+  const [isUpdating, startUpdatingTransition] = useTransition();
+  const [isDeleting, startDeletingTransition] = useTransition();
+  const [isAdding, startAddingTransition] = useTransition();
 
-  const addExercise = () => {
-    // TODO - Functionality - tie form to server action useActionState
-    setEditing(false);
-    setSaving(true);
+  const add = () => {
+    if (!onAdd) {
+      return;
+    }
+
+    const newExercise: ExerciseDto = {
+      name: name,
+      text1: text1,
+      text2: text2,
+      completed: false,
+    };
+
+    startAddingTransition(async () => {
+      const response = await onAdd(newExercise);
+
+      if (response.error) {
+        console.log(response.error);
+      }
+    });
   };
 
-  const saveExercise = () => {
-    // TODO - Functionality - tie form to server action useActionState
-    setEditing(false);
-    setSaving(true);
+  const edit = () => {
+    if (!exercise || !setEditingExercise) {
+      return;
+    }
+
+    setName(exercise.name);
+    setText1(exercise.text1);
+    setText2(exercise.text2);
+    setEditing(true);
+    setEditingExercise(true);
+  };
+
+  const update = () => {
+    if (!exercise || !setEditingExercise || !onUpdate) {
+      return;
+    }
+
+    const updatedExercise: ExerciseDto = {
+      ...exercise,
+      name: name,
+      text1: text1,
+      text2: text2,
+    };
+
+    startUpdatingTransition(async () => {
+      const response = await onUpdate(updatedExercise);
+
+      if (response.error) {
+        console.log(response.error);
+      } else {
+        setEditing(false);
+        setEditingExercise(false);
+      }
+    });
   };
 
   const deleteExercise = () => {
-    // TODO - Functionality
-    setSaving(true);
-    disableActive!(true);
-  };
-
-  useEffect(() => {
-    if (editing || addExerciseForm) {
-      nameRef.current?.focus();
+    if (!exercise || !exercise.id || !setEditingExercise || !onDelete) {
+      return;
     }
-  }, [editing, adding]);
+
+    setEditingExercise(true);
+
+    startDeletingTransition(async () => {
+      const response = await onDelete(exercise.id!);
+
+      if (response.error) {
+        console.log(response.error);
+      }
+
+      setEditingExercise(false);
+    });
+  };
 
   return (
     <div className={`${styles.container} ${adding && !addExerciseForm && styles.adding} ${reordering && styles.reordering}`}>
@@ -66,9 +134,9 @@ const Exercise = ({ exercise, completed, disableActive, last, adding, addExercis
         <label htmlFor="name" className={styles.exercise_hidden_label}>
           Name
         </label>
-        {editing || saving || addExerciseForm ? (
+        {editing || addExerciseForm ? (
           <input
-            ref={nameRef}
+            autoFocus={true}
             name="name"
             id="name"
             type="text"
@@ -76,7 +144,7 @@ const Exercise = ({ exercise, completed, disableActive, last, adding, addExercis
             onChange={(e) => setName(e.target.value)}
             className={styles.exercise_name_input}
             placeholder="Name..."
-            disabled={saving}
+            disabled={isUpdating}
           />
         ) : (
           <p className={styles.exercise_name}>{exercise ? exercise.name : ""}</p>
@@ -85,7 +153,7 @@ const Exercise = ({ exercise, completed, disableActive, last, adding, addExercis
           <label htmlFor="text1" className={styles.exercise_hidden_label}>
             Text1
           </label>
-          {editing || saving || addExerciseForm ? (
+          {editing || addExerciseForm ? (
             <input
               name="text1"
               id="text1"
@@ -94,7 +162,7 @@ const Exercise = ({ exercise, completed, disableActive, last, adding, addExercis
               onChange={(e) => setText1(e.target.value)}
               className={styles.exercise_detail_input}
               placeholder="Text 1..."
-              disabled={saving}
+              disabled={isUpdating}
             />
           ) : (
             <p className={styles.exercise_detail}>{exercise ? exercise.text1 : ""}</p>
@@ -105,7 +173,7 @@ const Exercise = ({ exercise, completed, disableActive, last, adding, addExercis
               <label htmlFor="text2" className={styles.exercise_hidden_label}>
                 Text2
               </label>
-              {editing || saving || addExerciseForm ? (
+              {editing || addExerciseForm ? (
                 <input
                   name="text2"
                   id="text2"
@@ -114,7 +182,7 @@ const Exercise = ({ exercise, completed, disableActive, last, adding, addExercis
                   onChange={(e) => setText2(e.target.value)}
                   className={styles.exercise_detail_input}
                   placeholder="Text 2..."
-                  disabled={saving}
+                  disabled={isUpdating}
                 />
               ) : (
                 <p className={styles.exercise_detail}>{exercise ? exercise.text2 : ""}</p>
@@ -125,16 +193,10 @@ const Exercise = ({ exercise, completed, disableActive, last, adding, addExercis
       </form>
 
       <div className={styles.exercise_actions_container}>
-        <div className={`${styles.btn_container} ${(saving || editing || adding || addExerciseForm || reordering) && styles.slide_out}`}>
-          <button
-            type="button"
-            className={styles.primary_btn}
-            tabIndex={-1}
-            onClick={() => {
-              setEditing(true);
-              disableActive!(true);
-            }}
-          >
+        <div
+          className={`${styles.btn_container} ${(isUpdating || isDeleting || editing || adding || addExerciseForm || reordering) && styles.slide_out}`}
+        >
+          <button type="button" className={styles.primary_btn} tabIndex={-1} onClick={edit}>
             <Pencil size={35} />
           </button>
           <button type="button" className={styles.delete_btn} tabIndex={-1} onClick={deleteExercise}>
@@ -142,13 +204,20 @@ const Exercise = ({ exercise, completed, disableActive, last, adding, addExercis
           </button>
         </div>
 
-        <div className={`${styles.save_container_regular} ${editing && styles.slide_in}`}>
-          <button type="submit" form="exerciseForm" className={styles.primary_btn} tabIndex={-1} onClick={saveExercise} disabled={name === ""}>
+        <div className={`${styles.save_container_regular} ${editing && !isUpdating && styles.slide_in}`}>
+          <button
+            type="button"
+            form="exerciseForm"
+            className={styles.primary_btn}
+            tabIndex={-1}
+            onClick={update}
+            disabled={name === "" || text1 === ""}
+          >
             <Check size={45} />
           </button>
         </div>
 
-        <div className={`${styles.save_container_adding} ${addExerciseForm && !saving && styles.slide_in}`}>
+        <div className={`${styles.save_container_adding} ${addExerciseForm && !isAdding && styles.slide_in}`}>
           <button
             type="button"
             form="exerciseForm"
@@ -160,12 +229,12 @@ const Exercise = ({ exercise, completed, disableActive, last, adding, addExercis
           >
             <X size={35} />
           </button>
-          <button type="submit" form="exerciseForm" className={styles.primary_btn} tabIndex={-1} onClick={addExercise}>
+          <button type="button" form="exerciseForm" className={styles.primary_btn} tabIndex={-1} onClick={add} disabled={name === "" || text1 === ""}>
             <Check size={45} />
           </button>
         </div>
 
-        <div className={`${styles.spinner} ${saving && styles.slide_in}`} />
+        <div className={`${styles.spinner} ${(isUpdating || isAdding || isDeleting) && styles.slide_in}`} />
       </div>
     </div>
   );

@@ -9,8 +9,8 @@
 .skeleton_back_btn {
   @extend %skeleton_base;
 
-  width: 12.3rem;
-  height: 4.8rem;
+  width: 13rem;
+  height: 5.4rem;
 }
 
 .skeleton_header {
@@ -19,11 +19,32 @@
   align-items: center;
   margin-top: 3.5rem;
 
+  @media only screen and (max-width: $bp-6) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.4rem;
+  }
+
   .skeleton_header_text {
     @extend %skeleton_base;
 
     width: 42rem;
-    height: 10rem;
+    height: 8.5rem;
+
+    @media only screen and (max-width: $bp-3) {
+      width: 40rem;
+      height: 8rem;
+    }
+
+    @media only screen and (max-width: $bp-4) {
+      width: 38rem;
+      height: 6.5rem;
+    }
+
+    @media only screen and (max-width: $bp-6) {
+      width: 34rem;
+      height: 6rem;
+    }
   }
 
   .skeleton_header_btn_container {
@@ -34,15 +55,116 @@
     .skeleton_header_btn_1 {
       @extend %skeleton_base;
 
-      width: 14.9rem;
-      height: 5rem;
+      width: 15.6rem;
+      height: 5.4rem;
     }
 
     .skeleton_header_btn_2 {
       @extend %skeleton_base;
 
-      width: 19.3rem;
-      height: 5rem;
+      width: 18.9rem;
+      height: 5.4rem;
     }
+  }
+}
+
+.skeleton_action_btn_container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3rem;
+
+  @media only screen and (max-width: $bp-6) {
+    margin-top: 2rem;
+  }
+
+  .skeleton_action_btn {
+    @extend %skeleton_base;
+
+    width: 12rem;
+    height: 3rem;
+  }
+}
+
+.skeleton_main_divider {
+  margin-top: 1.9rem;
+  height: 0.8px;
+  width: 100%;
+  background-color: $color-light-grey;
+}
+
+.skeleton_exercises {
+  .skeleton_exercise_container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    border-left-style: solid;
+    border-left-width: 0.8px;
+    border-left-color: $color-light-grey;
+    margin-left: 10rem;
+
+    @media only screen and (max-width: $bp-6) {
+      margin-left: 2rem;
+    }
+
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    padding-left: 8rem;
+
+    @media only screen and (max-width: $bp-6) {
+      padding-left: 5.5rem;
+    }
+
+    &:last-child {
+      border: none;
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 0.8px;
+        height: 50%;
+        background-color: $color-light-grey;
+      }
+    }
+
+    .skeleton_exercise_text {
+      @extend %skeleton_base;
+
+      width: 70rem;
+      height: 9.6rem;
+
+      @media only screen and (max-width: $bp-5) {
+        width: 35rem;
+      }
+    }
+
+    .skeleton_exercise_btns {
+      @extend %skeleton_base;
+
+      width: 11rem;
+      height: 4.2rem;
+
+      @media only screen and (max-width: $bp-6) {
+        @include hidden;
+      }
+    }
+  }
+}
+
+.skeleton_add_exercise {
+  margin-top: 2rem;
+  margin: auto;
+
+  @extend %skeleton_base;
+
+  width: 22.3rem;
+  height: 4.2rem;
+
+  @media only screen and (max-width: $bp-6) {
+    @include hidden;
   }
 }

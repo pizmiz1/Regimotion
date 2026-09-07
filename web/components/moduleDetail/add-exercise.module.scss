@@ -13,6 +13,10 @@
 
 .exercise_container {
   margin-left: 10rem;
+
+  @media only screen and (max-width: $bp-6) {
+    margin-left: 2rem;
+  }
 }
 
 .add_btn_container {

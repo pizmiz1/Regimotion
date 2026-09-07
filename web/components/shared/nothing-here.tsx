@@ -46,7 +46,7 @@ const NothingHere = () => {
         </p>
 
         <ModuleDetailDialog buttonText="Add Module">
-          <Plus size={18} color="white" />
+          <Plus size={20} color="white" />
         </ModuleDetailDialog>
       </div>
     </div>

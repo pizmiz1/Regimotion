@@ -15,6 +15,16 @@
   width: 30rem;
   height: 25rem;
   margin-bottom: -2.5rem;
+
+  @media only screen and (max-width: $bp-5) {
+    width: 28rem;
+    height: 23rem;
+  }
+
+  @media only screen and (max-width: $bp-6) {
+    width: 24rem;
+    height: 19rem;
+  }
 }
 
 .ambientGlow {
@@ -28,15 +38,37 @@
   z-index: 1;
 
   animation: backgroundGlowFade 3s ease-in-out infinite alternate;
+
+  @media only screen and (max-width: $bp-5) {
+    width: 23rem;
+    height: 23rem;
+  }
+
+  @media only screen and (max-width: $bp-6) {
+    width: 19rem;
+    height: 19rem;
+  }
 }
 
 .icon {
   position: relative;
+  width: 18rem;
+  height: 18rem;
   z-index: 2;
   stroke: rgba(255, 255, 255, 0.95);
   filter: drop-shadow(0 0 16px rgba(104, 85, 213, 0.55));
 
   animation: iconFillFade 3s ease-in-out infinite alternate;
+
+  @media only screen and (max-width: $bp-5) {
+    width: 16rem;
+    height: 16rem;
+  }
+
+  @media only screen and (max-width: $bp-6) {
+    width: 12rem;
+    height: 12rem;
+  }
 }
 
 .title {
@@ -45,6 +77,14 @@
   color: #ffffff;
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
   margin-top: 1.2rem;
+
+  @media only screen and (max-width: $bp-5) {
+    font-size: 5.5rem;
+  }
+
+  @media only screen and (max-width: $bp-6) {
+    font-size: 5rem;
+  }
 }
 
 .description {
@@ -52,6 +92,14 @@
   color: $color-light-grey;
   line-height: 1.6;
   text-align: center;
+
+  @media only screen and (max-width: $bp-5) {
+    font-size: 2.4rem;
+  }
+
+  @media only screen and (max-width: $bp-6) {
+    font-size: 1.9rem;
+  }
 }
 
 @keyframes backgroundGlowFade {

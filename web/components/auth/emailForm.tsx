@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import styles from "./emailForm.module.scss";
-import { generateOtp } from "@/lib/actions/auth";
+import { generateOtpForm } from "@/lib/actions/auth";
 import { validateEmail } from "@/lib/validation/validation";
 
 interface EmailFormProps {
@@ -12,24 +12,14 @@ interface EmailFormProps {
 const EmailForm = ({ success }: EmailFormProps) => {
   const [email, setEmail] = useState("");
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const [state, formAction, isLoading] = useActionState(generateOtp, {});
+  const [state, formAction, isLoading] = useActionState(generateOtpForm, {});
 
   useEffect(() => {
+    // Required for useActionState, can't use derived state
     if (state.data) {
       success(email);
     }
   }, [state.data]);
-
-  useEffect(() => {
-    if (!isLoading) {
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
 
   const emailValid = validateEmail(email);
 
@@ -37,7 +27,7 @@ const EmailForm = ({ success }: EmailFormProps) => {
     <form className={styles.form} action={formAction}>
       <div className={styles.email_container}>
         <input
-          ref={inputRef}
+          autoFocus={true}
           name="email"
           type="text"
           placeholder="E-mail"

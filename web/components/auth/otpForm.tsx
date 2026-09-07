@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import styles from "./otpForm.module.scss";
-import { verifyOtp } from "@/lib/actions/auth";
+import { verifyOtpForm } from "@/lib/actions/auth";
 import { validateOtp } from "@/lib/validation/validation";
 import { OTPInput, REGEXP_ONLY_DIGITS } from "input-otp";
 
@@ -15,18 +15,8 @@ const OtpForm = ({ email, back }: OtpFormProps) => {
   const [otp, setOtp] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  const [state, formAction, isLoading] = useActionState(verifyOtp, {});
-
-  useEffect(() => {
-    if (!isLoading) {
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
+  const [state, formAction, isLoading] = useActionState(verifyOtpForm, {});
 
   const otpValid = validateOtp(otp);
 
@@ -39,7 +29,7 @@ const OtpForm = ({ email, back }: OtpFormProps) => {
       <input type="hidden" name="email" value={email} />
 
       <OTPInput
-        ref={inputRef}
+        autoFocus={true}
         maxLength={6}
         name="otp"
         value={otp}

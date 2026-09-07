@@ -1,0 +1,10 @@
+@use "./../../constants/mixins" as *;
+@use "./../../constants/variables" as *;
+
+.container {
+  margin-top: 4rem;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 3rem;
+}

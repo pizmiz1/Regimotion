@@ -4,14 +4,16 @@
 %button_base {
   border: none;
   border-radius: 8px;
-  padding: 1.2rem 2.3rem;
+  padding: 1.5rem 2.7rem;
   font-weight: 500;
+  line-height: 1;
   cursor: pointer;
 
   transition:
     opacity 0.2s ease,
-    transform 0.1s ease,
-    background-color 0.2s ease-out;
+    scale 0.1s ease,
+    background-color 0.2s ease-out,
+    visibility 0.2s ease allow-discrete;
 }
 
 @mixin button-primary {
@@ -21,7 +23,7 @@
   color: #ffffff;
 
   &:active:not(:disabled) {
-    transform: scale(0.98);
+    scale: 0.98;
   }
 
   &:hover:not(:disabled) {
@@ -44,12 +46,13 @@
 
   transition:
     opacity 0.2s ease,
-    transform 0.1s ease,
+    scale 0.1s ease,
     background-color 0.2s ease-in-out,
-    color 0.2s ease-in-out;
+    color 0.2s ease-in-out,
+    visibility 0.2s ease allow-discrete;
 
   &:active:not(:disabled) {
-    transform: scale(0.98);
+    scale: 0.98;
     background-color: rgba(255, 255, 255, 0.15);
   }
 
@@ -72,8 +75,15 @@
   background-color: orangered;
   color: #ffffff;
 
+  transition:
+    opacity 0.2s ease,
+    scale 0.1s ease,
+    background-color 0.2s ease-in-out,
+    color 0.2s ease-in-out,
+    visibility 0.2s ease allow-discrete;
+
   &:active:not(:disabled) {
-    transform: scale(0.98);
+    scale: 0.98;
   }
 
   &:hover:not(:disabled) {
@@ -95,7 +105,8 @@
   transition:
     opacity 0.2s ease,
     scale 0.1s ease,
-    color 0.2s ease-out;
+    color 0.2s ease-in-out,
+    visibility 0.2s ease allow-discrete;
 
   &:active:not(:disabled) {
     scale: 0.97;
@@ -135,7 +146,7 @@
   }
 
   &:active {
-    transform: scale(0.97);
+    scale: 0.97;
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.3);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
@@ -144,9 +155,9 @@
 }
 
 @mixin shimmer {
-  background: linear-gradient(90deg, rgba(22, 23, 34, 0.4) 25%, rgba(40, 42, 58, 0.4) 50%, rgba(22, 23, 34, 0.4) 75);
+  background: linear-gradient(90deg, rgba(28, 25, 29, 0.9) 25%, rgba(68, 61, 71, 0.95) 50%, rgba(28, 25, 29, 0.9) 75%);
   background-size: 200% 100%;
-  animation: shimmerAnimation 2s infinite linear;
+  animation: shimmerAnimation 1.5s infinite linear;
 }
 
 @keyframes shimmerAnimation {
@@ -183,4 +194,8 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   user-select: none;
   gap: 0.5rem;
+
+  @media only screen and (max-width: $bp-6) {
+    flex: 0 0 37rem;
+  }
 }

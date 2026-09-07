@@ -1,16 +1,16 @@
 "use server";
 
 import { JsonDto } from "../../../shared/jsondto";
-import { DaysDto, ModuleDto } from "../../../shared/moduledto";
+import { DaysDto, ExerciseDto, ModuleDto } from "../../../shared/moduledto";
 import { deleteFetch, get, patch, post } from "../helpers/fetch";
 import { updateTag } from "next/cache";
 import { dataTags } from "@/constants/dataTags";
 import { cookies } from "next/headers";
 import { cookieKeys } from "@/constants/cookieKeys";
-import { validateColor, validateDaysActive, validateIcon, validateName } from "../validation/validation";
+import { validateColor, validateExercise, validateIcon, validateName, validateProgress } from "../validation/validation";
 import { convertDays } from "../helpers/day-converter";
 
-const validateModule = (name: string, color: string, icon: string, daysActive: string[]) => {
+const validateModule = (name: string, color: string, icon: string, progress: number, exercises: ExerciseDto[]) => {
   const nameValid = validateName(name);
   if (!nameValid) {
     return {
@@ -35,28 +35,36 @@ const validateModule = (name: string, color: string, icon: string, daysActive: s
     };
   }
 
-  const daysActiveValid = validateDaysActive(daysActive);
-  if (!daysActiveValid) {
+  const progressValid = validateProgress(progress);
+  if (!progressValid) {
     return {
       data: false,
-      error: "Invalid Days",
+      error: "Invalid Progress",
     };
+  }
+
+  for (const exercise of exercises) {
+    const exercisesValid = validateExercise(exercise);
+    if (!exercisesValid) {
+      return {
+        data: false,
+        error: "Invalid Exercises",
+      };
+    }
   }
 };
 
-export const postModule = async (prevState: JsonDto<boolean>, formData: FormData): Promise<JsonDto<boolean>> => {
-  // Testing
-  return {
-    data: false,
-    error: "Test",
-  };
-
+// Form Actions
+export const postModuleForm = async (prevState: JsonDto<boolean>, formData: FormData): Promise<JsonDto<boolean>> => {
   const name = formData.get("name") as string;
   const color = formData.get("color") as string;
   const icon = formData.get("icon") as string;
   const daysActive = formData.getAll("daysActive") as string[];
 
-  validateModule(name, color, icon, daysActive);
+  const exercises: ExerciseDto[] = [];
+  const progress = 0;
+
+  validateModule(name, color, icon, progress, exercises);
 
   try {
     const daysDto = convertDays(daysActive, true) as DaysDto;
@@ -66,8 +74,8 @@ export const postModule = async (prevState: JsonDto<boolean>, formData: FormData
       icon: icon,
       color: color,
       days: daysDto,
-      progress: 0,
-      exercises: [],
+      progress: progress,
+      exercises: exercises,
     };
 
     const cookieStore = await cookies();
@@ -96,14 +104,12 @@ export const postModule = async (prevState: JsonDto<boolean>, formData: FormData
   }
 };
 
-export const patchModule = async (prevState: JsonDto<boolean>, formData: FormData): Promise<JsonDto<boolean>> => {
+export const patchModuleForm = async (prevState: JsonDto<boolean>, formData: FormData): Promise<JsonDto<boolean>> => {
   const id = formData.get("id") as string;
   const name = formData.get("name") as string;
   const color = formData.get("color") as string;
   const icon = formData.get("icon") as string;
   const daysActive = formData.getAll("daysActive") as string[];
-
-  validateModule(name, color, icon, daysActive);
 
   try {
     const cookieStore = await cookies();
@@ -124,7 +130,16 @@ export const patchModule = async (prevState: JsonDto<boolean>, formData: FormDat
       };
     }
 
-    const daysDto = convertDays(daysActive, true) as DaysDto;
+    const daysDto = convertDays(daysActive, true) as DaysDto | boolean;
+
+    if (typeof daysDto === "boolean") {
+      return {
+        data: false,
+        error: "Invalid Days",
+      };
+    }
+
+    validateModule(name, color, icon, existing.progress, existing.exercises);
 
     const body: ModuleDto = {
       id: id,
@@ -154,7 +169,36 @@ export const patchModule = async (prevState: JsonDto<boolean>, formData: FormDat
     console.log(error);
     return {
       data: false,
-      error: "Unable to update module",
+      error: "Unable to patch module",
+    };
+  }
+};
+
+// Regular Actions
+export const patchModule = async (module: ModuleDto): Promise<JsonDto<ModuleDto>> => {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get(cookieKeys.accessToken)?.value;
+
+    validateModule(module.name, module.color, module.icon, module.progress, module.exercises);
+
+    const response: JsonDto<ModuleDto> = await patch("/module", module, accessToken!);
+
+    if (response.error) {
+      return {
+        error: response.error,
+      };
+    }
+
+    updateTag(dataTags.modules);
+
+    return {
+      data: response.data,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      error: "Unable to patch module",
     };
   }
 };

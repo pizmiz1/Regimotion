@@ -1,21 +1,86 @@
+"use client";
+
 import { ModuleDto } from "../../../shared/moduledto";
 import Progress from "./progress";
 import styles from "./home-module.module.scss";
 import MatIcon from "../shared/mat-icon";
 import { Check } from "lucide-react";
 import Link from "next/link";
+import { useRef, useTransition } from "react";
+import { patchModule } from "@/lib/actions/module";
+import { stopHolyLoader } from "holy-loader";
+import { UserSettingsDto } from "../../../shared/usersettingsdto";
 
 interface HomeModuleProps {
   module: ModuleDto;
+  userSettings: UserSettingsDto;
 }
 
-export const HomeModuleSkeleton = () => {
-  return <div className={styles.card_skeleton}></div>;
-};
+export const HomeModule = ({ module, userSettings }: HomeModuleProps) => {
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isLongPress = useRef(false);
 
-export const HomeModule = ({ module }: HomeModuleProps) => {
+  const [isCompleting, startCompleteTransition] = useTransition();
+
+  const completeModule = async () => {
+    const updatedExercises = module.exercises.map((curr) => ({ ...curr, completed: true }));
+    const updatedModule: ModuleDto = { ...module, exercises: updatedExercises, progress: 100 };
+
+    startCompleteTransition(async () => {
+      const response = await patchModule(updatedModule);
+
+      if (response.error) {
+        console.log(response.error);
+      }
+    });
+  };
+
+  const startPress = () => {
+    isLongPress.current = false;
+
+    if (userSettings.enableHoldComplete && module.exercises.length > 0) {
+      timerRef.current = setTimeout(() => {
+        isLongPress.current = true;
+
+        if (module.progress !== 100) {
+          completeModule();
+        }
+      }, 600);
+    }
+  };
+
+  const endPress = (e: React.MouseEvent | React.TouchEvent) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    if (isLongPress.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      stopHolyLoader();
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isLongPress.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      setTimeout(() => {
+        stopHolyLoader();
+      }, 0);
+    }
+  };
+
   return (
-    <Link href={`/moduleDetail/${module.id}`} className={styles.card} prefetch={false}>
+    <Link
+      href={`/moduleDetail/${module.id}?r=${Date.now()}&prev=home`}
+      onMouseDown={startPress}
+      onMouseUp={endPress}
+      onTouchStart={startPress}
+      onTouchEnd={endPress}
+      onClick={handleClick}
+      className={styles.card}
+    >
       <div className={styles.header}>
         <MatIcon
           name={module.icon}

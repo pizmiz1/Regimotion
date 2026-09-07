@@ -6,8 +6,8 @@ export const get = async (path: string, accessToken: string, dataTag: string, pa
   "use cache";
   cacheLife({
     stale: Number(process.env.CACHE_STALE) || 30, // 30 Seconds
-    revalidate: Number(process.env.CACHE_REVALIDATE) || 300, // 5 Min
-    expire: Number(process.env.CACHE_EXPIRE) || 300, // 5 Min
+    revalidate: Number(process.env.CACHE_REVALIDATE) || 60, // 1 Min
+    expire: Number(process.env.CACHE_EXPIRE) || 60, // 1 Min
   });
   cacheTag(dataTag);
 

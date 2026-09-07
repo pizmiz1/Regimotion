@@ -3,22 +3,21 @@
 import { ReactNode, useActionState, useEffect, useRef, useState, useTransition } from "react";
 import styles from "./module-detail-dialog.module.scss";
 import { Trash, X } from "lucide-react";
-import { patchModule, postModule, deleteModule } from "@/lib/actions/module";
+import { patchModuleForm, postModuleForm, deleteModule } from "@/lib/actions/module";
 import { colors } from "@/constants/colors";
 import MatIcon from "./mat-icon";
 import { daysActiveMap, iconList, moduleColorList } from "@/constants/maps";
 import { ModuleDto } from "../../../shared/moduledto";
 import { validateColor, validateDaysActive, validateIcon, validateName } from "@/lib/validation/validation";
 import { convertDays } from "@/lib/helpers/day-converter";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { DialogPhase } from "@/constants/types";
 
 interface ModuleDetailDialogProps {
   buttonText: string;
   children?: ReactNode;
   module?: ModuleDto;
 }
-
-type DialogPhase = "closed" | "opening" | "open" | "closing";
 
 const ModuleDetailDialog = ({ buttonText, children, module }: ModuleDetailDialogProps) => {
   const [phase, setPhase] = useState<DialogPhase>("closed");
@@ -32,11 +31,17 @@ const ModuleDetailDialog = ({ buttonText, children, module }: ModuleDetailDialog
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const lastProcessedStateRef = useRef<typeof state | null>(null);
 
-  const [state, formAction, isLoading] = useActionState(module ? patchModule : postModule, {});
-  const [isDeleting, startTransition] = useTransition();
+  const [state, formAction, isLoading] = useActionState(module ? patchModuleForm : postModuleForm, {});
+  const [isDeleting, startDeleteTransition] = useTransition();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
+  const prev = searchParams.get("prev");
   const isClosing = phase === "closing";
+  const nameValid = validateName(name);
+  const colorValid = validateColor(color);
+  const iconValid = validateIcon(icon);
+  const daysActiveValid = validateDaysActive(daysActive);
 
   const requestClose = () => {
     if (phase === "closing" || phase === "closed") {
@@ -50,14 +55,18 @@ const ModuleDetailDialog = ({ buttonText, children, module }: ModuleDetailDialog
       return;
     }
 
-    startTransition(async () => {
+    startDeleteTransition(async () => {
       const result = await deleteModule(module.id!);
 
       if (result.error) {
         setError(result.error);
       } else {
         requestClose();
-        router.back();
+        if (prev === "home") {
+          router.push("/");
+        } else {
+          router.push("/modules");
+        }
       }
     });
   };
@@ -81,7 +90,7 @@ const ModuleDetailDialog = ({ buttonText, children, module }: ModuleDetailDialog
   }, [phase]);
 
   useEffect(() => {
-    // Handle form submissions
+    // Required for useActionState, can't use derived state
     if (phase === "closed") {
       return;
     }
@@ -98,11 +107,6 @@ const ModuleDetailDialog = ({ buttonText, children, module }: ModuleDetailDialog
       requestClose();
     }
   }, [state, phase]);
-
-  const nameValid = validateName(name);
-  const colorValid = validateColor(color);
-  const iconValid = validateIcon(icon);
-  const daysActiveValid = validateDaysActive(daysActive);
 
   return (
     <>

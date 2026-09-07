@@ -1,14 +1,6 @@
 @use "./../../constants/variables" as *;
 @use "./../../constants/mixins" as *;
 
-.card_skeleton {
-  @include card_base;
-
-  pointer-events: none;
-
-  @include shimmer;
-}
-
 .card {
   @include card_base;
 
@@ -28,7 +20,6 @@
     background-color: var(--module-hover-color);
     transform: translateY(-3px);
     border-color: color-mix(in oklab, var(--module-hover-color) 70%, #ffffff);
-    // TODO - Scale box shadows for media queries
     box-shadow:
       0 60px 120px rgba(0, 0, 0, 0.6),
       0 0 40px 0px color-mix(in oklab, var(--module-hover-color) 30%, transparent);
@@ -48,6 +39,10 @@
     font-weight: bold;
 
     @include text-ellipsis;
+
+    @media only screen and (max-width: $bp-6) {
+      font-size: 3.5rem;
+    }
   }
 
   p {

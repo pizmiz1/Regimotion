@@ -36,4 +36,8 @@
   margin-bottom: 10rem;
 
   @include button-primary;
+
+  @media only screen and (max-width: $bp-3) {
+    font-size: 1.8rem;
+  }
 }

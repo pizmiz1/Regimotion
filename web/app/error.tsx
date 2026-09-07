@@ -16,7 +16,7 @@ const ErrorPage = () => {
       {showHomeButton && (
         <Link href="/" className={styles.home_btn}>
           Return Home
-          <House size={18} color="white" />
+          <House size={20} color="white" />
         </Link>
       )}
     </div>

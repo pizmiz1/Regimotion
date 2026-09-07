@@ -1,4 +1,3 @@
-import { ModulesModuleSkeleton } from "@/components/modules/modules-module";
 import styles from "./loading.module.scss";
 
 const Loading = () => {
@@ -10,10 +9,10 @@ const Loading = () => {
       </div>
       <div className={styles.skeleton_container}>
         <div className={styles.skeleton_card_container}>
-          <ModulesModuleSkeleton />
-          <ModulesModuleSkeleton />
-          <ModulesModuleSkeleton />
-          <ModulesModuleSkeleton />
+          <div className={styles.skeleton_card} />
+          <div className={styles.skeleton_card} />
+          <div className={styles.skeleton_card} />
+          <div className={styles.skeleton_card} />
         </div>
       </div>
     </>

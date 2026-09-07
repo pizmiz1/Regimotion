@@ -13,6 +13,16 @@
     height: 30rem;
     object-fit: contain;
     image-rendering: optimizeQuality;
+
+    @media only screen and (max-width: $bp-5) {
+      width: 25rem;
+      height: 25rem;
+    }
+
+    @media only screen and (max-width: $bp-6) {
+      width: 20rem;
+      height: 20rem;
+    }
   }
 
   span {

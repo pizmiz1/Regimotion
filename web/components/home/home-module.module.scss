@@ -1,13 +1,5 @@
 @use "./../../constants/mixins" as *;
 
-.card_skeleton {
-  @include card_base;
-
-  pointer-events: none;
-
-  @include shimmer;
-}
-
 .card {
   @include card_base;
 
@@ -27,7 +19,6 @@
     background-color: rgba(22, 23, 34, 0.9);
     transform: translateY(-3px);
     border-color: rgba(255, 255, 255, 0.4);
-    // TODO - Scale box shadows for media queries
     box-shadow:
       0 60px 120px rgba(0, 0, 0, 0.4),
       0 0 40px 0px rgba(255, 255, 255, 0.1);

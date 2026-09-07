@@ -9,6 +9,11 @@
   font-size: 1.8rem;
 
   @include button-primary;
+
+  @media only screen and (max-width: $bp-6) {
+    font-size: 1.7rem;
+    padding: 1.2rem 2.2rem;
+  }
 }
 
 .modalDialog {
@@ -65,17 +70,27 @@
       backdrop-filter: blur(0px);
     }
   }
+
+  @media only screen and (max-width: $bp-1) {
+    width: 90rem;
+    height: fit-content;
+  }
 }
 
 .header_container {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 
   .close_btn_container {
-    flex-basis: 33%;
+    flex-basis: 20%;
     display: flex;
     justify-content: flex-end;
     align-items: center;
+
+    @media only screen and (max-width: $bp-6) {
+      flex-basis: 25%;
+    }
 
     .close_btn {
       color: $color-lighter-grey;
@@ -88,12 +103,16 @@
   }
 
   .header_text {
-    flex-basis: 33%;
+    flex-basis: 60%;
     font-size: 5.5rem;
     font-weight: 600;
     text-align: center;
 
     @include text-ellipsis;
+
+    @media only screen and (max-width: $bp-6) {
+      flex-basis: 50%;
+    }
 
     &.new {
       font-size: 5.2rem;
@@ -101,11 +120,15 @@
   }
 
   .delete_container {
-    flex-basis: 33%;
+    flex-basis: 20%;
     position: relative;
     display: inline-flex;
     align-items: center;
     overflow: hidden;
+
+    @media only screen and (max-width: $bp-6) {
+      flex-basis: 25%;
+    }
 
     .delete_btn {
       position: absolute;
@@ -115,7 +138,6 @@
       transition:
         transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
         color 0.2s ease-out,
-        opacity 0.2s linear,
         opacity 0.25s ease;
       transform: translateX(0);
       opacity: 1;
@@ -140,7 +162,7 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      white-space: nowrap;
+      white-space: wrap;
       transition:
         transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
         opacity 0.25s ease;
@@ -162,6 +184,10 @@
         margin-top: 3px;
         gap: 1rem;
         align-items: flex-start;
+
+        @media only screen and (max-width: $bp-6) {
+          flex-direction: column;
+        }
 
         .no_btn {
           font-size: 1.5rem;
@@ -348,10 +374,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 2.3rem;
-
-  // TODO - Maybe use these when doing reactive styling/breakpoints
-  // max-height: 16rem;
-  // overflow: auto;
+  max-height: 30rem;
+  overflow: auto;
 
   .radio_input {
     position: absolute;
@@ -393,6 +417,10 @@
 
   transition: opacity 0.2s ease;
 
+  @media only screen and (max-width: $bp-6) {
+    width: 100%;
+  }
+
   &:has(.radio_input:disabled) {
     opacity: 0.2;
   }
@@ -407,7 +435,6 @@
   .icon_label {
     cursor: pointer;
     padding: 1.3rem;
-    border-radius: 3px;
     color: white;
     font-size: 2.4rem;
     font-weight: 300;
@@ -417,6 +444,13 @@
     text-align: center;
 
     transition: all 0.2s ease;
+
+    @media only screen and (max-width: $bp-6) {
+      width: 4.5rem;
+      height: 4.5rem;
+      font-size: 2rem;
+      padding: 1rem;
+    }
 
     &:has(.radio_input:disabled) {
       cursor: not-allowed;

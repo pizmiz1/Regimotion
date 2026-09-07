@@ -9,7 +9,7 @@ const NotFound = () => {
       <p className={styles.description_text}>Oops something went wrong</p>
       <Link href="/" className={styles.home_btn}>
         Return Home
-        <House size={18} color="white" />
+        <House size={20} color="white" />
       </Link>
     </div>
   );

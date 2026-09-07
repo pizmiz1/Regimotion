@@ -1,13 +1,32 @@
 @use "./../../../constants/mixins" as *;
+@use "./../../../constants/variables" as *;
 
 .skeleton_header_container {
   display: flex;
   justify-content: space-between;
   align-items: center;
 
+  @media only screen and (max-width: $bp-6) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
   h1 {
     font-size: 12rem;
     line-height: 1;
+
+    @media only screen and (max-width: $bp-3) {
+      font-size: 10rem;
+    }
+
+    @media only screen and (max-width: $bp-4) {
+      font-size: 9rem;
+    }
+
+    @media only screen and (max-width: $bp-6) {
+      font-size: 7rem;
+    }
   }
 
   .skeleton_add_btn {
@@ -28,4 +47,12 @@
   flex-direction: row;
   flex-wrap: wrap;
   gap: 3rem;
+
+  .skeleton_card {
+    @include card_base;
+
+    pointer-events: none;
+
+    @include shimmer;
+  }
 }

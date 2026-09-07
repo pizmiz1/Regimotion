@@ -6,7 +6,7 @@ const NothingToday = () => {
     <div className={styles.container}>
       <div className={styles.iconWrapper}>
         <div className={styles.ambientGlow} aria-hidden="true" />
-        <MoonStar className={styles.icon} size={180} strokeWidth={1.25} />
+        <MoonStar className={styles.icon} strokeWidth={1.25} />
       </div>
 
       <h2 className={styles.title}>Nothing Here</h2>

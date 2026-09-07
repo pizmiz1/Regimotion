@@ -1,9 +1,14 @@
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import Content from "@/components/account/content";
+import { getUserSettings } from "@/lib/helpers/common-fetch";
 
 const AccountPage = async () => {
-  await delay(2000);
+  const userSettings = await getUserSettings();
 
-  return <h1>Account Page!</h1>;
+  await new Promise((resolve) => {
+    setTimeout(resolve, 3000);
+  });
+
+  return <Content userSettings={userSettings} />;
 };
 
 export default AccountPage;

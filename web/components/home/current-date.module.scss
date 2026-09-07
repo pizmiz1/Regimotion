@@ -4,11 +4,27 @@
 .header {
   font-size: 12rem;
   line-height: 1;
+
+  @media only screen and (max-width: $bp-3) {
+    font-size: 10rem;
+  }
+
+  @media only screen and (max-width: $bp-4) {
+    font-size: 9rem;
+  }
+
+  @media only screen and (max-width: $bp-6) {
+    font-size: 7rem;
+  }
 }
 
 .date {
   font-size: 3rem;
   color: $color-light-grey;
+
+  @media only screen and (max-width: $bp-4) {
+    font-size: 2.5rem;
+  }
 }
 
 .skeleton_header {

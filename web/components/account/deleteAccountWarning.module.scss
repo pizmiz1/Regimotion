@@ -1,0 +1,136 @@
+@use "./../../constants/variables" as *;
+@use "./../../constants//mixins" as *;
+@use "sass:color";
+
+.modalDialog {
+  position: fixed;
+  inset: 0;
+  top: 30%;
+  margin-left: auto;
+  margin-right: auto;
+
+  background-color: #2a272c;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  padding: 3rem;
+  box-sizing: border-box;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.4),
+    0 1px 0 rgba(255, 255, 255, 0.05) inset;
+
+  width: 70rem;
+  height: fit-content;
+
+  opacity: 0;
+  transform: translateY(0.75rem) scale(0.98);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    overlay 180ms allow-discrete,
+    display 180ms allow-discrete;
+  will-change: opacity, transform;
+
+  &::backdrop {
+    background-color: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0px);
+    transition:
+      background-color 180ms ease,
+      overlay 180ms allow-discrete,
+      display 180ms allow-discrete;
+  }
+
+  &[data-state="open"] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+
+    &::backdrop {
+      background-color: rgba(14, 12, 15, 0.6);
+      backdrop-filter: blur(2px);
+    }
+  }
+
+  &[data-state="closing"] {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.98);
+
+    &::backdrop {
+      background-color: rgba(0, 0, 0, 0);
+      backdrop-filter: blur(0px);
+    }
+  }
+
+  .header_container {
+    display: flex;
+    justify-content: space-between;
+
+    .invis {
+      flex-basis: 10%;
+
+      @include hidden;
+    }
+
+    .header_text {
+      flex-basis: 80%;
+      font-size: 5.5rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .close_btn_container {
+      justify-content: flex-end;
+      display: flex;
+      align-items: center;
+
+      .close_btn {
+        flex-basis: 10%;
+        color: $color-lighter-grey;
+        cursor: pointer;
+        transition:
+          transform 0.2s ease,
+          color 0.2s ease-out,
+          opacity 0.2s linear;
+
+        &:hover:not(:disabled) {
+          color: $color-light-grey;
+        }
+
+        &:active:not(:disabled) {
+          transform: scale(0.9);
+        }
+
+        &:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+
+  .description_text {
+    font-size: 2.1rem;
+    color: $color-lighter-grey;
+
+    margin-top: 2rem;
+  }
+
+  .btn_container {
+    display: flex;
+    justify-content: flex-end;
+    align-self: flex-end;
+    gap: 2.3rem;
+
+    margin-top: 5rem;
+
+    .cancel_btn {
+      font-size: 2.2rem;
+
+      @include button-secondary;
+    }
+
+    .delete_btn {
+      font-size: 2.2rem;
+
+      @include button-warning;
+    }
+  }
+}

@@ -8,6 +8,21 @@
   margin-bottom: 1rem;
 
   @include shimmer;
+
+  @media only screen and (max-width: $bp-3) {
+    height: 9.2rem;
+    width: 42rem;
+  }
+
+  @media only screen and (max-width: $bp-4) {
+    height: 8rem;
+    width: 38rem;
+  }
+
+  @media only screen and (max-width: $bp-6) {
+    height: 6.8rem;
+    width: 30rem;
+  }
 }
 
 .skeleton_date {
@@ -16,6 +31,10 @@
   height: 3rem;
 
   @include shimmer;
+
+  @media only screen and (max-width: $bp-4) {
+    height: 2.5rem;
+  }
 }
 
 .skeleton_container {
@@ -27,4 +46,12 @@
   flex-direction: row;
   flex-wrap: wrap;
   gap: 3rem;
+
+  .skeleton_card {
+    @include card_base;
+
+    pointer-events: none;
+
+    @include shimmer;
+  }
 }
