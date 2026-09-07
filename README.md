@@ -1,5 +1,7 @@
 # Regimotion
 
+https://regimotion.vercel.app/
+
 Daily Exercise Mobile and Web App
 
 Mobile App built with [React Native](https://reactnative.dev/)
