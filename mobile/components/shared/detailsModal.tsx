@@ -1,6 +1,6 @@
 import { ComponentProps, useContext, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, FlatList, Modal, Pressable, Text, TouchableOpacity, useWindowDimensions, View } from "react-native";
-import { useGlobalContext } from "../../store/globalContext";
+import { useGlobalContext } from "../../store/GlobalContext";
 import colors from "../../constants/colors";
 import Input from "./Input";
 import { MaterialIcons } from "@expo/vector-icons";

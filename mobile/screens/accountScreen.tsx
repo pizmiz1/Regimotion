@@ -2,7 +2,7 @@ import { Animated, Image, Text, TouchableOpacity, View } from "react-native";
 import PageContainer from "../components/shared/PageContainer";
 import { useRef, useState } from "react";
 import routeNames from "../constants/routeNames";
-import { useGlobalContext } from "../store/globalContext";
+import { useGlobalContext } from "../store/GlobalContext";
 import { deleteAlert, errorAlert } from "../helpers/alert";
 import * as SecureStore from "expo-secure-store";
 import storageKeys from "../constants/storageKeys";

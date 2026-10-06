@@ -5,7 +5,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { MaterialIconButton } from "../components/shared/IconButton";
 import PageContainer from "../components/shared/PageContainer";
 import DetailsModal from "../components/shared/DetailsModal";
-import { useGlobalContext } from "../store/globalContext";
+import { useGlobalContext } from "../store/GlobalContext";
 import Exercise from "../components/moduleDetail/Exercise";
 import LottieView from "lottie-react-native";
 import { opacityLayout, scaleYLayout } from "../helpers/layouts";

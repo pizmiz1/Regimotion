@@ -2,7 +2,7 @@ import { ActivityIndicator, Animated, Easing, StyleSheet, Text, View } from "rea
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from "../constants/colors";
 import { useEffect, useRef, useState } from "react";
-import { useGlobalContext } from "../store/globalContext";
+import { useGlobalContext } from "../store/GlobalContext";
 import Module from "../components/shared/Module";
 import { useNavigation } from "@react-navigation/native";
 import routeNames from "../constants/routeNames";

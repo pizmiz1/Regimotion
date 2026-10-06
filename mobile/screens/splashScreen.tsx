@@ -4,7 +4,7 @@ import colors from "../constants/colors";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
-import { useGlobalContext } from "../store/globalContext";
+import { useGlobalContext } from "../store/GlobalContext";
 import { get } from "../helpers/fetch";
 import * as SecureStore from "expo-secure-store";
 import storageKeys from "../constants/storageKeys";

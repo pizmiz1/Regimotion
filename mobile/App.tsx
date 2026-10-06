@@ -1,6 +1,6 @@
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import AppNav from "./navigation/Navigation";
-import GlobalProvider from "./store/globalProvider";
+import { GlobalProvider } from "./store/GlobalContext";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { registerRootComponent } from "expo";
 

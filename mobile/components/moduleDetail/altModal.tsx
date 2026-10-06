@@ -3,7 +3,7 @@ import colors from "../../constants/colors";
 import { useState } from "react";
 import Button from "../shared/Button";
 import { ExerciseDto } from "../../../shared/moduledto";
-import { useGlobalContext } from "../../store/globalContext";
+import { useGlobalContext } from "../../store/GlobalContext";
 import { opacityLayout } from "../../helpers/layouts";
 
 interface AltModalProps {

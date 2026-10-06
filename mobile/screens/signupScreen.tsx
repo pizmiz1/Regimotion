@@ -10,7 +10,7 @@ import * as SecureStore from "expo-secure-store";
 import storageKeys from "../constants/storageKeys";
 import { JsonDto } from "../../shared/jsondto";
 import { AccessDto } from "../../shared/accessdto";
-import { useGlobalContext } from "../store/globalContext";
+import { useGlobalContext } from "../store/GlobalContext";
 import { StackActions, useNavigation } from "@react-navigation/native";
 import routeNames from "../constants/routeNames";
 import { opacityLayout } from "../helpers/layouts";

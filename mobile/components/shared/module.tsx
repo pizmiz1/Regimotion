@@ -5,7 +5,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { ModuleDto } from "../../../shared/moduledto";
 import { ComponentProps } from "react";
 import * as Progress from "react-native-progress";
-import { useGlobalContext } from "../../store/globalContext";
+import { useGlobalContext } from "../../store/GlobalContext";
 
 interface ModuleProps {
   module: ModuleDto;

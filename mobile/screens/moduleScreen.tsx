@@ -2,7 +2,7 @@ import { Animated, Text, View } from "react-native";
 import Module from "../components/shared/Module";
 import colors from "../constants/colors";
 import { useEffect, useRef, useState } from "react";
-import { useGlobalContext } from "../store/globalContext";
+import { useGlobalContext } from "../store/GlobalContext";
 import DetailsModal from "../components/shared/DetailsModal";
 import { useNavigation } from "@react-navigation/native";
 import routeNames from "../constants/routeNames";
