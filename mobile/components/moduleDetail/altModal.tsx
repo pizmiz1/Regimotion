@@ -1,7 +1,7 @@
 import { ActivityIndicator, Keyboard, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
 import { useState } from "react";
-import Button from "../shared/button";
+import Button from "../shared/Button";
 import { ExerciseDto } from "../../../shared/moduledto";
 import { useGlobalContext } from "../../store/globalContext";
 import { opacityLayout } from "../../helpers/layouts";

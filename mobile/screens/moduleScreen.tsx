@@ -1,13 +1,13 @@
 import { Animated, Text, View } from "react-native";
-import Module from "../components/shared/module";
+import Module from "../components/shared/Module";
 import colors from "../constants/colors";
 import { useEffect, useRef, useState } from "react";
 import { useGlobalContext } from "../store/globalContext";
-import DetailsModal from "../components/shared/detailsModal";
+import DetailsModal from "../components/shared/DetailsModal";
 import { useNavigation } from "@react-navigation/native";
 import routeNames from "../constants/routeNames";
-import { MaterialIconButton } from "../components/shared/iconButton";
-import PageContainer from "../components/shared/pageContainer";
+import { MaterialIconButton } from "../components/shared/IconButton";
+import PageContainer from "../components/shared/PageContainer";
 
 const ModuleScreen = () => {
   const { modules } = useGlobalContext();

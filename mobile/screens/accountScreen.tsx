@@ -1,5 +1,5 @@
 import { Animated, Image, Text, TouchableOpacity, View } from "react-native";
-import PageContainer from "../components/shared/pageContainer";
+import PageContainer from "../components/shared/PageContainer";
 import { useRef, useState } from "react";
 import routeNames from "../constants/routeNames";
 import { useGlobalContext } from "../store/globalContext";
@@ -14,7 +14,7 @@ import { useNavigation } from "@react-navigation/native";
 import { opacityLayout } from "../helpers/layouts";
 import { animalColors, animals } from "../constants/animals";
 import { generateSlug } from "random-word-slugs";
-import Setting from "../components/account/setting";
+import Setting from "../components/account/Setting";
 
 const AccountScreen = () => {
   const { userSettings, patchUserSettings, accessToken, updateAccessToken, updateModules } = useGlobalContext();

@@ -1,11 +1,11 @@
 import { ActivityIndicator, Animated, StyleSheet, Text, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
-import { MaterialIconButton } from "../shared/iconButton";
+import { MaterialIconButton } from "../shared/IconButton";
 import { useGlobalContext } from "../../store/globalContext";
 import { useRef, useState } from "react";
 import { Swipeable } from "react-native-gesture-handler";
 import { opacityLayout } from "../../helpers/layouts";
-import AltModal from "./altModal";
+import AltModal from "./AltModal";
 
 interface ExerciseProps {
   exerciseId: string;

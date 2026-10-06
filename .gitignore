@@ -15,7 +15,7 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
-ips.tsx
+ips.ts
 
 # Node/Express
 .env

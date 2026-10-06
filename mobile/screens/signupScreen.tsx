@@ -1,8 +1,6 @@
 import { ActivityIndicator, Keyboard, Text, TouchableWithoutFeedback, View } from "react-native";
 import colors from "../constants/colors";
-import Input from "../components/shared/input";
 import { useRef, useState } from "react";
-import Button from "../components/shared/button";
 import { LinearGradient } from "expo-linear-gradient";
 import { OtpDto } from "../../shared/otpdto";
 import { UserDto } from "../../shared/userdto";
@@ -17,6 +15,10 @@ import { StackActions, useNavigation } from "@react-navigation/native";
 import routeNames from "../constants/routeNames";
 import { opacityLayout } from "../helpers/layouts";
 import { OTPInput, OTPInputRef } from "input-otp-native";
+
+// Custom Components
+import Button from "../components/shared/Button";
+import Input from "../components/shared/Input";
 
 const SignupScreen = () => {
   const { updateAccessToken } = useGlobalContext();

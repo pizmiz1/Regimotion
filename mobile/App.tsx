@@ -1,5 +1,5 @@
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import AppNav from "./navigation/navigation";
+import AppNav from "./navigation/Navigation";
 import GlobalProvider from "./store/globalProvider";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 

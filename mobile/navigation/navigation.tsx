@@ -2,13 +2,13 @@ import { createStaticNavigation, StaticParamList } from "@react-navigation/nativ
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 // screens
-import SplashScreen from "../screens/splashScreen";
+import SplashScreen from "../screens/SplashScreen";
 import routeNames from "../constants/routeNames";
-import SignupScreen from "../screens/signupScreen";
-import ModuleScreen from "../screens/moduleScreen";
-import DailyScreen from "../screens/dailyScreen";
-import ModuleDetailScreen from "../screens/moduleDetailScreen";
-import AccountScreen from "../screens/accountScreen";
+import SignupScreen from "../screens/SignupScreen";
+import ModuleScreen from "../screens/ModuleScreen";
+import DailyScreen from "../screens/DailyScreen";
+import ModuleDetailScreen from "../screens/ModuleDetailScreen";
+import AccountScreen from "../screens/AccountScreen";
 
 const AppNav = () => {
   const Stack = createNativeStackNavigator({

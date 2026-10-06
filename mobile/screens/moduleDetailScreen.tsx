@@ -2,17 +2,17 @@ import { ActivityIndicator, Animated, StyleSheet, Text, TouchableOpacity, View }
 import colors from "../constants/colors";
 import { useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { MaterialIconButton } from "../components/shared/iconButton";
-import PageContainer from "../components/shared/pageContainer";
-import DetailsModal from "../components/shared/detailsModal";
+import { MaterialIconButton } from "../components/shared/IconButton";
+import PageContainer from "../components/shared/PageContainer";
+import DetailsModal from "../components/shared/DetailsModal";
 import { useGlobalContext } from "../store/globalContext";
-import Exercise from "../components/moduleDetail/exercise";
+import Exercise from "../components/moduleDetail/Exercise";
 import LottieView from "lottie-react-native";
 import { opacityLayout, scaleYLayout } from "../helpers/layouts";
-import AddExercise from "../components/moduleDetail/addExercise";
+import AddExercise from "../components/moduleDetail/AddExercise";
 import { NestableDraggableFlatList } from "react-native-draggable-flatlist";
 import { ScrollView } from "react-native-gesture-handler";
-import ReorderExercise from "../components/moduleDetail/reorderExercise";
+import ReorderExercise from "../components/moduleDetail/ReorderExercise";
 
 const ModuleDetailScreen = () => {
   const route = useRoute();

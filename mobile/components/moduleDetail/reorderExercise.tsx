@@ -2,7 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ScaleDecorator } from "react-native-draggable-flatlist";
 import colors from "../../constants/colors";
 import { ExerciseDto } from "../../../shared/moduledto";
-import { MaterialIconButton } from "../shared/iconButton";
+import { MaterialIconButton } from "../shared/IconButton";
 
 interface ReorderExerciseProps {
   item: ExerciseDto;

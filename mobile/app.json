@@ -14,7 +14,14 @@
       }
     },
     "android": {},
-    "plugins": [["expo-font"], "expo-asset"],
+    "plugins": [
+      [
+        "expo-font"
+      ],
+      "expo-asset",
+      "expo-secure-store",
+      "expo-status-bar"
+    ],
     "extra": {
       "eas": {
         "projectId": "6b1f17ae-4a20-4f8a-b6e2-68a141d210d0"

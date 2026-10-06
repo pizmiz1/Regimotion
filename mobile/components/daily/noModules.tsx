@@ -1,7 +1,7 @@
 import { Text, View } from "react-native";
-import Module from "../shared/module";
+import Module from "../shared/Module";
 import colors from "../../constants/colors";
-import Button from "../shared/button";
+import Button from "../shared/Button";
 
 interface NoModulesProps {
   addPress: () => void;

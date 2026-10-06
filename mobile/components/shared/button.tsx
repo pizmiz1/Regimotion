@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity, ViewStyle } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, ViewStyle } from "react-native";
 import colors from "../../constants/colors";
 
 interface ButtonProps {
@@ -10,25 +10,30 @@ interface ButtonProps {
   disabled?: boolean;
 }
 
-const Button = ({ style, label, onPress, color = colors.primary, size = 150, disabled = false }: ButtonProps) => {
+const Button = ({ style, label, onPress, color = colors.primary, size, disabled = false }: ButtonProps) => {
   return (
     <TouchableOpacity
-      style={{
-        backgroundColor: color,
-        width: size,
-        height: size / 2.9,
-        borderRadius: 200,
-        alignItems: "center",
-        justifyContent: "center",
-        opacity: disabled ? 0.4 : 1,
-        ...style,
-      }}
+      style={[styles.btn, size !== undefined && { width: size, height: size / 2.9 }, { backgroundColor: color, opacity: disabled ? 0.4 : 1 }, style]}
       onPress={onPress}
       disabled={disabled}
     >
-      <Text style={{ fontWeight: "bold", color: "white" }}>{label}</Text>
+      <Text style={styles.btnText}>{label}</Text>
     </TouchableOpacity>
   );
 };
 
 export default Button;
+
+const styles = StyleSheet.create({
+  btn: {
+    width: 150,
+    height: 150 / 2.9,
+    borderRadius: 200,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  btnText: {
+    fontWeight: "bold",
+    color: "white",
+  },
+});

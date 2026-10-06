@@ -1,10 +1,10 @@
 import { ActivityIndicator, Animated, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
-import { MaterialIconButton } from "../shared/iconButton";
+import { MaterialIconButton } from "../shared/IconButton";
 import { useGlobalContext } from "../../store/globalContext";
 import { ExerciseDto } from "../../../shared/moduledto";
 import { useRef, useState } from "react";
-import Button from "../shared/button";
+import Button from "../shared/Button";
 
 interface AddExerciseProps {
   moduleId: string;

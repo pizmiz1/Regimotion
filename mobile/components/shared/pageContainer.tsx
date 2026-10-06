@@ -9,7 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { opacityLayoutEaseOut } from "../../helpers/layouts";
-import { MaterialIconButton } from "./iconButton";
+import { MaterialIconButton } from "./IconButton";
 import { useNavigation } from "@react-navigation/native";
 import { NestableScrollContainer } from "react-native-draggable-flatlist";
 import { ScrollView, RefreshControl } from "react-native-gesture-handler";
