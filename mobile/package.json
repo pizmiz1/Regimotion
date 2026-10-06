@@ -1,7 +1,7 @@
 {
   "name": "regimotion-frontend",
   "version": "9.0.0",
-  "main": "index.tsx",
+  "main": "App.tsx",
   "scripts": {
     "start": "expo start",
     "startc": "expo start -c",
