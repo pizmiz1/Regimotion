@@ -19,18 +19,31 @@ const dayMap: { key: keyof DaysDto; label: string }[] = [
 
 export const ModulesModule = ({ module }: ModulesModuleProps) => {
   let hoverColor = "rgba(22, 23, 34, 0.9)";
+  let moduleColor = module.color;
 
   switch (module.color) {
     case "#6855d5": {
       hoverColor = "#7d6ce0";
+      if (!Object.values(module.days).some((val) => val === true)) {
+        moduleColor = "#1C1936";
+        hoverColor = "#2F2A59";
+      }
       break;
     }
     case "#4169e1": {
       hoverColor = "#5c7feb";
+      if (!Object.values(module.days).some((val) => val === true)) {
+        moduleColor = "#141A33";
+        hoverColor = "#242C54";
+      }
       break;
     }
     case "#D56855": {
       hoverColor = "#dd7e6d";
+      if (!Object.values(module.days).some((val) => val === true)) {
+        moduleColor = "#241715";
+        hoverColor = "#3D2824";
+      }
       break;
     }
   }
@@ -57,7 +70,7 @@ export const ModulesModule = ({ module }: ModulesModuleProps) => {
       className={styles.card}
       style={
         {
-          "--module-color": module.color,
+          "--module-color": moduleColor,
           "--module-hover-color": hoverColor,
         } as React.CSSProperties
       }
