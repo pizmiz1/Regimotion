@@ -83,7 +83,7 @@ export const validateIcon = (icon: string): boolean => {
  * @returns true for valid module days active.
  */
 export const validateDaysActive = (daysActive: string[]): boolean => {
-  if (daysActive === undefined || daysActive === null || daysActive.length === 0 || !daysActive.every((curr) => curr in daysActiveMap)) {
+  if (daysActive === undefined || daysActive === null || (daysActive.length !== 0 && !daysActive.every((curr) => curr in daysActiveMap))) {
     return false;
   }
 
