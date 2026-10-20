@@ -259,8 +259,6 @@ export const postSignOut = async (req: Request<{}, {}, AccessDto>, res: Response
 
     const user = await User.findOne({ email: req.user!.email, passkey: hashedPasskey });
 
-    res.status(200).json({});
-
     if (!user) {
       return res.status(401).json({ error: "Invalid user" });
     }
