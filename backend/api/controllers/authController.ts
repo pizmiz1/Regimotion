@@ -346,9 +346,10 @@ export const postAppleSignIn = async (req: Request<{}, {}, AppleDto>, res: Respo
       }
 
       const email = decodedToken.email;
+      const isPrivateEmail = decodedToken.is_private_email === "true" || decodedToken.is_private_email === true;
 
-      if (email.endsWith("@://appleid.com")) {
-        return res.status(200).json({ data: { passkey: "", email: email } });
+      if (isPrivateEmail) {
+        return res.status(200).json({ data: { passkey: "", email: email, privateAppleEmail: true } });
       }
 
       try {
