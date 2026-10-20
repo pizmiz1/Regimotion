@@ -10,8 +10,6 @@ import storageKeys from "../constants/storageKeys";
 import { JsonDto } from "../../shared/jsondto";
 import { AccessDto } from "../../shared/accessdto";
 import { useGlobalContext } from "../store/GlobalContext";
-import { StackActions, useNavigation } from "@react-navigation/native";
-import routeNames from "../constants/routeNames";
 import { OTPInput, OTPInputRef } from "input-otp-native";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -23,28 +21,42 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Button from "../components/shared/Button";
 import Input from "../components/shared/Input";
 
+type Auth_State = "Base" | "VerifyingOtp" | "HiddenEmail" | "HiddenVerifyingOtp";
+
+const headerText: Record<Auth_State, string> = {
+  Base: "Welcome!",
+  VerifyingOtp: "Verify",
+  HiddenEmail: "Confirm",
+  HiddenVerifyingOtp: "Verify",
+};
+
+const headerSubText: Record<Auth_State, string> = {
+  Base: "Enter your email to recieve a code.",
+  VerifyingOtp: "Enter your code.",
+  HiddenEmail: "To find any existing account history, please verify your primary email address.",
+  HiddenVerifyingOtp: "Enter your code.",
+};
+
 const SignupScreen = () => {
   const { updateAccessToken } = useGlobalContext();
 
+  const [authState, setAuthState] = useState<Auth_State>("Base");
   const [email, setEmail] = useState("");
   const [emailValid, setEmailValid] = useState(true);
   const [loading, setLoading] = useState(false);
   const [otp, setOtp] = useState("");
   const [resetEmailInput, setResetEmailInput] = useState(false);
-  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
   const otpRef = useRef<OTPInputRef>(null);
   const pulseAnim = useRef(new Animated.Value(0.5)).current;
   const errorHeight = useRef(new Animated.Value(0)).current;
   const contentOpacity = useRef(new Animated.Value(1)).current;
 
-  const navigation = useNavigation();
-
   const resetState = () => {
     setEmail("");
     setOtp("");
     setResetEmailInput(!resetEmailInput);
-    transitionState(false);
+    transitionState("Base");
   };
 
   const successfulIdentityFlow = async (email: string, passkey: string) => {
@@ -70,11 +82,10 @@ const SignupScreen = () => {
     await SecureStore.setItemAsync(storageKeys.passkey, accessResponse.data.passkey);
     await SecureStore.setItemAsync(storageKeys.token, accessResponse.data.accessToken);
     updateAccessToken(accessResponse.data?.accessToken!);
-    navigation.dispatch(StackActions.replace(routeNames.daily));
   };
 
   const submit = async (fullOtpValue?: string) => {
-    if (!verifyingOtp) {
+    if (authState === "Base" || authState === "HiddenEmail") {
       if (!emailValid) {
         return;
       }
@@ -100,7 +111,7 @@ const SignupScreen = () => {
         return;
       }
 
-      transitionState(true);
+      transitionState("VerifyingOtp");
     } else {
       otpRef.current?.blur();
       setLoading(true);
@@ -145,21 +156,25 @@ const SignupScreen = () => {
           return;
         }
 
+        if (response.data.email.endsWith("@://appleid.com")) {
+          transitionState("HiddenEmail");
+          return;
+        }
+
         await successfulIdentityFlow(response.data.email, response.data.passkey);
       }
     } catch (error: any) {
-      // Todo - Temporary for now, just to build and test. Put safe text here
-      errorAlert(error);
+      errorAlert("Unable to Sign In With Apple");
     }
   };
 
-  const transitionState = (toOtpState: boolean) => {
+  const transitionState = (authState: Auth_State) => {
     Animated.timing(contentOpacity, {
       toValue: 0,
       duration: 150,
       useNativeDriver: true,
     }).start(() => {
-      setVerifyingOtp(toOtpState);
+      setAuthState(authState);
       setLoading(false);
 
       Animated.timing(contentOpacity, {
@@ -221,10 +236,6 @@ const SignupScreen = () => {
           <Image style={styles.img} source={require("./../assets/logo-clear.png")} />
         </View>
 
-        <Text style={styles.headerText}>Welcome!</Text>
-
-        <Text style={styles.headerSubText}>Enter your email to recieve a code.</Text>
-
         <Animated.View
           style={[
             styles.content,
@@ -241,9 +252,11 @@ const SignupScreen = () => {
             },
           ]}
         >
-          <Text style={styles.inputLabel}>{verifyingOtp ? "Otp" : "Email"}</Text>
+          <Text style={styles.headerText}>{headerText[authState]}</Text>
+          <Text style={styles.headerSubText}>{headerSubText[authState]}</Text>
+          <Text style={styles.inputLabel}>{authState === "VerifyingOtp" ? "Otp" : "Email"}</Text>
 
-          {verifyingOtp ? (
+          {authState === "VerifyingOtp" ? (
             <OTPInput
               ref={otpRef}
               maxLength={6}
@@ -308,11 +321,17 @@ const SignupScreen = () => {
             label={loading ? "Loading..." : "Submit"}
             onPress={submit}
             style={[styles.btnBase, styles.submitBtn]}
-            disabled={(!verifyingOtp && email.length === 0) || (verifyingOtp && otp.length !== 6) || loading}
+            disabled={
+              authState === "Base" ||
+              (authState === "HiddenEmail" && email.length === 0) ||
+              authState === "VerifyingOtp" ||
+              (authState === "HiddenVerifyingOtp" && otp.length !== 6) ||
+              loading
+            }
           />
-          {verifyingOtp && <Button label="Reset" onPress={resetState} style={[styles.btnBase, styles.resetBtn]} />}
+          {authState !== "Base" && <Button label="Reset" onPress={resetState} style={[styles.btnBase, styles.resetBtn]} />}
 
-          {!verifyingOtp && (
+          {authState === "Base" && (
             <>
               <View style={styles.dividerContainer}>
                 <View style={styles.divider} />

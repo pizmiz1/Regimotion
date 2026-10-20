@@ -1,5 +1,6 @@
-import { createStaticNavigation } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { NavigationContainer, ParamListBase } from "@react-navigation/native";
+import { createNativeStackNavigator, NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useGlobalContext } from "../store/GlobalContext";
 
 // Screen
 import SplashScreen from "../screens/SplashScreen";
@@ -10,62 +11,64 @@ import DailyScreen from "../screens/DailyScreen";
 import ModuleDetailScreen from "../screens/ModuleDetailScreen";
 import AccountScreen from "../screens/AccountScreen";
 
+const Stack = createNativeStackNavigator();
+
 const AppNav = () => {
-  const Stack = createNativeStackNavigator({
-    screenOptions: {
-      headerShown: false,
-    },
-    initialRouteName: routeNames.splash,
-    screens: {
-      Splash: {
-        screen: SplashScreen,
-      },
-      Signup: {
-        screen: SignupScreen,
-      },
-      Daily: {
-        screen: DailyScreen,
-        options: ({ navigation }) => {
-          const state = navigation.getState();
-          const previousRoute = state.routes[state.index - 1];
+  const { appLoading, accessToken } = useGlobalContext();
 
-          return {
-            animation:
-              previousRoute?.name === routeNames.moduleDetail ||
-              previousRoute?.name === routeNames.module ||
-              previousRoute?.name === routeNames.account
-                ? "slide_from_left"
-                : "slide_from_right",
-            gestureEnabled: false,
-          };
-        },
-      },
-      Account: {
-        screen: AccountScreen,
-        options: { gestureEnabled: true },
-      },
-      Module: {
-        screen: ModuleScreen,
-        options: ({ navigation }) => {
-          const state = navigation.getState();
-          const previousRoute = state.routes[state.index - 1];
+  return (
+    <NavigationContainer>
+      <Stack.Navigator
+        screenOptions={{
+          headerShown: false,
+          animation: "fade",
+        }}
+      >
+        {appLoading && <Stack.Screen name="Splash" component={SplashScreen} />}
 
-          return {
-            animation: previousRoute?.name === routeNames.moduleDetail ? "slide_from_left" : "slide_from_right",
-            gestureEnabled: true,
-          };
-        },
-      },
-      ModuleDetail: {
-        screen: ModuleDetailScreen,
-        options: { gestureEnabled: true },
-      },
-    },
-  });
+        {!appLoading && accessToken === "" && <Stack.Screen name="Signup" component={SignupScreen} />}
 
-  const Navigation = createStaticNavigation(Stack);
+        {!appLoading && accessToken !== "" && (
+          <>
+            <Stack.Screen
+              name="Daily"
+              component={DailyScreen}
+              options={({ navigation }: { navigation: NativeStackNavigationProp<ParamListBase, string, undefined> }) => {
+                const state = navigation.getState();
+                const previousRoute = state.routes[state.index - 1];
 
-  return <Navigation />;
+                return {
+                  animation:
+                    previousRoute !== undefined &&
+                    (previousRoute.name === routeNames.moduleDetail ||
+                      previousRoute.name === routeNames.module ||
+                      previousRoute.name === routeNames.account)
+                      ? "slide_from_left"
+                      : "slide_from_right",
+                  gestureEnabled: false,
+                };
+              }}
+            />
+            <Stack.Screen name="Account" component={AccountScreen} options={{ gestureEnabled: true, animation: "slide_from_right" }} />
+            <Stack.Screen
+              name="Module"
+              component={ModuleScreen}
+              options={({ navigation }: { navigation: NativeStackNavigationProp<ParamListBase, string, undefined> }) => {
+                const state = navigation.getState();
+                const previousRoute = state.routes[state.index - 1];
+
+                return {
+                  animation: previousRoute?.name === routeNames.moduleDetail ? "slide_from_left" : "slide_from_right",
+                  gestureEnabled: true,
+                };
+              }}
+            />
+            <Stack.Screen name="ModuleDetail" component={ModuleDetailScreen} options={{ gestureEnabled: true, animation: "slide_from_right" }} />
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
 };
 
 export default AppNav;

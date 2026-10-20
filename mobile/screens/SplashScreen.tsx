@@ -1,7 +1,6 @@
 import { Animated, StyleSheet, Text } from "react-native";
 import { useRef, useEffect, useState } from "react";
 import colors from "../constants/colors";
-import { StackActions, useNavigation } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
 import { useGlobalContext } from "../store/GlobalContext";
@@ -14,12 +13,11 @@ import { JsonDto } from "../../shared/jsondto";
 import { LinearGradient } from "expo-linear-gradient";
 
 const SplashScreen = () => {
-  const { updateAccessToken } = useGlobalContext();
+  const { updateAccessToken, updateAppLoading } = useGlobalContext();
 
   const [initialAnim, setInitialAnim] = useState(true);
   const [dots, setDots] = useState("");
 
-  const navigation = useNavigation();
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
 
@@ -106,7 +104,7 @@ const SplashScreen = () => {
       const token = await SecureStore.getItemAsync(storageKeys.token);
 
       if (!email || !passkey || !token) {
-        navigation.dispatch(StackActions.replace(routeNames.signup));
+        updateAppLoading(false);
         return;
       }
 
@@ -117,11 +115,9 @@ const SplashScreen = () => {
         SecureStore.deleteItemAsync(storageKeys.email);
         SecureStore.deleteItemAsync(storageKeys.passkey);
         SecureStore.deleteItemAsync(storageKeys.token);
-        navigation.dispatch(StackActions.replace(routeNames.signup));
-        return;
       }
 
-      navigation.dispatch(StackActions.replace(routeNames.daily));
+      updateAppLoading(false);
     };
 
     load();

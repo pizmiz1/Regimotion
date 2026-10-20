@@ -14,6 +14,7 @@ interface GlobalProviderProps {
 export const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 
 export const GlobalProvider = ({ children }: GlobalProviderProps) => {
+  const [appLoading, setAppLoading] = useState(true);
   const [accessToken, setAccessToken] = useState("");
   const [modules, setModules] = useState<ModuleDto[]>([]);
   const [userSettings, setUserSettings] = useState<UserSettingsDto>({
@@ -23,6 +24,10 @@ export const GlobalProvider = ({ children }: GlobalProviderProps) => {
     enableCompleteAnimation: true,
     enableHoldComplete: false,
   });
+
+  const updateAppLoading = (newAppLoading: boolean) => {
+    setAppLoading(newAppLoading);
+  };
 
   const updateAccessToken = (newAccesstoken: string) => {
     setAccessToken(newAccesstoken);
@@ -69,9 +74,11 @@ export const GlobalProvider = ({ children }: GlobalProviderProps) => {
   };
 
   const contextValue: GlobalContextType = {
+    appLoading,
     accessToken,
     modules,
     userSettings,
+    updateAppLoading,
     updateAccessToken,
     updateModules,
     patchModule,

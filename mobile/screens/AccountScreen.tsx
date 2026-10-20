@@ -101,8 +101,6 @@ const AccountScreen = () => {
     await SecureStore.deleteItemAsync(storageKeys.token);
     updateAccessToken("");
     updateModules([]);
-
-    navigation.navigate(routeNames.signup);
   };
 
   const toggleEnableCompletionAnimation = async () => {
