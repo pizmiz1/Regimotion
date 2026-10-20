@@ -2,7 +2,7 @@
   "expo": {
     "name": "Regimotion",
     "slug": "Regimotion",
-    "version": "9.0",
+    "version": "10.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
