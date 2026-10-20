@@ -67,7 +67,7 @@ const SignupScreen = () => {
     }
 
     await SecureStore.setItemAsync(storageKeys.email, email);
-    await SecureStore.setItemAsync(storageKeys.passkey, passkey);
+    await SecureStore.setItemAsync(storageKeys.passkey, accessResponse.data.passkey);
     await SecureStore.setItemAsync(storageKeys.token, accessResponse.data.accessToken);
     updateAccessToken(accessResponse.data?.accessToken!);
     navigation.dispatch(StackActions.replace(routeNames.daily));
