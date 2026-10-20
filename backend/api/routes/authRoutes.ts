@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { postAccessToken, postDeleteAccount, postGenerateOtp, postSignOut, postVerifyOTP } from "../controllers/authController.js";
+import { postAccessToken, postAppleSignIn, postDeleteAccount, postGenerateOtp, postSignOut, postVerifyOTP } from "../controllers/authController.js";
 import { body, ValidationChain } from "express-validator";
 import { validate } from "../middleware/validation.js";
 import { ipKeyGenerator, rateLimit } from "express-rate-limit";
@@ -50,6 +50,19 @@ const verifyOtpValidators: ValidationChain[] = [
   body("otp").isNumeric().withMessage("OTP must be a number").isLength({ min: 6, max: 6 }).withMessage("OTP must be exactly 6 digits"),
 ];
 
+const appleSignInValidators: ValidationChain[] = [
+  body("identityToken")
+    .exists()
+    .withMessage("identityToken is a required field")
+    .notEmpty()
+    .withMessage("identityToken cannot be empty")
+    .isString()
+    .withMessage("identityToken must be a valid text string")
+    .trim()
+    .isJWT()
+    .withMessage("identityToken must be a structurally valid JSON Web Token (JWT)"),
+];
+
 // Routes
 const authRoutes = express.Router();
 const baseUrl = "/auth";
@@ -59,5 +72,6 @@ authRoutes.route(baseUrl + "/generateOtp").post(authLimiter, generateOtpValidato
 authRoutes.route(baseUrl + "/verifyOtp").post(authLimiter, verifyOtpValidators, validate, postVerifyOTP);
 authRoutes.route(baseUrl + "/signOut").post(authenticate, authLimiter, accessTokenValidators, validate, postSignOut);
 authRoutes.route(baseUrl + "/deleteAccount").post(authenticate, authLimiter, accessTokenValidators, validate, postDeleteAccount);
+authRoutes.route(baseUrl + "/apple").post(authLimiter, appleSignInValidators, validate, postAppleSignIn);
 
 export default authRoutes;

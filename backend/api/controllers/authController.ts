@@ -4,7 +4,7 @@ import nodemailer from "nodemailer";
 import { OtpDto } from "../../../shared/otpdto.js";
 import { AccessDto } from "../../../shared/accessdto.js";
 import User from "../schema/user.js";
-import jwt from "jsonwebtoken";
+import jwt, { JwtHeader, SigningKeyCallback } from "jsonwebtoken";
 import UserOtp from "../schema/userOtp.js";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
@@ -13,6 +13,8 @@ import Module from "../schema/module.js";
 import UserSettings from "../schema/userSettings.js";
 import mongoose from "mongoose";
 import OldPasskey from "../schema/oldPasskey.js";
+import jwksClient from "jwks-rsa";
+import { AppleDto } from "../../../shared/appledto.js";
 
 const mailgunAuth: Options = {
   auth: {
@@ -23,14 +25,81 @@ const mailgunAuth: Options = {
 
 const transporter = nodemailer.createTransport(mailgun(mailgunAuth));
 
+const client = jwksClient({
+  jwksUri: "https://appleid.apple.com/auth/keys",
+  cache: true,
+  rateLimit: true,
+  jwksRequestsPerMinute: 10,
+});
+
+const getAppleSigningKey = (header: JwtHeader, callback: SigningKeyCallback) => {
+  if (!header || !header.kid) {
+    return callback(new Error("Missing key identifier (kid) in token header"));
+  }
+
+  client.getSigningKey(header.kid, (err, key) => {
+    if (err) {
+      return callback(err);
+    }
+
+    const signingKey = key?.getPublicKey();
+    if (!signingKey) {
+      return callback(new Error("Could not retrieve public key from signing key payload"));
+    }
+
+    callback(null, signingKey);
+  });
+};
+
+interface PasskeyReturnType {
+  passkey: string;
+  hashedPasskey: string;
+}
+
+const generateHashedPasskey = (): PasskeyReturnType => {
+  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~";
+  let passkey = "";
+  const randomBytes = crypto.randomBytes(16);
+  for (let i = 0; i < 16; i++) {
+    passkey += charset[randomBytes[i] % charset.length];
+  }
+  const hashedPasskey = crypto.createHash("sha256").update(passkey).digest("hex");
+
+  return { passkey: passkey, hashedPasskey: hashedPasskey };
+};
+
+const newUserSignIn = async (email: string, session: mongoose.mongo.ClientSession): Promise<PasskeyReturnType> => {
+  const passkeys = generateHashedPasskey();
+
+  const newUser = new User({ email: email, passkey: passkeys.hashedPasskey });
+
+  await session.withTransaction(async () => {
+    await newUser.save({ session });
+
+    const existingUserSettings = await UserSettings.findOne({ userEmail: email });
+    if (!existingUserSettings) {
+      const newUserSettings = new UserSettings({
+        userEmail: email,
+        userName: "new monkey",
+        userColor: "red",
+        enableCompleteAnimation: true,
+        enableHoldComplete: false,
+      });
+      await newUserSettings.save({ session });
+    }
+  });
+
+  return passkeys;
+};
+
 export const postAccessToken = async (req: Request<{}, {}, AccessDto>, res: Response<JsonDto<AccessDto>>) => {
   const session = await mongoose.startSession();
 
   try {
     const email = req.body.email;
-    const passKey = req.body.passkey;
+    const passkey = req.body.passkey;
 
-    const hashedPasskey = crypto.createHash("sha256").update(passKey).digest("hex");
+    const hashedPasskey = crypto.createHash("sha256").update(passkey).digest("hex");
 
     const user = await User.findOne({ email: email, passkey: hashedPasskey });
 
@@ -168,26 +237,8 @@ export const postVerifyOTP = async (req: Request<{}, {}, OtpDto>, res: Response<
       return res.status(403).json({ error: "Invalid otp" });
     }
 
-    const passkeys = generateHashedPasskey();
-
-    const newUser = new User({ email: req.body.email, passkey: passkeys.hashedPasskey });
-
-    await session.withTransaction(async () => {
-      await UserOtp.findByIdAndDelete(userOtp._id, { session });
-      await newUser.save({ session });
-
-      const existingUserSettings = await UserSettings.findOne({ userEmail: req.body.email });
-      if (!existingUserSettings) {
-        const newUserSettings = new UserSettings({
-          userEmail: req.body.email,
-          userName: "new monkey",
-          userColor: "red",
-          enableCompleteAnimation: true,
-          enableHoldComplete: false,
-        });
-        await newUserSettings.save({ session });
-      }
-    });
+    const passkeys = await newUserSignIn(req.body.email, session);
+    await UserOtp.findByIdAndDelete(userOtp._id, { session });
 
     const accessDto: AccessDto = { email: req.body.email, passkey: passkeys.passkey };
 
@@ -268,19 +319,46 @@ export const postDeleteAccount = async (req: Request<{}, {}, AccessDto>, res: Re
   }
 };
 
-interface passkeyReturnType {
-  passkey: string;
-  hashedPasskey: string;
-}
+export const postAppleSignIn = async (req: Request<{}, {}, AppleDto>, res: Response<JsonDto<AccessDto>>) => {
+  const identityToken = req.body.identityToken;
 
-const generateHashedPasskey = (): passkeyReturnType => {
-  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~";
-  let passkey = "";
-  const randomBytes = crypto.randomBytes(16);
-  for (let i = 0; i < 16; i++) {
-    passkey += charset[randomBytes[i] % charset.length];
+  if (!identityToken) {
+    return res.status(400).json({ error: "Token not provided" });
   }
-  const hashedPasskey = crypto.createHash("sha256").update(passkey).digest("hex");
 
-  return { passkey: passkey, hashedPasskey: hashedPasskey };
+  const session = await mongoose.startSession();
+
+  jwt.verify(
+    identityToken,
+    getAppleSigningKey,
+    {
+      algorithms: ["RS256"],
+      issuer: "https://appleid.apple.com",
+      audience: process.env.APPLE_BUNDLE_ID,
+    },
+    async (err, decodedToken) => {
+      if (err) {
+        return res.status(401).json({ error: "Invalid token signature or expired" });
+      }
+
+      if (!decodedToken || typeof decodedToken === "string") {
+        return res.status(400).json({ error: "Malformed token payload structure" });
+      }
+
+      const email = decodedToken.email;
+
+      try {
+        const passkeys = await newUserSignIn(email, session);
+
+        const accessDto: AccessDto = { email: email, passkey: passkeys.passkey };
+
+        res.status(200).json({ data: accessDto });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Server error" });
+      } finally {
+        await session.endSession();
+      }
+    },
+  );
 };
