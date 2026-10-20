@@ -347,6 +347,10 @@ export const postAppleSignIn = async (req: Request<{}, {}, AppleDto>, res: Respo
 
       const email = decodedToken.email;
 
+      if (email.endsWith("@://appleid.com")) {
+        return res.status(200).json({ data: { passkey: "", email: email } });
+      }
+
       try {
         const passkeys = await newUserSignIn(email, session);
 
