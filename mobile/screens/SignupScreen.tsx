@@ -135,7 +135,7 @@ const SignupScreen = () => {
   const appleSignIn = async () => {
     try {
       const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [AppleAuthentication.AppleAuthenticationScope.FULL_NAME, AppleAuthentication.AppleAuthenticationScope.EMAIL],
+        requestedScopes: [AppleAuthentication.AppleAuthenticationScope.EMAIL],
       });
 
       if (credential.identityToken) {
@@ -156,7 +156,7 @@ const SignupScreen = () => {
           return;
         }
 
-        if (response.data.email.endsWith("@://appleid.com")) {
+        if (response.data.privateAppleEmail !== undefined && response.data.privateAppleEmail === true) {
           transitionState("HiddenEmail");
           return;
         }

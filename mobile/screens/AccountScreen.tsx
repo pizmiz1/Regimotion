@@ -1,15 +1,13 @@
 import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRef, useState } from "react";
-import routeNames from "../constants/routeNames";
 import { useGlobalContext } from "../store/GlobalContext";
 import { deleteAlert, errorAlert } from "../helpers/alert";
 import * as SecureStore from "expo-secure-store";
 import storageKeys from "../constants/storageKeys";
 import { AccessDto } from "../../shared/accessdto";
 import { JsonDto } from "../../shared/jsondto";
-import { get, post } from "../helpers/fetch";
+import { post } from "../helpers/fetch";
 import colors from "../constants/colors";
-import { useNavigation } from "@react-navigation/native";
 import { opacityLayout } from "../helpers/layouts";
 import { animalColors, animals } from "../constants/animals";
 import { generateSlug } from "random-word-slugs";
@@ -20,8 +18,6 @@ import PageContainer from "../components/shared/PageContainer";
 
 const AccountScreen = () => {
   const { userSettings, patchUserSettings, accessToken, updateAccessToken, updateModules } = useGlobalContext();
-
-  const navigation = useNavigation();
 
   const [blurActive, setBlurActive] = useState(false);
   const [loading, setLoading] = useState(false);
