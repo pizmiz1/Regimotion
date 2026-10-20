@@ -1,5 +1,4 @@
-import { Animated, Image, Text, TouchableOpacity, View } from "react-native";
-import PageContainer from "../components/shared/PageContainer";
+import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useRef, useState } from "react";
 import routeNames from "../constants/routeNames";
 import { useGlobalContext } from "../store/GlobalContext";
@@ -14,7 +13,10 @@ import { useNavigation } from "@react-navigation/native";
 import { opacityLayout } from "../helpers/layouts";
 import { animalColors, animals } from "../constants/animals";
 import { generateSlug } from "random-word-slugs";
+
+// Custom Components
 import Setting from "../components/account/Setting";
+import PageContainer from "../components/shared/PageContainer";
 
 const AccountScreen = () => {
   const { userSettings, patchUserSettings, accessToken, updateAccessToken, updateModules } = useGlobalContext();
@@ -149,53 +151,27 @@ const AccountScreen = () => {
       backButtonDisabled={loading}
       backButtonStyle={{ opacity: loading ? 0.6 : 1 }}
     >
-      <Animated.View style={{ flex: 1, opacity: loadingOpacity }}>
-        <View style={{ flexDirection: "row" }}>
-          <View
-            style={{
-              backgroundColor: localAnimalColor,
-              width: 70,
-              height: 70,
-              borderRadius: 50,
-              justifyContent: "center",
-              alignItems: "center",
-              overflow: "hidden",
-            }}
-          >
-            <Image source={localAnimal} style={{ width: "85%", height: "85%" }} resizeMode="contain" />
+      <Animated.View style={[styles.container, { opacity: loadingOpacity }]}>
+        <View style={styles.headerContainer}>
+          <View style={[styles.imgContainer, { backgroundColor: localAnimalColor }]}>
+            <Image source={localAnimal} style={styles.img} resizeMode="contain" />
           </View>
-          <View style={{ marginLeft: 20, justifyContent: "center" }}>
-            <Text style={{ color: "white", fontSize: 25, fontWeight: "bold", textTransform: "capitalize" }}>{localUserName}</Text>
-            <Text style={{ color: colors.lighter_grey, fontSize: 18 }}>{userSettings.userEmail}</Text>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerText}>{localUserName}</Text>
+            <Text style={styles.descriptionText}>{userSettings.userEmail}</Text>
           </View>
         </View>
 
         <TouchableOpacity
-          style={{
-            backgroundColor: colors.primary,
-            alignSelf: "flex-start",
-            paddingHorizontal: 8,
-            paddingVertical: 10,
-            borderRadius: 10,
-            marginTop: 10,
-            opacity: newDigsDisabled ? 0.6 : 1,
-          }}
+          style={[styles.headerBtn, { opacity: newDigsDisabled ? 0.6 : 1 }]}
           disabled={loading || newDigsDisabled}
           onPress={animalPress}
         >
-          <Text style={{ color: "white" }}>New Digs</Text>
+          <Text style={styles.headerBtnText}>New Digs</Text>
         </TouchableOpacity>
 
-        <Text style={{ color: colors.lighter_grey, marginTop: 30, fontSize: 15 }}>Preferences</Text>
-        <View
-          style={{
-            backgroundColor: "#333438",
-            padding: 20,
-            borderRadius: 30,
-            marginTop: 5,
-            gap: 20,
-          }}
-        >
+        <Text style={styles.sectionLabel}>Preferences</Text>
+        <View style={styles.sectionContainer}>
           <Setting
             isSwitch={true}
             icon="flare"
@@ -217,16 +193,8 @@ const AccountScreen = () => {
           />
         </View>
 
-        <Text style={{ color: colors.lighter_grey, marginTop: 30, fontSize: 15 }}>Account</Text>
-        <View
-          style={{
-            backgroundColor: "#333438",
-            padding: 20,
-            borderRadius: 30,
-            marginTop: 5,
-            gap: 20,
-          }}
-        >
+        <Text style={styles.sectionLabel}>Account</Text>
+        <View style={styles.sectionContainer}>
           <Setting
             isSwitch={false}
             icon="logout"
@@ -261,3 +229,62 @@ const AccountScreen = () => {
 };
 
 export default AccountScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  headerContainer: {
+    flexDirection: "row",
+  },
+  imgContainer: {
+    width: 70,
+    height: 70,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+  },
+  img: {
+    width: "85%",
+    height: "85%",
+  },
+  headerTextContainer: {
+    marginLeft: 20,
+    justifyContent: "center",
+  },
+  headerText: {
+    color: "white",
+    fontSize: 25,
+    fontWeight: "bold",
+    textTransform: "capitalize",
+    fontFamily: "Main-Font",
+  },
+  descriptionText: {
+    color: colors.lighter_grey,
+    fontSize: 18,
+  },
+  headerBtn: {
+    backgroundColor: colors.primary,
+    alignSelf: "flex-start",
+    paddingHorizontal: 8,
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  headerBtnText: {
+    color: "white",
+  },
+  sectionLabel: {
+    color: colors.lighter_grey,
+    marginTop: 30,
+    fontSize: 15,
+  },
+  sectionContainer: {
+    backgroundColor: "#333438",
+    padding: 20,
+    borderRadius: 30,
+    marginTop: 5,
+    gap: 20,
+  },
+});

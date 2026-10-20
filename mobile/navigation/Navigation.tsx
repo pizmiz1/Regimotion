@@ -1,7 +1,7 @@
-import { createStaticNavigation, StaticParamList } from "@react-navigation/native";
+import { createStaticNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-// screens
+// Screen
 import SplashScreen from "../screens/SplashScreen";
 import routeNames from "../constants/routeNames";
 import SignupScreen from "../screens/SignupScreen";

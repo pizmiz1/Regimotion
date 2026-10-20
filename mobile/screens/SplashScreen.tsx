@@ -1,4 +1,4 @@
-import { Animated, Text, View } from "react-native";
+import { Animated, StyleSheet, Text } from "react-native";
 import { useRef, useEffect, useState } from "react";
 import colors from "../constants/colors";
 import { StackActions, useNavigation } from "@react-navigation/native";
@@ -11,6 +11,7 @@ import storageKeys from "../constants/storageKeys";
 import routeNames from "../constants/routeNames";
 import { errorAlert } from "../helpers/alert";
 import { JsonDto } from "../../shared/jsondto";
+import { LinearGradient } from "expo-linear-gradient";
 
 const SplashScreen = () => {
   const { updateAccessToken } = useGlobalContext();
@@ -54,13 +55,13 @@ const SplashScreen = () => {
         useNativeDriver: true,
       }),
       Animated.timing(scaleAnim, {
-        toValue: 1.1,
-        duration: 800,
+        toValue: 0.9,
+        duration: 500,
         useNativeDriver: true,
       }),
       Animated.timing(scaleAnim, {
         toValue: 1,
-        duration: 800,
+        duration: 500,
         useNativeDriver: true,
       }),
     ]),
@@ -89,7 +90,7 @@ const SplashScreen = () => {
 
     const interval = setInterval(() => {
       setDots((prev) => (prev.length < 3 ? prev + "." : ""));
-    }, 1600);
+    }, 1080);
 
     return () => clearInterval(interval);
   }, [initialAnim]);
@@ -127,15 +128,35 @@ const SplashScreen = () => {
   }, [loaded]);
 
   return (
-    <View style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: colors.primary }}>
+    <LinearGradient style={styles.container} colors={[colors.primary_full_gradient_top, colors.primary_full_gradient_bottom]}>
       <StatusBar style="light" />
       <Animated.Image
-        style={{ width: "0%", height: "50%", aspectRatio: 1, marginBottom: "10%", transform: [{ scale: scaleAnim }], opacity: opacityAnim }}
+        style={[styles.img, { transform: [{ scale: scaleAnim }], opacity: opacityAnim }]}
         source={require("./../assets/logo-clear.png")}
       ></Animated.Image>
-      <Text style={{ fontFamily: "Main-Font", fontSize: 20, color: colors.lightest_grey, opacity: initialAnim ? 0 : 1 }}>Hang tight{dots}</Text>
-    </View>
+      <Text style={[styles.loadingText, { opacity: initialAnim ? 0 : 1 }]}>Hang tight{dots}</Text>
+    </LinearGradient>
   );
 };
 
 export default SplashScreen;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  img: {
+    width: "0%",
+    height: "35%",
+    aspectRatio: 1,
+  },
+  loadingText: {
+    fontFamily: "Main-Font",
+    fontSize: 20,
+    color: colors.lightest_grey,
+    marginTop: -45,
+    marginBottom: 100,
+  },
+});

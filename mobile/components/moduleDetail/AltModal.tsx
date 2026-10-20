@@ -1,10 +1,11 @@
 import { ActivityIndicator, Keyboard, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
 import { useState } from "react";
-import Button from "../shared/Button";
-import { ExerciseDto } from "../../../shared/moduledto";
 import { useGlobalContext } from "../../store/GlobalContext";
 import { opacityLayout } from "../../helpers/layouts";
+
+// Custom Components
+import Button from "../shared/Button";
 
 interface AltModalProps {
   visible: boolean;
@@ -59,49 +60,37 @@ const AltModal = ({ visible, setVisible, moduleId, exerciseId, saveFinished }: A
   return (
     <Modal visible={visible} animationType="fade" transparent={true}>
       <Pressable
-        style={{ backgroundColor: "rgba(0, 0, 0, 0.5)", flex: 1, justifyContent: "center", alignItems: "center" }}
+        style={styles.container}
         onPress={() => {
           Keyboard.dismiss();
         }}
       >
-        <View
-          style={{
-            height: 220,
-            width: 250,
-            backgroundColor: colors.dark_grey,
-            borderRadius: 20,
-            paddingHorizontal: 10,
-            paddingVertical: 20,
-            marginBottom: 100,
-            alignItems: "center",
-            gap: 30,
-          }}
-        >
-          <Text style={{ color: "white", fontSize: 23, fontWeight: "bold" }}>Alternative Exercise</Text>
+        <View style={styles.content}>
+          <Text style={styles.headerText}>Alternative Exercise</Text>
 
-          <View style={{ justifyContent: "center", gap: 10, width: "90%" }}>
+          <View style={styles.inputContainer}>
             <TextInput
               value={name}
               onChangeText={setName}
-              style={{ color: "white", fontWeight: "bold", fontSize: 20, opacity: saving ? 0.6 : 1 }}
+              style={[styles.nameInput, { opacity: saving ? 0.6 : 1 }]}
               placeholderTextColor={colors.light_grey}
               placeholder="Name..."
               editable={!saving}
             />
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={styles.descriptionsContainer}>
               <TextInput
                 value={text1}
                 onChangeText={setText1}
-                style={{ color: colors.lightest_grey, width: "40%", opacity: saving ? 0.6 : 1 }}
+                style={[styles.descriptionInput, { opacity: saving ? 0.6 : 1 }]}
                 placeholderTextColor={colors.light_grey}
                 placeholder="Text..."
                 editable={!saving}
               />
-              <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: colors.border_grey, height: 20, marginHorizontal: 20 }} />
+              <View style={styles.descriptionDivider} />
               <TextInput
                 value={text2}
                 onChangeText={setText2}
-                style={{ color: colors.lightest_grey, width: "40%", opacity: saving ? 0.6 : 1 }}
+                style={[styles.descriptionInput, { opacity: saving ? 0.6 : 1 }]}
                 placeholderTextColor={colors.light_grey}
                 placeholder="Optional..."
                 editable={!saving}
@@ -109,12 +98,12 @@ const AltModal = ({ visible, setVisible, moduleId, exerciseId, saveFinished }: A
             </View>
           </View>
 
-          <View style={{ justifyContent: "space-around", flexDirection: "row", width: "100%" }}>
+          <View style={styles.btnContainer}>
             {saving ? (
-              <ActivityIndicator size="small" color={colors.lightest_grey} style={{ marginTop: "3%" }} />
+              <ActivityIndicator size="small" color={colors.lightest_grey} style={styles.spinner} />
             ) : (
               <>
-                <Button label="Close" onPress={closeModal} style={{ backgroundColor: colors.light_grey }} size={100} />
+                <Button label="Close" onPress={closeModal} style={styles.btn} size={100} />
                 <Button label="Save" onPress={save} size={100} disabled={name === "" || text1 === ""} />
               </>
             )}
@@ -126,3 +115,59 @@ const AltModal = ({ visible, setVisible, moduleId, exerciseId, saveFinished }: A
 };
 
 export default AltModal;
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  content: {
+    height: 220,
+    width: 250,
+    backgroundColor: colors.dark_grey,
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+    marginBottom: 100,
+    alignItems: "center",
+    gap: 30,
+  },
+  headerText: {
+    color: "white",
+    fontSize: 23,
+    fontWeight: "bold",
+  },
+  inputContainer: {
+    justifyContent: "center",
+    gap: 10,
+    width: "90%",
+  },
+  nameInput: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 20,
+  },
+  descriptionsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  descriptionInput: {
+    color: colors.lightest_grey,
+    width: "40%",
+  },
+  descriptionDivider: {
+    width: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border_grey,
+    height: 20,
+    marginHorizontal: 20,
+  },
+  btnContainer: {
+    justifyContent: "space-around",
+    flexDirection: "row",
+    width: "100%",
+  },
+  spinner: { marginTop: "3%" },
+  btn: { backgroundColor: colors.light_grey },
+});

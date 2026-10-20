@@ -2,16 +2,18 @@ import { ActivityIndicator, Animated, StyleSheet, Text, TouchableOpacity, View }
 import colors from "../constants/colors";
 import { useEffect, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import { useGlobalContext } from "../store/GlobalContext";
+import LottieView from "lottie-react-native";
+import { opacityLayout, scaleYLayout } from "../helpers/layouts";
+import { NestableDraggableFlatList } from "react-native-draggable-flatlist";
+import { ScrollView } from "react-native-gesture-handler";
+
+// Custom Components
 import { MaterialIconButton } from "../components/shared/IconButton";
 import PageContainer from "../components/shared/PageContainer";
 import DetailsModal from "../components/shared/DetailsModal";
-import { useGlobalContext } from "../store/GlobalContext";
 import Exercise from "../components/moduleDetail/Exercise";
-import LottieView from "lottie-react-native";
-import { opacityLayout, scaleYLayout } from "../helpers/layouts";
 import AddExercise from "../components/moduleDetail/AddExercise";
-import { NestableDraggableFlatList } from "react-native-draggable-flatlist";
-import { ScrollView } from "react-native-gesture-handler";
 import ReorderExercise from "../components/moduleDetail/ReorderExercise";
 
 const ModuleDetailScreen = () => {
@@ -367,11 +369,11 @@ const ModuleDetailScreen = () => {
       keyboardPadding={200}
       reordering={reordering}
       screenOverlay={
-        <Animated.View style={{ ...StyleSheet.absoluteFill, position: "absolute", opacity: lottieAnim }}>
+        <Animated.View style={[styles.animationContainer, StyleSheet.absoluteFill, { opacity: lottieAnim }]}>
           <LottieView
             ref={lottieAnimRef}
             source={require("./../assets/Success.lottie")}
-            style={{ flex: 1, backgroundColor: "rgba(0, 0, 0, 0.7)" }}
+            style={styles.animation}
             loop={false}
             onAnimationFinish={() => {
               setDisableScroll(false);
@@ -399,22 +401,11 @@ const ModuleDetailScreen = () => {
         }}
       />
 
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-        <Animated.Text
-          style={{
-            color: "white",
-            fontSize: module.name.length < 10 ? 50 : 30,
-            fontFamily: "Main-Font",
-            fontStyle: "italic",
-            fontWeight: "bold",
-            opacity: headerOpacity,
-            width: "78%",
-          }}
-          numberOfLines={1}
-        >
+      <View style={styles.headerContainer}>
+        <Animated.Text style={[styles.headerText, { fontSize: module.name.length < 10 ? 50 : 30, opacity: headerOpacity }]} numberOfLines={1}>
           {module.name}
         </Animated.Text>
-        <Animated.View style={{ flexDirection: "row", opacity: reorderHideOpacity }}>
+        <Animated.View style={[styles.headerBtnContainer, { opacity: reorderHideOpacity }]}>
           <MaterialIconButton
             name="swap-vert"
             color={colors.light_primary}
@@ -423,7 +414,7 @@ const ModuleDetailScreen = () => {
               setReordering(true);
             }}
             disabled={editing || reordering || exerciseActive || adding}
-            style={{ opacity: blurActive || exerciseActive || adding ? 0 : editing ? 0.4 : 1, padding: "1%", marginRight: "5%" }}
+            style={[styles.reorderBtn, { opacity: blurActive || exerciseActive || adding ? 0 : editing ? 0.4 : 1 }]}
           />
           <MaterialIconButton
             name="edit"
@@ -434,23 +425,21 @@ const ModuleDetailScreen = () => {
               setModalVisible(true);
             }}
             disabled={editing || reordering}
-            style={{ opacity: blurActive ? 0 : editing ? 0.4 : 1, padding: "1%" }}
+            style={[styles.editBtn, { opacity: blurActive ? 0 : editing ? 0.4 : 1 }]}
           />
         </Animated.View>
       </View>
 
-      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 5, paddingTop: 10 }}>
+      <View style={styles.actionBtnContainer}>
         {saving ? (
           <>
-            <ActivityIndicator size="small" color={colors.lightest_grey} style={{ opacity: 0 }} />
-            <ActivityIndicator size="small" color={colors.lightest_grey} style={{ marginRight: "5%", marginBottom: "1%" }} />
+            <ActivityIndicator size="small" color={colors.lightest_grey} style={styles.actionBtnInvisSpinner} />
+            <ActivityIndicator size="small" color={colors.lightest_grey} style={styles.actionBtnSpinner} />
           </>
         ) : (
           <>
             <TouchableOpacity
-              style={{
-                alignItems: "center",
-              }}
+              style={styles.actionBtnContent}
               onPress={() => {
                 if (reordering) {
                   cancelOrSave(false);
@@ -460,14 +449,10 @@ const ModuleDetailScreen = () => {
               }}
               disabled={!(reordering || (!adding && !(module.progress === 0) && exerciseActive))}
             >
-              <Animated.Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20, opacity: restartCancelButtonOpacity }}>
-                {reordering ? "Cancel" : "Restart"}
-              </Animated.Text>
+              <Animated.Text style={[styles.actionBtn, { opacity: restartCancelButtonOpacity }]}>{reordering ? "Cancel" : "Restart"}</Animated.Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={{
-                alignItems: "center",
-              }}
+              style={styles.actionBtnContent}
               onPress={() => {
                 if (reordering) {
                   cancelOrSave(true);
@@ -477,24 +462,22 @@ const ModuleDetailScreen = () => {
               }}
               disabled={!(reordering || (!adding && !(module.progress === 100) && !(module.exercises.length === 0) && exerciseActive))}
             >
-              <Animated.Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20, opacity: finishSaveButtonOpacity }}>
-                {reordering ? "Save" : "Finish"}
-              </Animated.Text>
+              <Animated.Text style={[styles.actionBtn, { opacity: finishSaveButtonOpacity }]}>{reordering ? "Save" : "Finish"}</Animated.Text>
             </TouchableOpacity>
           </>
         )}
       </View>
 
-      <View style={{ borderBottomColor: colors.border_grey, borderBottomWidth: 0.8, width: "100%", marginTop: 5 }} />
+      <View style={styles.divider} />
 
-      <View style={{ paddingHorizontal: "5%" }}>
+      <View style={styles.exerciseContainer}>
         {reordering ? (
           <NestableDraggableFlatList
             data={reorderExercises}
             onDragEnd={({ data }) => setReorderExercises(data)}
             keyExtractor={(item) => item.id!}
             renderItem={(props) => <ReorderExercise item={props.item} drag={props.drag} isActive={props.isActive} saving={saving} />}
-            style={{ overflow: "visible" }}
+            style={styles.reorder}
           />
         ) : (
           module.exercises.map((exercise, index) => (
@@ -519,9 +502,7 @@ const ModuleDetailScreen = () => {
 
         {adding && (
           <>
-            {module.exercises.length !== 0 && (
-              <View style={{ borderBottomColor: colors.border_grey, borderBottomWidth: StyleSheet.hairlineWidth, width: "100%" }} />
-            )}
+            {module.exercises.length !== 0 && <View style={styles.addExerciseDivider} />}
             <AddExercise
               moduleId={module.id!}
               done={(add: boolean) => {
@@ -538,7 +519,7 @@ const ModuleDetailScreen = () => {
         )}
 
         <TouchableOpacity
-          style={{ paddingHorizontal: 10, paddingVertical: 20, alignItems: "center", opacity: adding || reordering ? 0 : 1 }}
+          style={[styles.addExerciseContainer, { opacity: adding || reordering ? 0 : 1 }]}
           onPress={() => {
             scrollViewRef.current?.scrollToEnd();
             opacityLayout();
@@ -547,31 +528,12 @@ const ModuleDetailScreen = () => {
           }}
           disabled={adding || reordering}
         >
-          <Text style={{ color: colors.primary, fontWeight: "bold", fontSize: 20 }}>Add Exercise</Text>
+          <Text style={styles.addExerciseText}>Add Exercise</Text>
         </TouchableOpacity>
 
-        <Animated.View
-          style={{
-            position: "absolute",
-            left: 27,
-            top: 27,
-            zIndex: 10,
-            opacity: moveOpacity,
-            transform: [{ translateY: moveAnim }, { scale: moveScale }],
-          }}
-        >
+        <Animated.View style={[styles.activeCircleContainer, { opacity: moveOpacity, transform: [{ translateY: moveAnim }, { scale: moveScale }] }]}>
           <TouchableOpacity onPress={completePress} disabled={activeIndex.current + 1 > module.exercises.length || adding || reordering}>
-            <Animated.View
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: 300,
-                borderWidth: 3,
-                borderColor: borderColor,
-                backgroundColor: colors.secondary,
-                flex: 1,
-              }}
-            />
+            <Animated.View style={[styles.activeCircle, { borderColor: borderColor }]} />
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -580,3 +542,98 @@ const ModuleDetailScreen = () => {
 };
 
 export default ModuleDetailScreen;
+
+const styles = StyleSheet.create({
+  animationContainer: {
+    position: "absolute",
+  },
+  animation: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+  },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerText: {
+    color: "white",
+    fontFamily: "Main-Font",
+    fontStyle: "italic",
+    fontWeight: "bold",
+    width: "78%",
+  },
+  headerBtnContainer: {
+    flexDirection: "row",
+  },
+  reorderBtn: {
+    padding: "1%",
+    marginRight: "5%",
+  },
+  editBtn: {
+    padding: "1%",
+  },
+  actionBtnContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 5,
+    paddingTop: 10,
+  },
+  actionBtnInvisSpinner: {
+    opacity: 0,
+  },
+  actionBtnSpinner: {
+    marginRight: "5%",
+    marginBottom: "1%",
+  },
+  actionBtnContent: {
+    alignItems: "center",
+  },
+  actionBtn: {
+    color: colors.primary,
+    fontWeight: "bold",
+    fontSize: 20,
+  },
+  divider: {
+    borderBottomColor: colors.border_grey,
+    borderBottomWidth: 0.8,
+    width: "100%",
+    marginTop: 5,
+  },
+  exerciseContainer: {
+    paddingHorizontal: "5%",
+  },
+  reorder: {
+    overflow: "visible",
+  },
+  addExerciseDivider: {
+    borderBottomColor: colors.border_grey,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    width: "100%",
+  },
+  addExerciseContainer: {
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  addExerciseText: {
+    color: colors.primary,
+    fontWeight: "bold",
+    fontSize: 20,
+  },
+  activeCircleContainer: {
+    position: "absolute",
+    left: 27,
+    top: 27,
+    zIndex: 10,
+  },
+  activeCircle: {
+    width: 30,
+    height: 30,
+    borderRadius: 300,
+    borderWidth: 3,
+    backgroundColor: colors.secondary,
+    flex: 1,
+  },
+});

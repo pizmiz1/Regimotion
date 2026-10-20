@@ -1,9 +1,10 @@
-import { ActivityIndicator, Animated, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, StyleSheet, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
-import { MaterialIconButton } from "../shared/IconButton";
 import { useGlobalContext } from "../../store/GlobalContext";
 import { ExerciseDto } from "../../../shared/moduledto";
 import { useRef, useState } from "react";
+
+// Custom Components
 import Button from "../shared/Button";
 
 interface AddExerciseProps {
@@ -46,34 +47,23 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
 
   return (
     <>
-      <View style={{ flexDirection: "row" }}>
+      <View style={styles.inputContainer}>
         <View>
-          <View style={{ width: 49, alignItems: "center", zIndex: 0 }}>
-            <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: colors.border_grey, height: 40 }} />
+          <View style={styles.topDivider}>
+            <View style={styles.divider} />
           </View>
-          <View style={{ position: "absolute", top: 27, zIndex: 1 }}>
-            <View
-              style={{
-                marginLeft: 10,
-                width: 30,
-                height: 30,
-                borderRadius: 300,
-                borderWidth: 3,
-                borderColor: colors.border_grey,
-                backgroundColor: colors.secondary,
-                flex: 1,
-              }}
-            />
+          <View style={styles.activeCircleContainer}>
+            <View style={styles.activeCircle} />
           </View>
-          <View style={{ width: 49, alignItems: "center", zIndex: 0, opacity: 0 }}>
-            <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: colors.border_grey, height: 40 }} />
+          <View style={styles.invisTopDivider}>
+            <View style={styles.divider} />
           </View>
         </View>
-        <View style={{ justifyContent: "center", flex: 1, gap: 7, marginLeft: 15 }}>
+        <View style={styles.inputsContainer}>
           <TextInput
             value={name}
             onChangeText={setName}
-            style={{ color: "white", fontWeight: "bold", fontSize: 20 }}
+            style={styles.nameInput}
             placeholderTextColor="#6b6b6b"
             placeholder="Name..."
             editable={!saving}
@@ -86,12 +76,12 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
               }
             }}
           />
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={styles.descriptionsInputContainer}>
             <TextInput
               ref={text1Ref}
               value={text1}
               onChangeText={setText1}
-              style={{ color: colors.lightest_grey, width: "40%" }}
+              style={styles.descriptionInput}
               placeholderTextColor="#6b6b6b"
               placeholder="Text..."
               editable={!saving}
@@ -99,11 +89,11 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
               onSubmitEditing={savePress}
               enablesReturnKeyAutomatically={true}
             />
-            <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: colors.border_grey, height: 20, marginHorizontal: 20 }} />
+            <View style={styles.descriptionDivider} />
             <TextInput
               value={text2}
               onChangeText={setText2}
-              style={{ color: colors.lightest_grey, width: "40%" }}
+              style={styles.descriptionInput}
               placeholderTextColor="#6b6b6b"
               placeholder="Optional..."
               editable={!saving}
@@ -118,7 +108,7 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
           </View>
         </View>
       </View>
-      <View style={{ flexDirection: "row", justifyContent: "space-evenly", marginTop: 10 }}>
+      <View style={styles.btnContainer}>
         {saving ? (
           <ActivityIndicator size="large" color={colors.lightest_grey} />
         ) : (
@@ -128,7 +118,7 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
               onPress={() => {
                 done(false);
               }}
-              style={{ backgroundColor: colors.dark_grey }}
+              style={styles.btn}
               size={120}
             />
             <Button label="Save" onPress={savePress} size={120} disabled={name.length === 0 || text1.length === 0} />
@@ -140,3 +130,73 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
 };
 
 export default AddExercise;
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    flexDirection: "row",
+  },
+  topDivider: {
+    width: 49,
+    alignItems: "center",
+    zIndex: 0,
+  },
+  divider: {
+    width: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border_grey,
+    height: 40,
+  },
+  activeCircleContainer: {
+    position: "absolute",
+    top: 27,
+    zIndex: 1,
+  },
+  activeCircle: {
+    marginLeft: 10,
+    width: 30,
+    height: 30,
+    borderRadius: 300,
+    borderWidth: 3,
+    borderColor: colors.border_grey,
+    backgroundColor: colors.secondary,
+    flex: 1,
+  },
+  invisTopDivider: {
+    width: 49,
+    alignItems: "center",
+    zIndex: 0,
+    opacity: 0,
+  },
+  inputsContainer: {
+    justifyContent: "center",
+    flex: 1,
+    gap: 7,
+    marginLeft: 15,
+  },
+  nameInput: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 20,
+  },
+  descriptionsInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  descriptionInput: {
+    color: colors.lightest_grey,
+    width: "40%",
+  },
+  descriptionDivider: {
+    width: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border_grey,
+    height: 20,
+    marginHorizontal: 20,
+  },
+  btnContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    marginTop: 10,
+  },
+  btn: {
+    backgroundColor: colors.dark_grey,
+  },
+});

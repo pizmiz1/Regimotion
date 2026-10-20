@@ -1,13 +1,15 @@
-import { Animated, Text, View } from "react-native";
-import Module from "../components/shared/Module";
+import { Animated, StyleSheet, View } from "react-native";
 import colors from "../constants/colors";
 import { useEffect, useRef, useState } from "react";
 import { useGlobalContext } from "../store/GlobalContext";
-import DetailsModal from "../components/shared/DetailsModal";
 import { useNavigation } from "@react-navigation/native";
 import routeNames from "../constants/routeNames";
-import { MaterialIconButton } from "../components/shared/IconButton";
+
+// Custom Components
+import Module from "../components/shared/Module";
+import DetailsModal from "../components/shared/DetailsModal";
 import PageContainer from "../components/shared/PageContainer";
+import { MaterialIconButton } from "../components/shared/IconButton";
 
 const ModuleScreen = () => {
   const { modules } = useGlobalContext();
@@ -18,6 +20,13 @@ const ModuleScreen = () => {
   const headerOpacity = useRef(new Animated.Value(0)).current;
 
   const navigation = useNavigation();
+
+  const inactiveModules = modules.filter((curr) => {
+    return Object.values(curr.days).every((val) => val === false);
+  });
+  const activeModules = modules.filter((curr) => {
+    return Object.values(curr.days).some((val) => val === true);
+  });
 
   useEffect(() => {
     Animated.timing(headerOpacity, {
@@ -39,19 +48,8 @@ const ModuleScreen = () => {
         }}
       />
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-        <Animated.Text
-          style={{
-            color: "white",
-            fontSize: 50,
-            fontFamily: "Main-Font",
-            fontStyle: "italic",
-            fontWeight: "bold",
-            opacity: headerOpacity,
-          }}
-        >
-          Modules
-        </Animated.Text>
+      <View style={styles.headerContainer}>
+        <Animated.Text style={[styles.headerText, { opacity: headerOpacity }]}>Modules</Animated.Text>
         <MaterialIconButton
           name="add"
           size={34}
@@ -61,8 +59,20 @@ const ModuleScreen = () => {
           }}
         />
       </View>
-      <View style={{ marginTop: "8%", flexDirection: "row", gap: 30, flexWrap: "wrap" }}>
-        {modules.map((module) => (
+
+      <View style={styles.moduleContainer}>
+        {activeModules.map((module) => (
+          <Module
+            key={module.id}
+            module={module}
+            onPress={() => {
+              // @ts-ignore
+              navigation.navigate(routeNames.moduleDetail, { moduleId: module.id });
+            }}
+            dailyMod={false}
+          />
+        ))}
+        {inactiveModules.map((module) => (
           <Module
             key={module.id}
             module={module}
@@ -79,3 +89,24 @@ const ModuleScreen = () => {
 };
 
 export default ModuleScreen;
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  headerText: {
+    color: "white",
+    fontSize: 50,
+    fontFamily: "Main-Font",
+    fontStyle: "italic",
+    fontWeight: "bold",
+  },
+  moduleContainer: {
+    marginTop: "8%",
+    flexDirection: "row",
+    gap: 30,
+    flexWrap: "wrap",
+  },
+});

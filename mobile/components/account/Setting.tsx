@@ -32,33 +32,62 @@ const Setting = ({
 }: SettingsProps) => {
   return (
     <>
-      <TouchableOpacity style={{ flexDirection: "row", alignItems: "center", flex: 1 }} onPress={onPress} disabled={isSwitch || touchableDisabled}>
-        <View style={{ width: "15%" }}>
-          <View
-            style={{
-              backgroundColor: iconFillColor ? iconFillColor : colors.medium_grey,
-              alignItems: "center",
-              borderRadius: 5,
-              padding: 5,
-              alignSelf: "flex-start",
-            }}
-          >
+      <TouchableOpacity style={styles.content} onPress={onPress} disabled={isSwitch || touchableDisabled}>
+        <View style={styles.iconContainer}>
+          <View style={[styles.icon, { backgroundColor: iconFillColor ? iconFillColor : colors.medium_grey }]}>
             <MaterialCommunityIcons name={icon} size={22} color="white" />
           </View>
         </View>
-        <View style={{ width: "64%" }}>
-          <Text style={{ color: "white", fontSize: 17 }}>{text}</Text>
-          {description && <Text style={{ color: colors.light_grey, fontSize: 11 }}>{description}</Text>}
+        <View style={styles.textContainer}>
+          <Text style={styles.labelText}>{text}</Text>
+          {description && <Text style={styles.descriptionText}>{description}</Text>}
         </View>
         {isSwitch && (
-          <View style={{ alignItems: "flex-end", justifyContent: "center" }}>
+          <View style={styles.switchContainer}>
             <Switch value={switchValue} onValueChange={switchValueChange} disabled={switchDisabled} ios_backgroundColor={colors.light_grey} />
           </View>
         )}
       </TouchableOpacity>
-      {!noDivider && <View style={{ borderWidth: StyleSheet.hairlineWidth, borderColor: colors.medium_grey }} />}
+      {!noDivider && <View style={styles.divider} />}
     </>
   );
 };
 
 export default Setting;
+
+const styles = StyleSheet.create({
+  content: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  iconContainer: {
+    width: "15%",
+  },
+  icon: {
+    alignItems: "center",
+    borderRadius: 5,
+    padding: 5,
+    alignSelf: "flex-start",
+  },
+  textContainer: {
+    width: "64%",
+  },
+  labelText: {
+    color: "white",
+    fontSize: 17,
+  },
+  descriptionText: {
+    color: colors.light_grey,
+    fontSize: 11,
+  },
+  switchContainer: {
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  divider: {
+    borderBottomWidth: 1,
+    borderColor: colors.medium_grey,
+    width: "100%",
+  },
+});

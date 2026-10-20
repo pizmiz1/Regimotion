@@ -1,19 +1,21 @@
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Animated, Keyboard, KeyboardAvoidingView, ViewStyle } from "react-native";
+import { Animated, ViewStyle } from "react-native";
 import colors from "../../constants/colors";
-import React, { ReactElement, useEffect, useRef, useState } from "react";
-import { StyleSheet, View, Text, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { StyleSheet, View, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import MaskedView from "@react-native-masked-view/masked-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { opacityLayoutEaseOut } from "../../helpers/layouts";
-import { MaterialIconButton } from "./IconButton";
 import { useNavigation } from "@react-navigation/native";
 import { NestableScrollContainer } from "react-native-draggable-flatlist";
 import { ScrollView, RefreshControl } from "react-native-gesture-handler";
 import routeNames from "../../constants/routeNames";
+
+// Custom Components
+import { MaterialIconButton } from "./IconButton";
 
 interface PageContainerProps {
   children: React.ReactNode;
@@ -101,9 +103,10 @@ const PageContainer = ({
   const RootScrollView = reordering ? NestableScrollContainer : ScrollView;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.secondary }} edges={["top", "left", "right"]}>
+    <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
       <StatusBar style="light" />
-      <View style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 100, height: HEADER_HEIGHT, pointerEvents: "none" }}>
+
+      <View style={[styles.headerContainer, { height: HEADER_HEIGHT }]}>
         <MaskedView
           style={StyleSheet.absoluteFill}
           maskElement={
@@ -117,18 +120,17 @@ const PageContainer = ({
           <BlurView intensity={90} tint={"dark"} style={StyleSheet.absoluteFill} />
         </MaskedView>
 
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <Animated.Text style={{ opacity: headerOpacity, fontSize: 17, fontWeight: "700", fontFamily: "Main-Font", color: "white" }}>
-            {header}
-          </Animated.Text>
+        <View style={styles.headerTextContainer}>
+          <Animated.Text style={[styles.headerText, { opacity: headerOpacity }]}>{header}</Animated.Text>
         </View>
       </View>
+
       <RootScrollView
         scrollEventThrottle={16}
         onScroll={(e) => {
           handleScrollBlur(e, blurActive, setBlurActiveLocal);
         }}
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={styles.scrollContainer}
         removeClippedSubviews={false}
         scrollEnabled={!disableScroll}
         keyboardShouldPersistTaps="handled"
@@ -140,20 +142,20 @@ const PageContainer = ({
         }
       >
         {backButton || userButton ? (
-          <Animated.View style={{ height: 40, opacity: buttonOpacity }}>
+          <Animated.View style={[styles.topBtnContainer, { opacity: buttonOpacity }]}>
             <MaterialIconButton
               name={backButton ? "arrow-back" : "person"}
               size={34}
               color={colors.light_primary}
-              style={{ paddingHorizontal: "5%", marginTop: "3%", ...backButtonStyle }}
+              style={[styles.topBtn, backButtonStyle]}
               disabled={backButtonDisabled}
               onPress={headerButtonPress}
             />
           </Animated.View>
         ) : (
-          <View style={{ height: 40 }} />
+          <View style={styles.blankTop} />
         )}
-        <View style={{ padding: "5%", flex: 1 }}>
+        <View style={styles.content}>
           {children}
           <View style={{ padding: keyboardPadding ?? 0 }} />
         </View>
@@ -165,3 +167,46 @@ const PageContainer = ({
 };
 
 export default PageContainer;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.secondary,
+  },
+  headerContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    pointerEvents: "none",
+  },
+  headerTextContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerText: {
+    fontSize: 17,
+    fontWeight: "700",
+    fontFamily: "Main-Font",
+    color: "white",
+  },
+  scrollContainer: {
+    flexGrow: 1,
+  },
+  topBtnContainer: {
+    height: 40,
+  },
+  topBtn: {
+    paddingHorizontal: "5%",
+    marginTop: "3%",
+  },
+  blankTop: {
+    height: 40,
+  },
+  content: {
+    padding: "5%",
+    flex: 1,
+  },
+});

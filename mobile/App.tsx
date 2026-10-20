@@ -3,11 +3,12 @@ import AppNav from "./navigation/Navigation";
 import { GlobalProvider } from "./store/GlobalContext";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { registerRootComponent } from "expo";
+import { StyleSheet } from "react-native";
 
 const App = () => {
   return (
     <SafeAreaProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={styles.container}>
         <GlobalProvider>
           <AppNav />
         </GlobalProvider>
@@ -17,5 +18,11 @@ const App = () => {
 };
 
 export default App;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
 
 registerRootComponent(App);

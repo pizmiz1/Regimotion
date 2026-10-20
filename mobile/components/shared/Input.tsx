@@ -1,4 +1,4 @@
-import { TextInput, Animated, Text, View, ViewStyle, TouchableWithoutFeedback, Keyboard, KeyboardTypeOptions } from "react-native";
+import { TextInput, Animated, Text, View, ViewStyle, KeyboardTypeOptions, StyleSheet } from "react-native";
 import colors from "../../constants/colors";
 import { useEffect, useRef, useState } from "react";
 
@@ -70,20 +70,20 @@ const Input = ({ label, placeholder, baseBorderColor, onChangeText, style, reset
   };
 
   return (
-    <View style={{ ...style }}>
-      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 2, justifyContent: "space-between" }}>
-        {label && <Text style={{ color: "white", fontFamily: "Main-Font", fontWeight: "500", fontSize: 20 }}>{label}</Text>}
+    <View style={style}>
+      <View style={styles.labelContainer}>
+        {label && <Text style={styles.labelText}>{label}</Text>}
         {limit && (
           <Text style={{ color: text.length > 0 ? "white" : colors.light_grey }}>
             {text.length}/{limit}
           </Text>
         )}
       </View>
-      <Animated.View style={{ borderWidth: disabled ? 0 : 1, borderColor: borderColor, borderRadius: 7, opacity: disabled ? 0.4 : 1 }}>
+      <Animated.View style={[styles.inputContainer, { borderWidth: disabled ? 0 : 1, opacity: disabled ? 0.4 : 1, borderColor: borderColor }]}>
         <TextInput
           value={text}
           onChangeText={onChangeTextLocal}
-          style={{ height: 40, padding: 10, borderRadius: 7, color: "white", backgroundColor: colors.dark_grey }}
+          style={styles.input}
           placeholder={placeholder ? placeholder : "Type here"}
           placeholderTextColor="#aaa"
           maxLength={limit}
@@ -99,3 +99,28 @@ const Input = ({ label, placeholder, baseBorderColor, onChangeText, style, reset
 };
 
 export default Input;
+
+const styles = StyleSheet.create({
+  labelContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 2,
+    justifyContent: "space-between",
+  },
+  labelText: {
+    color: "white",
+    fontFamily: "Main-Font",
+    fontWeight: "500",
+    fontSize: 20,
+  },
+  inputContainer: {
+    borderRadius: 7,
+  },
+  input: {
+    height: 40,
+    padding: 10,
+    borderRadius: 7,
+    color: "white",
+    backgroundColor: colors.dark_grey,
+  },
+});

@@ -1,6 +1,10 @@
 const colors = {
   primary: "#6855d5",
   light_primary: "#8677dd",
+  primary_full_gradient_top: "#9182F2",
+  primary_full_gradient_bottom: "#3D2E91",
+  primary_gradient_top: "#9E92EB",
+  primary_gradient_bottom: "#423291",
   secondary: "#0b0c10",
   light_secondary: "#13151c",
   lightest_grey: "#dededeff",
@@ -10,10 +14,12 @@ const colors = {
   dark_grey: "#3f3942ff",
   border_grey: "#ccc",
   warning: "orangered",
-  primary_orange_compliment: "#D56855",
-  primary_orange_compliment_light: "#DD8172",
-  primary_blue_compliment: "#4169e1",
-  primary_blue_compliment_light: "#5381e4",
+  orange_compliment: "#D56855",
+  orange_gradient_top: "#E28D7D",
+  orange_gradient_bottom: "#8d3627",
+  blue_compliment: "#4169e1",
+  blue_gradient_top: "#7E98FA",
+  blue_gradient_bottom: "#203ca1",
 };
 
 export default colors;

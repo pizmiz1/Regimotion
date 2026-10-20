@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Animated, Pressable, Text } from "react-native";
+import { Animated, Pressable, StyleSheet, Text } from "react-native";
 import colors from "../../constants/colors";
 
 interface DayProps {
@@ -49,20 +49,22 @@ const Day = ({ label, size, baseColor, onPress, reset, disabled, startActive }: 
 
   return (
     <Pressable onPress={onLocalPress} disabled={disabled} style={{ opacity: disabled ? 0.4 : 1 }}>
-      <Animated.View
-        style={{
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: animatedBackgroundCol,
-        }}
-      >
-        <Text style={{ color: "white", textAlign: "center", fontSize: size / 2.2 }}>{label}</Text>
+      <Animated.View style={[styles.content, { width: size, height: size, borderRadius: size / 2, backgroundColor: animatedBackgroundCol }]}>
+        <Text style={[styles.label, { fontSize: size / 2.2 }]}>{label}</Text>
       </Animated.View>
     </Pressable>
   );
 };
 
 export default Day;
+
+const styles = StyleSheet.create({
+  content: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  label: {
+    color: "white",
+    textAlign: "center",
+  },
+});

@@ -1,22 +1,24 @@
-import { ActivityIndicator, Animated, Easing, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Animated, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import colors from "../constants/colors";
 import { useEffect, useRef, useState } from "react";
 import { useGlobalContext } from "../store/GlobalContext";
-import Module from "../components/shared/Module";
 import { useNavigation } from "@react-navigation/native";
 import routeNames from "../constants/routeNames";
-import DetailsModal from "../components/shared/DetailsModal";
-import NoModules from "../components/daily/NoModules";
 import { ModuleDto } from "../../shared/moduledto";
 import { opacityLayout } from "../helpers/layouts";
 import { JsonDto } from "../../shared/jsondto";
 import { get } from "../helpers/fetch";
 import { errorAlert } from "../helpers/alert";
-import { MaterialIconButton } from "../components/shared/IconButton";
-import PageContainer from "../components/shared/PageContainer";
 import { UserSettingsDto } from "../../shared/usersettingsdto";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+
+// Custom Components
+import { MaterialIconButton } from "../components/shared/IconButton";
+import PageContainer from "../components/shared/PageContainer";
+import DetailsModal from "../components/shared/DetailsModal";
+import NoModules from "../components/daily/NoModules";
+import Module from "../components/shared/Module";
 
 const DailyScreen = () => {
   const { modules, accessToken, updateAccessToken, updateModules, updateUserSettings } = useGlobalContext();
@@ -101,7 +103,7 @@ const DailyScreen = () => {
 
   if (loading)
     return (
-      <SafeAreaView style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.secondary }}>
+      <SafeAreaView style={styles.loadingContainer}>
         <ActivityIndicator size="large" />
       </SafeAreaView>
     );
@@ -122,28 +124,12 @@ const DailyScreen = () => {
       />
       {modules.length > 0 ? (
         <>
-          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-            <View style={{ width: "75%" }}>
-              <Animated.Text
-                style={{
-                  color: "white",
-                  fontSize: 50,
-                  fontFamily: "Main-Font",
-                  fontStyle: "italic",
-                  fontWeight: "bold",
-                  opacity: headerOpacity,
-                }}
-              >
+          <View style={styles.headerContainer}>
+            <View style={styles.headerTextContainer}>
+              <Animated.Text style={[styles.headerText, { opacity: headerOpacity }]}>
                 {date.toLocaleDateString("en-US", { weekday: "long" })}
               </Animated.Text>
-              <Animated.Text
-                style={{
-                  color: colors.lighter_grey,
-                  fontSize: 20,
-                  fontFamily: "Main-Font",
-                  opacity: headerOpacity,
-                }}
-              >
+              <Animated.Text style={[styles.headerDescriptionText, { opacity: headerOpacity }]}>
                 {date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
               </Animated.Text>
             </View>
@@ -152,14 +138,14 @@ const DailyScreen = () => {
               name="format-list-bulleted"
               color={colors.light_primary}
               size={34}
-              style={{ padding: "2%", opacity: blurActive ? 0 : 1 }}
+              style={[styles.headerBtn, { opacity: blurActive ? 0 : 1 }]}
               onPress={() => {
                 navigation.navigate(routeNames.module);
               }}
             />
           </View>
           {anyModulesToday ? (
-            <View style={{ flexDirection: "row", gap: 20, flexWrap: "wrap", marginTop: 20 }}>
+            <View style={styles.modulesContainer}>
               {todaysModules.map((module) => (
                 <Module
                   key={module.id}
@@ -174,26 +160,13 @@ const DailyScreen = () => {
               ))}
             </View>
           ) : (
-            <View style={{ flex: 1, alignItems: "center" }}>
-              <View style={{ marginTop: 120, width: 100, height: 100, justifyContent: "center", alignItems: "center", position: "absolute" }}>
-                <Animated.View
-                  style={{
-                    experimental_backgroundImage:
-                      "radial-gradient(circle at center, rgba(104, 85, 213, 0.85) 0%, rgba(104, 85, 213, 0.35) 18%, rgba(104, 85, 213, 0.1) 32%, rgba(104, 85, 213, 0.03) 42%, rgba(0, 0, 0, 0) 50%)",
-                    filter: [{ blur: 35 }],
-                    borderRadius: "50%",
-                    width: 260,
-                    height: 260,
-                    position: "absolute",
-                    opacity: iconOpacity,
-                  }}
-                />
+            <View style={styles.nothingTodayContainer}>
+              <View style={styles.nothingTodayIconContainer}>
+                <Animated.View style={[[styles.nothingTodayIconEffect, { opacity: iconOpacity }]]} />
               </View>
-              <MaterialCommunityIcons name="weather-night" size={100} color="white" style={{ marginTop: 120 }} />
-              <Text style={{ color: "white", fontSize: 40, fontWeight: 600, textAlign: "center" }}>Nothing Here</Text>
-              <Text style={{ color: colors.light_grey, fontSize: 20, textAlign: "center", marginTop: 5 }}>
-                It looks like you have no modules for today!
-              </Text>
+              <MaterialCommunityIcons name="weather-night" size={100} color="white" style={styles.nothingTodayIcon} />
+              <Text style={styles.nothingTodayText}>Nothing Here</Text>
+              <Text style={styles.nothingTodayDescriptionText}>It looks like you have no modules for today!</Text>
             </View>
           )}
         </>
@@ -209,3 +182,77 @@ const DailyScreen = () => {
 };
 
 export default DailyScreen;
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.secondary,
+  },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerTextContainer: {
+    width: "75%",
+  },
+  headerText: {
+    color: "white",
+    fontSize: 47,
+    fontFamily: "Main-Font",
+    fontStyle: "italic",
+    fontWeight: "bold",
+  },
+  headerDescriptionText: {
+    color: colors.lighter_grey,
+    fontSize: 20,
+    fontFamily: "Main-Font",
+  },
+  headerBtn: {
+    padding: "2%",
+  },
+  modulesContainer: {
+    flexDirection: "row",
+    gap: 20,
+    flexWrap: "wrap",
+    marginTop: 20,
+  },
+  nothingTodayContainer: {
+    flex: 1,
+    alignItems: "center",
+  },
+  nothingTodayIconContainer: {
+    marginTop: 120,
+    width: 100,
+    height: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+  },
+  nothingTodayIconEffect: {
+    experimental_backgroundImage:
+      "radial-gradient(circle at center, rgba(104, 85, 213, 0.85) 0%, rgba(104, 85, 213, 0.35) 18%, rgba(104, 85, 213, 0.1) 32%, rgba(104, 85, 213, 0.03) 42%, rgba(0, 0, 0, 0) 50%)",
+    filter: [{ blur: 35 }],
+    borderRadius: "50%",
+    width: 260,
+    height: 260,
+    position: "absolute",
+  },
+  nothingTodayIcon: {
+    marginTop: 120,
+  },
+  nothingTodayText: {
+    color: "white",
+    fontSize: 40,
+    fontWeight: 600,
+    textAlign: "center",
+  },
+  nothingTodayDescriptionText: {
+    color: colors.light_grey,
+    fontSize: 20,
+    textAlign: "center",
+    marginTop: 5,
+  },
+});

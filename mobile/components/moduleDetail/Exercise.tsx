@@ -1,10 +1,12 @@
 import { ActivityIndicator, Animated, StyleSheet, Text, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
-import { MaterialIconButton } from "../shared/IconButton";
 import { useGlobalContext } from "../../store/GlobalContext";
 import { useRef, useState } from "react";
 import { Swipeable } from "react-native-gesture-handler";
 import { opacityLayout } from "../../helpers/layouts";
+
+// Custom Components
+import { MaterialIconButton } from "../shared/IconButton";
 import AltModal from "./AltModal";
 
 interface ExerciseProps {
@@ -77,7 +79,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
     }
   };
 
-  const rightAction = (progress: Animated.AnimatedInterpolation<number>) => {
+  const RightAction = (progress: Animated.AnimatedInterpolation<number>) => {
     const translateX = progress.interpolate({
       inputRange: [0, 1],
       outputRange: [50, 0],
@@ -85,17 +87,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
     });
 
     return (
-      <Animated.View
-        style={{
-          opacity: progress,
-          transform: [{ translateX }],
-          alignItems: "center",
-          justifyContent: "flex-end",
-          flexDirection: "row",
-          gap: 10,
-          width: 140,
-        }}
-      >
+      <Animated.View style={[styles.actionContainer, { opacity: progress, transform: [{ translateX }] }]}>
         {saving ? (
           <ActivityIndicator size="small" color={colors.lightest_grey} />
         ) : (
@@ -111,7 +103,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                   onPress={() => {
                     setAltModalVisible(true);
                   }}
-                  style={{ padding: "1%" }}
+                  style={styles.actionBtn}
                 />
                 <MaterialIconButton
                   name="edit"
@@ -122,9 +114,9 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                     setEditing(true);
                     swipeableRef.current!.close();
                   }}
-                  style={{ padding: "1%" }}
+                  style={styles.actionBtn}
                 />
-                <MaterialIconButton name="delete" color={colors.warning} size={34} onPress={deleteExercise} style={{ padding: "1%" }} />
+                <MaterialIconButton name="delete" color={colors.warning} size={34} onPress={deleteExercise} style={styles.actionBtn} />
               </>
             )}
           </>
@@ -136,7 +128,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
   return (
     <Swipeable
       ref={swipeableRef}
-      renderRightActions={rightAction}
+      renderRightActions={RightAction}
       friction={2}
       onSwipeableOpenStartDrag={() => {
         opacityLayout();
@@ -170,32 +162,25 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
           swipeableRef.current!.close();
         }}
       />
-      <Animated.View style={{ flexDirection: "row", opacity: viewOpacity, overflow: "hidden" }}>
+      <Animated.View style={[styles.content, { opacity: viewOpacity }]}>
         <View>
-          <View style={{ width: 49, alignItems: "center", zIndex: 0 }}>
-            <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: colors.border_grey, height: 40 }} />
+          <View style={styles.topDividerContainer}>
+            <View style={styles.divider} />
           </View>
-          <Animated.View style={{ opacity: circleOpacity, position: "absolute", top: 27, zIndex: 1 }}>
-            <MaterialIconButton
-              name="circle"
-              color={"white"}
-              size={30}
-              onPress={() => {}}
-              style={{ paddingHorizontal: 10, width: 50 }}
-              disabled={true}
-            />
+          <Animated.View style={[styles.completeCircleContainer, { opacity: circleOpacity }]}>
+            <MaterialIconButton name="circle" color={"white"} size={30} onPress={() => {}} style={styles.completeCircle} disabled={true} />
           </Animated.View>
-          <View style={{ width: 49, alignItems: "center", zIndex: 0, opacity: last ? 0 : 1 }}>
-            <View style={{ width: StyleSheet.hairlineWidth, backgroundColor: colors.border_grey, height: 40 }} />
+          <View style={[styles.bottomDividerContainer, { opacity: last ? 0 : 1 }]}>
+            <View style={styles.divider} />
           </View>
         </View>
-        <View style={{ flexDirection: "row", flex: 1, alignItems: "center", justifyContent: "space-between" }}>
-          <View style={{ justifyContent: "center", flex: 1, gap: 7, marginLeft: 15 }}>
+        <View style={styles.infoContainer}>
+          <View style={styles.textContainer}>
             {editing ? (
               <TextInput
                 value={name}
                 onChangeText={setName}
-                style={{ color: "white", fontWeight: "bold", fontSize: 20 }}
+                style={styles.nameText}
                 placeholderTextColor="#6b6b6b"
                 placeholder="Name..."
                 editable={!saving}
@@ -209,17 +194,17 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                 }}
               />
             ) : (
-              <Text style={{ color: "white", fontWeight: "bold", fontSize: 20 }} numberOfLines={1}>
+              <Text style={styles.nameText} numberOfLines={1}>
                 {exercise?.altActive ? exercise.altName : exercise?.name}
               </Text>
             )}
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View style={styles.descriptionsContainer}>
               {editing ? (
                 <TextInput
                   ref={text1Ref}
                   value={text1}
                   onChangeText={setText1}
-                  style={{ color: colors.lightest_grey, width: "40%" }}
+                  style={styles.text1Text}
                   placeholderTextColor="#6b6b6b"
                   placeholder="Text..."
                   editable={!saving}
@@ -228,25 +213,17 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                   enablesReturnKeyAutomatically={true}
                 />
               ) : (
-                <Text style={{ color: colors.lightest_grey, width: "40%" }} numberOfLines={1}>
+                <Text style={styles.text1Text} numberOfLines={1}>
                   {exercise?.altActive ? exercise.altText1 : exercise?.text1}
                 </Text>
               )}
-              <View
-                style={{
-                  width: StyleSheet.hairlineWidth,
-                  backgroundColor: colors.border_grey,
-                  height: 20,
-                  marginHorizontal: 20,
-                  opacity: exercise?.text2 || editing ? 1 : 0,
-                }}
-              />
+              <View style={[styles.descriptionDivider, { opacity: exercise?.text2 || editing ? 1 : 0 }]} />
               {editing ? (
                 <>
                   <TextInput
                     value={text2}
                     onChangeText={setText2}
-                    style={{ color: colors.lightest_grey, width: "30%" }}
+                    style={styles.text2Input}
                     placeholderTextColor="#6b6b6b"
                     placeholder="Optional..."
                     editable={!saving}
@@ -262,7 +239,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
               ) : (
                 exercise?.text2 && (
                   <>
-                    <Text style={{ color: colors.lightest_grey, width: "40%" }} numberOfLines={1}>
+                    <Text style={styles.text1Text} numberOfLines={1}>
                       {exercise.altActive ? exercise.altText2 : exercise.text2}
                     </Text>
                   </>
@@ -271,21 +248,13 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
             </View>
           </View>
 
-          <View
-            style={{
-              opacity: !swiped && exercise?.altActive === true && !editing ? 1 : 0,
-              borderWidth: 1,
-              borderColor: colors.primary,
-              borderRadius: 20,
-              marginTop: 5,
-              backgroundColor: colors.primary,
-            }}
-          >
-            <Text style={{ color: "white", paddingHorizontal: 10, paddingVertical: 2 }}>Alt</Text>
+          <View style={[styles.altContainer, { opacity: !swiped && exercise?.altActive === true && !editing ? 1 : 0 }]}>
+            <Text style={styles.altText}>Alt</Text>
           </View>
         </View>
+
         {editing && (
-          <View style={{ position: "absolute", right: 0, top: 30 }}>
+          <View style={styles.btnContainer}>
             {saving ? (
               <ActivityIndicator size="small" color={colors.lightest_grey} />
             ) : (
@@ -306,3 +275,96 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
 };
 
 export default Exercise;
+
+const styles = StyleSheet.create({
+  content: {
+    flexDirection: "row",
+    overflow: "hidden",
+  },
+  topDividerContainer: {
+    width: 49,
+    alignItems: "center",
+    zIndex: 0,
+  },
+  divider: {
+    width: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border_grey,
+    height: 40,
+  },
+  completeCircleContainer: {
+    position: "absolute",
+    top: 27,
+    zIndex: 1,
+  },
+  completeCircle: {
+    paddingHorizontal: 10,
+    width: 50,
+  },
+  bottomDividerContainer: {
+    width: 49,
+    alignItems: "center",
+    zIndex: 0,
+  },
+  infoContainer: {
+    flexDirection: "row",
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  textContainer: {
+    justifyContent: "center",
+    flex: 1,
+    gap: 7,
+    marginLeft: 15,
+  },
+  nameText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 20,
+  },
+  descriptionsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  text1Text: {
+    color: colors.lightest_grey,
+    width: "40%",
+  },
+  descriptionDivider: {
+    width: StyleSheet.hairlineWidth,
+    backgroundColor: colors.border_grey,
+    height: 20,
+    marginHorizontal: 20,
+  },
+  text2Input: {
+    color: colors.lightest_grey,
+    width: "30%",
+  },
+  altContainer: {
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 20,
+    marginTop: 5,
+    backgroundColor: colors.primary,
+  },
+  altText: {
+    color: "white",
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+  },
+  btnContainer: {
+    position: "absolute",
+    right: 0,
+    top: 30,
+  },
+  actionContainer: {
+    alignItems: "center",
+    justifyContent: "flex-end",
+    flexDirection: "row",
+    gap: 10,
+    width: 140,
+  },
+  actionBtn: {
+    padding: "1%",
+  },
+});

@@ -1,8 +1,8 @@
-import { StyleSheet, Text, TouchableOpacity, ViewStyle } from "react-native";
+import { StyleProp, StyleSheet, Text, TouchableOpacity, ViewStyle } from "react-native";
 import colors from "../../constants/colors";
 
 interface ButtonProps {
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   label: string;
   onPress: () => void;
   color?: string;
