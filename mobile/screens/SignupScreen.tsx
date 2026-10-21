@@ -14,12 +14,18 @@ import { OTPInput, OTPInputRef } from "input-otp-native";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 import { FontAwesome5 } from "@expo/vector-icons";
 import * as AppleAuthentication from "expo-apple-authentication";
-import { AppleDto } from "../../shared/appledto";
+import { OtherAuthDto } from "../../shared/otherauthdto";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { GoogleOneTapSignIn, isSuccessResponse } from "react-native-nitro-google-signin";
 
 // Custom Components
 import Button from "../components/shared/Button";
 import Input from "../components/shared/Input";
+
+GoogleOneTapSignIn.configure({
+  webClientId: "642282462247-grv2t2drgo4lobh39takhjoa5md7sf5j.apps.googleusercontent.com",
+  scopes: ["email"],
+});
 
 type Auth_State = "Base" | "VerifyingOtp" | "HiddenEmail" | "HiddenVerifyingOtp";
 
@@ -139,7 +145,7 @@ const SignupScreen = () => {
       });
 
       if (credential.identityToken) {
-        const body: AppleDto = {
+        const body: OtherAuthDto = {
           identityToken: credential.identityToken,
         };
         const response: JsonDto<AccessDto> = await post("/auth/apple", body);
@@ -165,6 +171,35 @@ const SignupScreen = () => {
       }
     } catch (error: any) {
       errorAlert("Unable to Sign In With Apple");
+    }
+  };
+
+  const googleSignIn = async () => {
+    try {
+      const result = await GoogleOneTapSignIn.signIn();
+
+      if (isSuccessResponse(result)) {
+        const body: OtherAuthDto = {
+          identityToken: result.data.idToken,
+        };
+        const response: JsonDto<AccessDto> = await post("/auth/google", body);
+
+        if (response.error) {
+          errorAlert(response.error);
+          setLoading(false);
+          return;
+        }
+
+        if (response.data === undefined || response.data.email === undefined || response.data.passkey === undefined) {
+          errorAlert("Bad Response");
+          resetState();
+          return;
+        }
+
+        await successfulIdentityFlow(response.data.email, response.data.passkey);
+      }
+    } catch (error: any) {
+      errorAlert("Unable to Sign In With Google");
     }
   };
 
@@ -340,7 +375,7 @@ const SignupScreen = () => {
               </View>
 
               <View style={styles.otherOptContainer}>
-                <TouchableOpacity style={[styles.otherOpt, { opacity: loading ? 0.4 : 1 }]} disabled={loading}>
+                <TouchableOpacity style={[styles.otherOpt, { opacity: loading ? 0.4 : 1 }]} onPress={googleSignIn} disabled={loading}>
                   <Image style={{ height: 32, aspectRatio: 1 }} source={require("./../assets/google.png")} />
                   <Text style={styles.otherOptText}>Google</Text>
                 </TouchableOpacity>

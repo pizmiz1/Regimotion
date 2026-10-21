@@ -14,7 +14,8 @@ import UserSettings from "../schema/userSettings.js";
 import mongoose from "mongoose";
 import OldPasskey from "../schema/oldPasskey.js";
 import jwksClient from "jwks-rsa";
-import { AppleDto } from "../../../shared/appledto.js";
+import { OtherAuthDto } from "../../../shared/otherauthdto.js";
+import { OAuth2Client } from "google-auth-library";
 
 const mailgunAuth: Options = {
   auth: {
@@ -22,22 +23,24 @@ const mailgunAuth: Options = {
     domain: process.env.MAILGUN_DOMAIN,
   },
 };
-
 const transporter = nodemailer.createTransport(mailgun(mailgunAuth));
 
-const client = jwksClient({
+const appleClient = jwksClient({
   jwksUri: "https://appleid.apple.com/auth/keys",
   cache: true,
   rateLimit: true,
   jwksRequestsPerMinute: 10,
 });
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClient = new OAuth2Client(googleClientId);
+
 const getAppleSigningKey = (header: JwtHeader, callback: SigningKeyCallback) => {
   if (!header || !header.kid) {
     return callback(new Error("Missing key identifier (kid) in token header"));
   }
 
-  client.getSigningKey(header.kid, (err, key) => {
+  appleClient.getSigningKey(header.kid, (err, key) => {
     if (err) {
       return callback(err);
     }
@@ -319,7 +322,7 @@ export const postDeleteAccount = async (req: Request<{}, {}, AccessDto>, res: Re
   }
 };
 
-export const postAppleSignIn = async (req: Request<{}, {}, AppleDto>, res: Response<JsonDto<AccessDto>>) => {
+export const postAppleSignIn = async (req: Request<{}, {}, OtherAuthDto>, res: Response<JsonDto<AccessDto>>) => {
   const identityToken = req.body.identityToken;
 
   if (!identityToken) {
@@ -365,4 +368,40 @@ export const postAppleSignIn = async (req: Request<{}, {}, AppleDto>, res: Respo
       }
     },
   );
+};
+
+export const postGoogleSignIn = async (req: Request<{}, {}, OtherAuthDto>, res: Response<JsonDto<AccessDto>>) => {
+  const identityToken = req.body.identityToken;
+
+  if (!identityToken) {
+    return res.status(400).json({ error: "Token not provided" });
+  }
+
+  const session = await mongoose.startSession();
+
+  try {
+    const ticket = await googleClient.verifyIdToken({
+      idToken: identityToken,
+      audience: googleClientId,
+    });
+
+    const payload = ticket.getPayload();
+
+    if (payload === undefined || payload.email === undefined) {
+      return res.status(400).json({ error: "Malformed token payload structure" });
+    }
+
+    const email = payload.email;
+
+    const passkeys = await newUserSignIn(email, session);
+
+    const accessDto: AccessDto = { email: email, passkey: passkeys.passkey };
+
+    res.status(200).json({ data: accessDto });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  } finally {
+    await session.endSession();
+  }
 };

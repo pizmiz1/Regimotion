@@ -15,7 +15,15 @@
       "usesAppleSignIn": true
     },
     "android": {},
-    "plugins": ["expo-font", "expo-secure-store", "expo-apple-authentication"],
+    "plugins": [
+      "expo-font",
+      "expo-secure-store",
+      "expo-apple-authentication",
+      "react-native-nitro-google-signin",
+      {
+        "iosUrlScheme": "com.googleusercontent.apps.642282462247-fs3pus1p2uiasc78r4umiinl961us65o"
+      }
+    ],
     "extra": {
       "eas": {
         "projectId": "6b1f17ae-4a20-4f8a-b6e2-68a141d210d0"
