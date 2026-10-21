@@ -16,16 +16,11 @@ import { FontAwesome5 } from "@expo/vector-icons";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { OtherAuthDto } from "../../shared/otherauthdto";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { GoogleOneTapSignIn, isSuccessResponse } from "react-native-nitro-google-signin";
 
 // Custom Components
 import Button from "../components/shared/Button";
 import Input from "../components/shared/Input";
-
-GoogleOneTapSignIn.configure({
-  webClientId: "642282462247-grv2t2drgo4lobh39takhjoa5md7sf5j.apps.googleusercontent.com",
-  scopes: ["email"],
-});
+import { googleSignInHelper } from "../helpers/googleAuth";
 
 type Auth_State = "Base" | "VerifyingOtp" | "HiddenEmail" | "HiddenVerifyingOtp";
 
@@ -176,11 +171,11 @@ const SignupScreen = () => {
 
   const googleSignIn = async () => {
     try {
-      const result = await GoogleOneTapSignIn.signIn();
+      const idToken = await googleSignInHelper();
 
-      if (isSuccessResponse(result)) {
+      if (idToken !== undefined) {
         const body: OtherAuthDto = {
-          identityToken: result.data.idToken,
+          identityToken: idToken,
         };
         const response: JsonDto<AccessDto> = await post("/auth/google", body);
 
