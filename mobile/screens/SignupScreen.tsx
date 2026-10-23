@@ -194,7 +194,12 @@ const SignupScreen = () => {
         await successfulIdentityFlow(response.data.email, response.data.passkey);
       }
     } catch (error: any) {
-      errorAlert("Unable to Sign In With Google");
+      const errorMessage = error?.message || "Unknown error";
+      const errorCode = error?.code || "No code";
+
+      errorAlert(`Google Sign-In Failed (${errorCode}): ${errorMessage}`);
+      // TODO - Commented out for testing
+      //errorAlert("Unable to Sign In With Google");
     }
   };
 

@@ -7,6 +7,7 @@ if (Constants.executionEnvironment !== ExecutionEnvironment.StoreClient) {
 
   GoogleSignin.configure({
     webClientId: "642282462247-grv2t2drgo4lobh39takhjoa5md7sf5j.apps.googleusercontent.com",
+    iosClientId: "642282462247-fs3pus1p2uiasc78r4umiinl961us65o.apps.googleusercontent.com",
     scopes: ["email"],
   });
 }
