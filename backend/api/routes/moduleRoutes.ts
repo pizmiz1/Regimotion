@@ -43,11 +43,14 @@ const deleteValidator: ValidationChain[] = [
 ];
 
 const linkExercisesValidators: ValidationChain[] = [
-  body("exerciseIds").isArray({ min: 1 }).withMessage("exerciseIds must be a non-empty array"),
+  body("exerciseIds").isArray({ min: 1 }).withMessage("ExerciseIds must be a non-empty array"),
   body("exerciseIds.*").isMongoId().withMessage("Each exerciseId must be a valid MongoDB ID"),
 ];
 
-const unlinkExerciseValidators: ValidationChain[] = [body("exerciseId").isMongoId().withMessage("exerciseId must be a valid MongoDB ID")];
+const unlinkExercisesValidators: ValidationChain[] = [
+  body("exerciseIds").isArray({ max: 1 }).withMessage("ExerciseIds must be a single item array"),
+  body("exerciseIds.*").isMongoId().withMessage("ExerciseId must be a valid MongoDB ID"),
+];
 
 // Routes
 const moduleRoutes = express.Router();
@@ -58,6 +61,6 @@ moduleRoutes.route(baseUrl).patch(authenticate, postPatchValidators, validate, p
 moduleRoutes.route(baseUrl).get(authenticate, getValidator, validate, get);
 moduleRoutes.route(baseUrl + "/:id").delete(authenticate, deleteValidator, validate, deleteModule);
 moduleRoutes.route(baseUrl + "/linkExercises").post(authenticate, linkExercisesValidators, validate, linkExercises);
-moduleRoutes.route(baseUrl + "/unlinkExercises").post(authenticate, unlinkExerciseValidators, validate, unlinkExercises);
+moduleRoutes.route(baseUrl + "/unlinkExercises").post(authenticate, unlinkExercisesValidators, validate, unlinkExercises);
 
 export default moduleRoutes;

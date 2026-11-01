@@ -4,6 +4,7 @@ import { JsonDto } from "../../../shared/jsondto.js";
 import Module from "../schema/module.js";
 import { randomUUID } from "crypto";
 import mongoose, { Types } from "mongoose";
+import { LinkExercisesDto } from "../../../shared/linkexercisesdto.js";
 
 export const post = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonDto<ModuleDto>>) => {
   try {
@@ -106,11 +107,11 @@ export const deleteModule = async (req: Request, res: Response<JsonDto<any>>) =>
   }
 };
 
-export const linkExercises = async (req: Request<{}, {}, string[]>, res: Response<JsonDto<ModuleDto[]>>) => {
+export const linkExercises = async (req: Request<{}, {}, LinkExercisesDto>, res: Response<JsonDto<ModuleDto[]>>) => {
   const session = await mongoose.startSession();
 
   const linkId = randomUUID();
-  const exerciseIds = req.body;
+  const exerciseIds = req.body.exerciseIds;
   const exerciseObjectIds = exerciseIds.map((curr) => new Types.ObjectId(curr));
 
   let modules: ModuleDto[] = [];
@@ -174,9 +175,9 @@ export const linkExercises = async (req: Request<{}, {}, string[]>, res: Respons
   }
 };
 
-export const unlinkExercises = async (req: Request<{}, {}, string>, res: Response<JsonDto<ModuleDto[]>>) => {
+export const unlinkExercises = async (req: Request<{}, {}, LinkExercisesDto>, res: Response<JsonDto<ModuleDto[]>>) => {
   try {
-    const exerciseObjectId = new Types.ObjectId(req.body);
+    const exerciseObjectId = new Types.ObjectId(req.body.exerciseIds[0]);
 
     const matchingModules = await Module.find({
       userEmail: req.user!.email,
