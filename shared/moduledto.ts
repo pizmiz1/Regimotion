@@ -24,10 +24,7 @@ export interface ExerciseDto {
   completed: boolean;
   text1: string;
   text2?: string;
-  altActive?: boolean;
-  altName?: string;
-  altText1?: string;
-  altText2?: string;
+  linkId?: string;
 }
 
 // Use this for icon
