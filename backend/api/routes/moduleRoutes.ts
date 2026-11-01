@@ -2,7 +2,7 @@ import express from "express";
 import { body, param, query, ValidationChain } from "express-validator";
 import { authenticate } from "../middleware/authentication.js";
 import { validate } from "../middleware/validation.js";
-import { deleteModule, get, patch, post } from "../controllers/moduleController.js";
+import { deleteModule, get, linkExercises, patch, post } from "../controllers/moduleController.js";
 
 // Validators
 const postPatchValidators: ValidationChain[] = [
@@ -42,6 +42,11 @@ const deleteValidator: ValidationChain[] = [
     .withMessage("Id must be 24 characters"),
 ];
 
+const linkExercisesValidators: ValidationChain[] = [
+  body("exerciseIds").isArray({ min: 1 }).withMessage("exerciseIds must be a non-empty array"),
+  body("exerciseIds.*").isMongoId().withMessage("Each exerciseId must be a valid MongoDB ID"),
+];
+
 // Routes
 const moduleRoutes = express.Router();
 const baseUrl = "/module";
@@ -50,5 +55,6 @@ moduleRoutes.route(baseUrl).post(authenticate, postPatchValidators, validate, po
 moduleRoutes.route(baseUrl).patch(authenticate, postPatchValidators, validate, patch);
 moduleRoutes.route(baseUrl).get(authenticate, getValidator, validate, get);
 moduleRoutes.route(baseUrl + "/:id").delete(authenticate, deleteValidator, validate, deleteModule);
+moduleRoutes.route(baseUrl + "/linkExercises").post(authenticate, linkExercisesValidators, validate, linkExercises);
 
 export default moduleRoutes;

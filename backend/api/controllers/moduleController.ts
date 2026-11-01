@@ -2,6 +2,8 @@ import { Request, Response } from "express";
 import { ModuleDto } from "../../../shared/moduledto.js";
 import { JsonDto } from "../../../shared/jsondto.js";
 import Module from "../schema/module.js";
+import { randomUUID } from "crypto";
+import { Types } from "mongoose";
 
 export const post = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonDto<ModuleDto>>) => {
   try {
@@ -98,6 +100,38 @@ export const deleteModule = async (req: Request, res: Response<JsonDto<any>>) =>
     }
 
     res.status(200).json({});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const linkExercises = async (req: Request<{}, {}, string[]>, res: Response<JsonDto<ModuleDto[]>>) => {
+  try {
+    const linkId = randomUUID();
+    const exerciseIds = req.body;
+
+    const exerciseObjectIds = exerciseIds.map((curr) => new Types.ObjectId(curr));
+
+    await Module.updateMany(
+      {
+        userEmail: req.user!.email,
+        "exercises._id": { $in: exerciseObjectIds },
+      },
+      {
+        $set: { "exercises.$[exercise].linkId": linkId },
+      },
+      {
+        arrayFilters: [{ "exercise._id": { $in: exerciseObjectIds } }],
+      },
+    );
+
+    const modules = await Module.find({ userEmail: req.user!.email });
+    const dto = modules.map((module) => {
+      return module.toJSON();
+    });
+
+    res.status(200).json({ data: dto });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });

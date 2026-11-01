@@ -24,10 +24,7 @@ const exerciseSchema = new mongoose.Schema<ExerciseDto>(
     completed: { type: Boolean, required: true },
     text1: { type: String, required: true },
     text2: { type: String },
-    altActive: { type: Boolean },
-    altName: { type: String },
-    altText1: { type: String },
-    altText2: { type: String },
+    linkId: { type: String },
   },
   {
     toJSON: {
