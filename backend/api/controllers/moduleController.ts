@@ -3,7 +3,7 @@ import { ModuleDto } from "../../../shared/moduledto.js";
 import { JsonDto } from "../../../shared/jsondto.js";
 import Module from "../schema/module.js";
 import { randomUUID } from "crypto";
-import { Types } from "mongoose";
+import mongoose, { Types } from "mongoose";
 
 export const post = async (req: Request<{}, {}, ModuleDto>, res: Response<JsonDto<ModuleDto>>) => {
   try {
@@ -107,28 +107,112 @@ export const deleteModule = async (req: Request, res: Response<JsonDto<any>>) =>
 };
 
 export const linkExercises = async (req: Request<{}, {}, string[]>, res: Response<JsonDto<ModuleDto[]>>) => {
+  const session = await mongoose.startSession();
+
+  const linkId = randomUUID();
+  const exerciseIds = req.body;
+  const exerciseObjectIds = exerciseIds.map((curr) => new Types.ObjectId(curr));
+
+  let modules: ModuleDto[] = [];
+
   try {
-    const linkId = randomUUID();
-    const exerciseIds = req.body;
-
-    const exerciseObjectIds = exerciseIds.map((curr) => new Types.ObjectId(curr));
-
-    await Module.updateMany(
-      {
+    await session.withTransaction(async () => {
+      const matchingModules = await Module.find({
         userEmail: req.user!.email,
         "exercises._id": { $in: exerciseObjectIds },
-      },
-      {
-        $set: { "exercises.$[exercise].linkId": linkId },
-      },
-      {
-        arrayFilters: [{ "exercise._id": { $in: exerciseObjectIds } }],
-      },
+      })
+        .select("exercises._id exercises.linkId")
+        .session(session);
+
+      const previousLinkIds = [
+        ...new Set(
+          matchingModules.flatMap((module) =>
+            module.exercises
+              .filter((exercise) => exerciseObjectIds.some((curr) => curr.equals(exercise.id)))
+              .map((exercise) => exercise.linkId)
+              .filter((id): id is string => Boolean(id)),
+          ),
+        ),
+      ];
+
+      if (previousLinkIds.length > 0) {
+        await Module.updateMany(
+          { userEmail: req.user!.email },
+          { $unset: { "exercises.$[exercise].linkId": "" } },
+          {
+            arrayFilters: [{ "exercise.linkId": { $in: previousLinkIds } }],
+            session,
+          },
+        );
+      }
+
+      await Module.updateMany(
+        {
+          userEmail: req.user!.email,
+          "exercises._id": { $in: exerciseObjectIds },
+        },
+        { $set: { "exercises.$[exercise].linkId": linkId } },
+        {
+          arrayFilters: [{ "exercise._id": { $in: exerciseObjectIds } }],
+          session,
+        },
+      );
+
+      const updatedModules = await Module.find({
+        userEmail: req.user!.email,
+      }).session(session);
+
+      modules = updatedModules.map((module) => module.toJSON());
+    });
+
+    res.status(200).json({ data: modules });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Server error" });
+  } finally {
+    await session.endSession();
+  }
+};
+
+export const unlinkExercises = async (req: Request<{}, {}, string>, res: Response<JsonDto<ModuleDto[]>>) => {
+  try {
+    const exerciseObjectId = new Types.ObjectId(req.body);
+
+    const matchingModules = await Module.find({
+      userEmail: req.user!.email,
+      "exercises._id": exerciseObjectId,
+    }).select("exercises._id exercises.linkId");
+
+    if (matchingModules.length === 0) {
+      res.status(404).json({ error: "Modules not found" });
+      return;
+    }
+
+    const linkIds = [
+      ...new Set(
+        matchingModules.flatMap((module) =>
+          module.exercises
+            .filter((exercise) => exerciseObjectId.equals(exercise.id))
+            .map((exercise) => exercise.linkId)
+            .filter((id): id is string => Boolean(id)),
+        ),
+      ),
+    ];
+
+    if (linkIds.length === 0) {
+      res.status(404).json({ error: "Links not found" });
+      return;
+    }
+
+    await Module.updateMany(
+      { userEmail: req.user!.email },
+      { $unset: { "exercises.$[exercise].linkId": "" } },
+      { arrayFilters: [{ "exercise.linkId": { $in: linkIds } }] },
     );
 
     const modules = await Module.find({ userEmail: req.user!.email });
-    const dto = modules.map((module) => {
-      return module.toJSON();
+    const dto = modules.map((curr) => {
+      return curr.toJSON();
     });
 
     res.status(200).json({ data: dto });

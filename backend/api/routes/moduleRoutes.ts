@@ -2,7 +2,7 @@ import express from "express";
 import { body, param, query, ValidationChain } from "express-validator";
 import { authenticate } from "../middleware/authentication.js";
 import { validate } from "../middleware/validation.js";
-import { deleteModule, get, linkExercises, patch, post } from "../controllers/moduleController.js";
+import { deleteModule, get, linkExercises, patch, post, unlinkExercises } from "../controllers/moduleController.js";
 
 // Validators
 const postPatchValidators: ValidationChain[] = [
@@ -47,6 +47,8 @@ const linkExercisesValidators: ValidationChain[] = [
   body("exerciseIds.*").isMongoId().withMessage("Each exerciseId must be a valid MongoDB ID"),
 ];
 
+const unlinkExerciseValidators: ValidationChain[] = [body("exerciseId").isMongoId().withMessage("exerciseId must be a valid MongoDB ID")];
+
 // Routes
 const moduleRoutes = express.Router();
 const baseUrl = "/module";
@@ -56,5 +58,6 @@ moduleRoutes.route(baseUrl).patch(authenticate, postPatchValidators, validate, p
 moduleRoutes.route(baseUrl).get(authenticate, getValidator, validate, get);
 moduleRoutes.route(baseUrl + "/:id").delete(authenticate, deleteValidator, validate, deleteModule);
 moduleRoutes.route(baseUrl + "/linkExercises").post(authenticate, linkExercisesValidators, validate, linkExercises);
+moduleRoutes.route(baseUrl + "/unlinkExercises").post(authenticate, unlinkExerciseValidators, validate, unlinkExercises);
 
 export default moduleRoutes;
