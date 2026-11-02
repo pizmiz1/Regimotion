@@ -1,13 +1,20 @@
 import { ActivityIndicator, Animated, StyleSheet, Text, TextInput, View } from "react-native";
+import { ComponentRef, useEffect, useRef, useState } from "react";
 import colors from "../../constants/colors";
 import { useGlobalContext } from "../../store/GlobalContext";
-import { useRef, useState } from "react";
-import { Swipeable } from "react-native-gesture-handler";
+import ReanimatedSwipeable, { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import { opacityLayout } from "../../helpers/layouts";
+import Reanimated from "react-native-reanimated";
+import { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated";
 
 // Custom Components
 import { MaterialIconButton } from "../shared/IconButton";
-import AltModal from "./AltModal";
+import LinkModal from "./LinkModal";
+import { JsonDto } from "../../../shared/jsondto";
+import { ModuleDto } from "../../../shared/moduledto";
+import { get } from "../../helpers/fetch";
+import { errorAlert } from "../../helpers/alert";
+import Text2Modal from "./Text2Modal";
 
 interface ExerciseProps {
   exerciseId: string;
@@ -21,20 +28,21 @@ interface ExerciseProps {
 }
 
 const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hideActive, active, deleteCallback }: ExerciseProps) => {
-  const { modules, patchModule } = useGlobalContext();
+  const { modules, patchModule, updateModules, accessToken, updateAccessToken } = useGlobalContext();
   const module = modules.find((x) => x.id === moduleId)!;
-  const exercise = module.exercises.find((exercise) => exercise.id === exerciseId);
+  const exercise = module.exercises.find((exercise) => exercise.id === exerciseId)!;
 
-  const [altModalVisible, setAltModalVisible] = useState(false);
+  const [text2ModalVisible, setText2ModalVisible] = useState(false);
+  const [linkModalVisible, setLinkModalVisible] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [name, setName] = useState(exercise?.name);
-  const [text1, setText1] = useState(exercise?.text1);
-  const [text2, setText2] = useState(exercise?.text2);
+  const [name, setName] = useState(exercise.name);
+  const [text1, setText1] = useState(exercise.text1);
+  const [text2, setText2] = useState(exercise.text2);
   const [swiped, setSwiped] = useState(false);
 
-  const swipeableRef = useRef<Swipeable>(null);
-  const text1Ref = useRef<TextInput>(null);
+  const swipeableRef = useRef<SwipeableMethods>(null);
+  const text1Ref = useRef<ComponentRef<typeof TextInput>>(null);
 
   const deleteExercise = async () => {
     setSaving(true);
@@ -60,14 +68,24 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
     newExercise.text1 = text1!;
     newExercise.text2 = text2;
 
-    const index = module.exercises.findIndex((curr) => curr.id === exercise?.id);
+    const index = module.exercises.findIndex((curr) => curr.id === exercise.id);
     module.exercises[index] = newExercise;
 
     const success = await patchModule(module);
 
-    setSaving(false);
-
     if (success) {
+      const linkedModule = module.exercises.some((curr) => curr.linkId !== undefined);
+
+      if (linkedModule) {
+        const responseModule: JsonDto<ModuleDto[]> = await get("/module", { accessToken: accessToken, updateAccessToken: updateAccessToken });
+        if (responseModule.error) {
+          errorAlert(responseModule.error);
+          return;
+        }
+
+        updateModules(responseModule.data!);
+      }
+
       if (active) {
         Animated.timing(hideActive, {
           toValue: 0,
@@ -77,17 +95,26 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
       }
       setEditing(false);
     }
+
+    setSaving(false);
   };
 
-  const RightAction = (progress: Animated.AnimatedInterpolation<number>) => {
-    const translateX = progress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [50, 0],
-      extrapolate: "clamp",
-    });
+  useEffect(() => {
+    setText2(exercise.text2);
+  }, [exercise.text2]);
+
+  const RightAction = (progress: SharedValue<number>) => {
+    const animatedStyle = useAnimatedStyle(() => ({
+      opacity: progress.value,
+      transform: [
+        {
+          translateX: interpolate(progress.value, [0, 1], [50, 0], Extrapolation.CLAMP),
+        },
+      ],
+    }));
 
     return (
-      <Animated.View style={[styles.actionContainer, { opacity: progress, transform: [{ translateX }] }]}>
+      <Reanimated.View style={[styles.actionContainer, animatedStyle]}>
         {saving ? (
           <ActivityIndicator size="small" color={colors.lightest_grey} />
         ) : (
@@ -97,11 +124,11 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
             ) : (
               <>
                 <MaterialIconButton
-                  name={exercise?.altName ? "do-not-disturb-on-total-silence" : "radio-button-unchecked"}
+                  name="link"
                   color={colors.light_primary}
                   size={34}
                   onPress={() => {
-                    setAltModalVisible(true);
+                    setLinkModalVisible(true);
                   }}
                   style={styles.actionBtn}
                 />
@@ -114,6 +141,9 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                     setEditing(true);
                     swipeableRef.current!.close();
                   }}
+                  onLongPress={() => {
+                    setText2ModalVisible(true);
+                  }}
                   style={styles.actionBtn}
                 />
                 <MaterialIconButton name="delete" color={colors.warning} size={34} onPress={deleteExercise} style={styles.actionBtn} />
@@ -121,12 +151,12 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
             )}
           </>
         )}
-      </Animated.View>
+      </Reanimated.View>
     );
   };
 
   return (
-    <Swipeable
+    <ReanimatedSwipeable
       ref={swipeableRef}
       renderRightActions={RightAction}
       friction={2}
@@ -153,15 +183,25 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
       }}
       enabled={!saving && !editing}
     >
-      <AltModal
-        visible={altModalVisible}
-        setVisible={setAltModalVisible}
+      <Text2Modal
+        visible={text2ModalVisible}
+        setVisible={setText2ModalVisible}
         moduleId={moduleId}
         exerciseId={exerciseId}
-        saveFinished={() => {
+        onText2EditSave={() => {
           swipeableRef.current!.close();
         }}
       />
+
+      <LinkModal
+        visible={linkModalVisible}
+        setVisible={setLinkModalVisible}
+        onFinish={() => {
+          swipeableRef.current!.close();
+        }}
+        exerciseId={exerciseId}
+      />
+
       <Animated.View style={[styles.content, { opacity: viewOpacity }]}>
         <View>
           <View style={styles.topDividerContainer}>
@@ -195,7 +235,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
               />
             ) : (
               <Text style={styles.nameText} numberOfLines={1}>
-                {exercise?.altActive ? exercise.altName : exercise?.name}
+                {exercise.name}
               </Text>
             )}
             <View style={styles.descriptionsContainer}>
@@ -214,10 +254,10 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                 />
               ) : (
                 <Text style={styles.text1Text} numberOfLines={1}>
-                  {exercise?.altActive ? exercise.altText1 : exercise?.text1}
+                  {exercise.text1}
                 </Text>
               )}
-              <View style={[styles.descriptionDivider, { opacity: exercise?.text2 || editing ? 1 : 0 }]} />
+              <View style={[styles.descriptionDivider, { opacity: exercise.text2 || editing ? 1 : 0 }]} />
               {editing ? (
                 <>
                   <TextInput
@@ -237,10 +277,10 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
                   />
                 </>
               ) : (
-                exercise?.text2 && (
+                exercise.text2 && (
                   <>
                     <Text style={styles.text1Text} numberOfLines={1}>
-                      {exercise.altActive ? exercise.altText2 : exercise.text2}
+                      {exercise.text2}
                     </Text>
                   </>
                 )
@@ -248,8 +288,8 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
             </View>
           </View>
 
-          <View style={[styles.altContainer, { opacity: !swiped && exercise?.altActive === true && !editing ? 1 : 0 }]}>
-            <Text style={styles.altText}>Alt</Text>
+          <View style={[styles.linkContainer, { opacity: !swiped && !editing && exercise.linkId !== undefined ? 1 : 0 }]}>
+            <Text style={styles.linkText}>Link</Text>
           </View>
         </View>
 
@@ -270,7 +310,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
           </View>
         )}
       </Animated.View>
-    </Swipeable>
+    </ReanimatedSwipeable>
   );
 };
 
@@ -340,14 +380,14 @@ const styles = StyleSheet.create({
     color: colors.lightest_grey,
     width: "30%",
   },
-  altContainer: {
+  linkContainer: {
     borderWidth: 1,
     borderColor: colors.primary,
     borderRadius: 20,
     marginTop: 5,
     backgroundColor: colors.primary,
   },
-  altText: {
+  linkText: {
     color: "white",
     paddingHorizontal: 10,
     paddingVertical: 2,

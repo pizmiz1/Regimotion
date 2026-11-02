@@ -7,13 +7,14 @@ interface MaterialIconButtonProps {
   color: string;
   size: number;
   onPress: () => void;
+  onLongPress?: () => void;
   style?: StyleProp<ViewStyle>;
   disabled?: boolean;
 }
 
-export const MaterialIconButton = ({ name, color, size, onPress, style, disabled }: MaterialIconButtonProps) => {
+export const MaterialIconButton = ({ name, color, size, onPress, onLongPress, style, disabled }: MaterialIconButtonProps) => {
   return (
-    <TouchableOpacity onPress={onPress} style={style} disabled={disabled}>
+    <TouchableOpacity onPress={onPress} style={style} disabled={disabled} onLongPress={onLongPress}>
       <MaterialIcons name={name} size={size} color={color} />
     </TouchableOpacity>
   );
@@ -24,13 +25,14 @@ interface EntypoIconButtonProps {
   color: string;
   size: number;
   onPress: () => void;
+  onLongPress?: () => void;
   style?: ViewStyle;
   disabled?: boolean;
 }
 
-export const EntypoIconButton = ({ name, color, size, onPress, style, disabled }: EntypoIconButtonProps) => {
+export const EntypoIconButton = ({ name, color, size, onPress, onLongPress, style, disabled }: EntypoIconButtonProps) => {
   return (
-    <TouchableOpacity onPress={onPress} style={style} disabled={disabled}>
+    <TouchableOpacity onPress={onPress} style={style} disabled={disabled} onLongPress={onLongPress}>
       <Entypo name={name} size={size} color={color} />
     </TouchableOpacity>
   );

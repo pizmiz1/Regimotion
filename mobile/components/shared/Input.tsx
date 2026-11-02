@@ -1,88 +1,76 @@
-import { TextInput, Animated, Text, View, ViewStyle, KeyboardTypeOptions, StyleSheet } from "react-native";
+import { TextInput, Animated, Text, View, ViewStyle, KeyboardTypeOptions, StyleSheet, StyleProp } from "react-native";
 import colors from "../../constants/colors";
-import { useEffect, useRef, useState } from "react";
+import { ComponentProps, useEffect, useRef, useState } from "react";
+import { MaterialIcons } from "@expo/vector-icons";
 
 interface InputProps {
   label?: string;
   placeholder?: string;
   baseBorderColor: string;
-  onChangeText: (val: string) => void;
-  style?: ViewStyle;
-  reset: boolean;
+  value: string;
+  setValue: (val: string) => void;
+  style?: StyleProp<ViewStyle>;
   limit?: number;
   keyboardType?: KeyboardTypeOptions;
   disabled?: boolean;
-  startVal?: string;
   submit?: () => void;
+  iconName?: ComponentProps<typeof MaterialIcons>["name"];
+  clearable?: boolean;
 }
 
-const Input = ({ label, placeholder, baseBorderColor, onChangeText, style, reset, limit, keyboardType, disabled, startVal, submit }: InputProps) => {
-  const [text, setText] = useState("");
-
+const Input = ({
+  label,
+  placeholder,
+  baseBorderColor,
+  value,
+  setValue,
+  style,
+  limit,
+  keyboardType,
+  disabled,
+  submit,
+  iconName,
+  clearable,
+}: InputProps) => {
   const animatedValue = useRef(new Animated.Value(0)).current;
-
-  useEffect(() => {
-    Animated.timing(animatedValue, {
-      toValue: 0,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-    setText("");
-  }, [reset]);
-
-  useEffect(() => {
-    if (!startVal) {
-      return;
-    }
-
-    Animated.timing(animatedValue, {
-      toValue: 1,
-      duration: 200,
-      useNativeDriver: false,
-    }).start();
-    setText(startVal);
-  }, [startVal]);
 
   const borderColor = animatedValue.interpolate({
     inputRange: [0, 1],
     outputRange: [baseBorderColor, "white"],
   });
 
-  const onChangeTextLocal = (newText: string) => {
-    // @ts-ignore
-    if (newText.length > 0 && animatedValue.__getValue() === 0) {
-      Animated.timing(animatedValue, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: false,
-      }).start();
-      // @ts-ignore
-    } else if (newText.length === 0 && animatedValue.__getValue() === 1) {
-      Animated.timing(animatedValue, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: false,
-      }).start();
-    }
+  useEffect(() => {
+    const toValue = value.length > 0 ? 1 : 0;
 
-    setText(newText);
-    onChangeText(newText);
-  };
+    Animated.timing(animatedValue, {
+      toValue,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [value]);
 
   return (
     <View style={style}>
       <View style={styles.labelContainer}>
         {label && <Text style={styles.labelText}>{label}</Text>}
         {limit && (
-          <Text style={{ color: text.length > 0 ? "white" : colors.light_grey }}>
-            {text.length}/{limit}
+          <Text style={{ color: value.length > 0 ? "white" : colors.light_grey }}>
+            {value.length}/{limit}
           </Text>
         )}
       </View>
-      <Animated.View style={[styles.inputContainer, { borderWidth: disabled ? 0 : 1, opacity: disabled ? 0.4 : 1, borderColor: borderColor }]}>
+
+      <Animated.View
+        style={[
+          styles.inputContainer,
+          { height: iconName ? 44 : 40, borderWidth: disabled ? 0 : 1, opacity: disabled ? 0.4 : 1, borderColor: borderColor },
+        ]}
+      >
+        {iconName && <MaterialIcons name={iconName} size={24} color={colors.light_grey} style={{ paddingLeft: 10 }} />}
+
         <TextInput
-          value={text}
-          onChangeText={onChangeTextLocal}
+          value={value}
+          onChangeText={setValue}
           style={styles.input}
           placeholder={placeholder ? placeholder : "Type here"}
           placeholderTextColor="#aaa"
@@ -92,6 +80,7 @@ const Input = ({ label, placeholder, baseBorderColor, onChangeText, style, reset
           submitBehavior="blurAndSubmit"
           onSubmitEditing={submit}
           returnKeyType={submit ? "go" : "default"}
+          clearButtonMode={clearable ? "always" : undefined}
         />
       </Animated.View>
     </View>
@@ -115,12 +104,14 @@ const styles = StyleSheet.create({
   },
   inputContainer: {
     borderRadius: 7,
+    backgroundColor: colors.dark_grey,
+    flexDirection: "row",
+    alignItems: "center",
   },
   input: {
-    height: 40,
-    padding: 10,
-    borderRadius: 7,
+    flex: 1,
+    height: "100%",
+    paddingHorizontal: 10,
     color: "white",
-    backgroundColor: colors.dark_grey,
   },
 });

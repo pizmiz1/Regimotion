@@ -6,9 +6,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View, NativeSyntheticEvent, NativeScrollEvent } from "react-native";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
-import MaskedView from "@react-native-masked-view/masked-view";
+import MaskedViewComponent from "@react-native-masked-view/masked-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { opacityLayoutEaseOut } from "../../helpers/layouts";
 import { useNavigation } from "@react-navigation/native";
 import { NestableScrollContainer } from "react-native-draggable-flatlist";
 import { ScrollView, RefreshControl } from "react-native-gesture-handler";
@@ -26,7 +25,7 @@ interface PageContainerProps {
   backButtonStyle?: ViewStyle;
   disableScroll?: boolean;
   screenOverlay?: React.ReactNode;
-  scrollViewRef?: React.Ref<ScrollView>;
+  scrollViewRef?: React.Ref<any>;
   keyboardPadding?: number;
   userButton?: boolean;
   reordering?: boolean;
@@ -59,6 +58,33 @@ const PageContainer = ({
 
   const navigation = useNavigation();
 
+  const HEADER_HEIGHT = 65 + insets.top;
+
+  const inactiveLocations: readonly [number, number, ...number[]] = [0, 0.05, 0.1, 1];
+  const activeLocations: readonly [number, number, ...number[]] = [0, 0.5, 0.7, 0.9];
+
+  const handleScrollBlur = (event: NativeSyntheticEvent<NativeScrollEvent>, blurActive: boolean, setBlurActiveLocal: (active: boolean) => void) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    if (offsetY >= 66 && !blurActive) {
+      setBlurActiveLocal(true);
+      setBlurActive(true);
+    } else if (offsetY < 66 && blurActive) {
+      setBlurActiveLocal(false);
+      setBlurActive(false);
+    }
+  };
+
+  const headerButtonPress = () => {
+    if (backButton) {
+      navigation.goBack();
+    } else if (userButton) {
+      navigation.navigate(routeNames.account as never);
+    }
+  };
+
+  const RootScrollView = (reordering ? NestableScrollContainer : ScrollView) as React.ComponentType<any>;
+  const MaskedView = MaskedViewComponent as React.ComponentType<any>;
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(headerOpacity, {
@@ -73,34 +99,6 @@ const PageContainer = ({
       }),
     ]).start();
   }, [blurActive]);
-
-  const HEADER_HEIGHT = 65 + insets.top;
-
-  const inactiveLocations: readonly [number, number, ...number[]] = [0, 0.05, 0.1, 1];
-  const activeLocations: readonly [number, number, ...number[]] = [0, 0.5, 0.7, 0.9];
-
-  const handleScrollBlur = (event: NativeSyntheticEvent<NativeScrollEvent>, blurActive: boolean, setBlurActiveLocal: (active: boolean) => void) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    if (offsetY >= 66 && !blurActive) {
-      opacityLayoutEaseOut();
-      setBlurActiveLocal(true);
-      setBlurActive(true);
-    } else if (offsetY < 66 && blurActive) {
-      opacityLayoutEaseOut();
-      setBlurActiveLocal(false);
-      setBlurActive(false);
-    }
-  };
-
-  const headerButtonPress = () => {
-    if (backButton) {
-      navigation.goBack();
-    } else if (userButton) {
-      navigation.navigate(routeNames.account as never);
-    }
-  };
-
-  const RootScrollView = reordering ? NestableScrollContainer : ScrollView;
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right"]}>
@@ -127,7 +125,7 @@ const PageContainer = ({
 
       <RootScrollView
         scrollEventThrottle={16}
-        onScroll={(e) => {
+        onScroll={(e: NativeSyntheticEvent<NativeScrollEvent>) => {
           handleScrollBlur(e, blurActive, setBlurActiveLocal);
         }}
         contentContainerStyle={styles.scrollContainer}

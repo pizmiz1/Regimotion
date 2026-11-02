@@ -1,5 +1,5 @@
 import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGlobalContext } from "../store/GlobalContext";
 import { deleteAlert, errorAlert } from "../helpers/alert";
 import * as SecureStore from "expo-secure-store";
@@ -131,11 +131,13 @@ const AccountScreen = () => {
     setSwitchesDisabled(false);
   };
 
-  Animated.timing(loadingOpacity, {
-    toValue: loading ? 0.6 : 1,
-    duration: 200,
-    useNativeDriver: true,
-  }).start();
+  useEffect(() => {
+    Animated.timing(loadingOpacity, {
+      toValue: loading ? 0.6 : 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [loading]);
 
   return (
     <PageContainer

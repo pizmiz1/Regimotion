@@ -21,23 +21,23 @@ const ReorderExercise = ({ item, drag, isActive, saving }: ReorderExerciseProps)
         <View style={styles.infoContainer}>
           <View style={styles.textContainer}>
             <Text style={styles.nameText} numberOfLines={1}>
-              {item?.altActive ? item.altName : item?.name}
+              {item.name}
             </Text>
             <View style={styles.descriptionsContainer}>
               <Text style={styles.descriptionText} numberOfLines={1}>
-                {item?.altActive ? item.altText1 : item?.text1}
+                {item.text1}
               </Text>
               <View style={[styles.descriptionDivider, { opacity: item?.text2 ? 1 : 0 }]} />
               {item?.text2 && (
                 <Text style={styles.descriptionText} numberOfLines={1}>
-                  {item.altActive ? item.altText2 : item.text2}
+                  {item.text2}
                 </Text>
               )}
             </View>
           </View>
 
-          <View style={[styles.altContainer, { opacity: item?.altActive === true ? 1 : 0 }]}>
-            <Text style={styles.altText}>Alt</Text>
+          <View style={[styles.linkContainer, { opacity: true ? 1 : 0 }]}>
+            <Text style={styles.linkText}>Link</Text>
           </View>
         </View>
       </TouchableOpacity>
@@ -88,14 +88,14 @@ const styles = StyleSheet.create({
     height: 20,
     marginHorizontal: 20,
   },
-  altContainer: {
+  linkContainer: {
     borderWidth: 1,
     borderColor: colors.primary,
     borderRadius: 20,
     marginTop: 5,
     backgroundColor: colors.primary,
   },
-  altText: {
+  linkText: {
     color: "white",
     paddingHorizontal: 10,
     paddingVertical: 2,

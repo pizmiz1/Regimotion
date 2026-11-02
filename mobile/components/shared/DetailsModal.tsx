@@ -93,33 +93,6 @@ const DetailsModal = ({ visible, setVisible, module }: DetailsModalProps) => {
     "api",
   ];
 
-  useEffect(() => {
-    if (!module || !visible) {
-      return;
-    }
-
-    setName(module.name);
-    setIcon(module.icon);
-    setDays(module.days);
-    colorPress(module.color);
-
-    const index = availableIcons.indexOf(module.icon);
-    let offset;
-    if (index < 8) {
-      offset = 0;
-    } else if (index < 12) {
-      offset = 105;
-    } else if (index < 16) {
-      offset = 190;
-    } else if (index < 20) {
-      offset = 275;
-    } else {
-      offset = 300;
-    }
-
-    flatListRef.current?.scrollToOffset({ offset: offset, animated: false });
-  }, [visible]);
-
   const mapDayToLabel = (dayKey: string) => {
     const dayKeys = Object.keys(days);
 
@@ -254,6 +227,33 @@ const DetailsModal = ({ visible, setVisible, module }: DetailsModalProps) => {
     setColor(color);
   };
 
+  useEffect(() => {
+    if (!module || !visible) {
+      return;
+    }
+
+    setName(module.name);
+    setIcon(module.icon);
+    setDays(module.days);
+    colorPress(module.color);
+
+    const index = availableIcons.indexOf(module.icon);
+    let offset;
+    if (index < 8) {
+      offset = 0;
+    } else if (index < 12) {
+      offset = 105;
+    } else if (index < 16) {
+      offset = 190;
+    } else if (index < 20) {
+      offset = 275;
+    } else {
+      offset = 300;
+    }
+
+    flatListRef.current?.scrollToOffset({ offset: offset, animated: false });
+  }, [visible]);
+
   const ColorInput = ({
     backgroundColor,
     opacityAnim,
@@ -328,13 +328,12 @@ const DetailsModal = ({ visible, setVisible, module }: DetailsModalProps) => {
 
           <Input
             label="Name"
-            onChangeText={setName}
+            value={name}
+            setValue={setName}
             style={styles.nameInput}
-            reset={resetInput}
             baseBorderColor={colors.light_secondary}
             limit={15}
             disabled={saving}
-            startVal={module ? module.name : ""}
           />
 
           <Text style={styles.label}>Color</Text>

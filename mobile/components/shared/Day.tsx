@@ -17,6 +17,16 @@ const Day = ({ label, size, baseColor, onPress, reset, disabled, startActive }: 
 
   const animVal = useRef(new Animated.Value(0)).current;
 
+  const animatedBackgroundCol = animVal.interpolate({
+    inputRange: [0, 1],
+    outputRange: [baseColor, colors.primary],
+  });
+
+  const onLocalPress = () => {
+    setActive(!active);
+    onPress();
+  };
+
   useEffect(() => {
     Animated.timing(animVal, {
       toValue: active ? 1 : 0,
@@ -36,16 +46,6 @@ const Day = ({ label, size, baseColor, onPress, reset, disabled, startActive }: 
 
     setActive(true);
   }, [startActive]);
-
-  const animatedBackgroundCol = animVal.interpolate({
-    inputRange: [0, 1],
-    outputRange: [baseColor, colors.primary],
-  });
-
-  const onLocalPress = () => {
-    setActive(!active);
-    onPress();
-  };
 
   return (
     <Pressable onPress={onLocalPress} disabled={disabled} style={{ opacity: disabled ? 0.4 : 1 }}>

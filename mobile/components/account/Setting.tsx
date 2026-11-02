@@ -10,7 +10,7 @@ interface SettingsProps {
   description?: string;
   iconFillColor?: string;
   switchValue?: boolean;
-  switchValueChange?: ((value: boolean) => void | Promise<void>) | null | undefined;
+  switchValueChange?: ((value: boolean) => void | Promise<void>) | undefined;
   switchDisabled?: boolean;
   onPress?: () => void;
   touchableDisabled?: boolean;

@@ -140,6 +140,8 @@ const SignupScreen = () => {
       });
 
       if (credential.identityToken) {
+        setLoading(true);
+
         const body: OtherAuthDto = {
           identityToken: credential.identityToken,
         };
@@ -153,7 +155,7 @@ const SignupScreen = () => {
 
         if (response.data === undefined || response.data.email === undefined || response.data.passkey === undefined) {
           errorAlert("Bad Response");
-          resetState();
+          setLoading(false);
           return;
         }
 
@@ -174,6 +176,8 @@ const SignupScreen = () => {
       const idToken = await googleSignInHelper();
 
       if (idToken !== undefined) {
+        setLoading(true);
+
         const body: OtherAuthDto = {
           identityToken: idToken,
         };
@@ -187,19 +191,14 @@ const SignupScreen = () => {
 
         if (response.data === undefined || response.data.email === undefined || response.data.passkey === undefined) {
           errorAlert("Bad Response");
-          resetState();
+          setLoading(false);
           return;
         }
 
         await successfulIdentityFlow(response.data.email, response.data.passkey);
       }
     } catch (error: any) {
-      const errorMessage = error?.message || "Unknown error";
-      const errorCode = error?.code || "No code";
-
-      errorAlert(`Google Sign-In Failed (${errorCode}): ${errorMessage}`);
-      // TODO - Commented out for testing
-      //errorAlert("Unable to Sign In With Google");
+      errorAlert("Unable to Sign In With Google");
     }
   };
 
@@ -221,7 +220,7 @@ const SignupScreen = () => {
   };
 
   useEffect(() => {
-    Animated.loop(
+    const loop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
           toValue: 0.8,
@@ -234,7 +233,11 @@ const SignupScreen = () => {
           useNativeDriver: true,
         }),
       ]),
-    ).start();
+    );
+
+    loop.start();
+
+    return () => loop.stop();
   }, [pulseAnim]);
 
   useEffect(() => {
@@ -324,11 +327,11 @@ const SignupScreen = () => {
           ) : (
             <View style={styles.emailContainer}>
               <Input
-                onChangeText={(text) => {
+                value={email}
+                setValue={(text) => {
                   setEmailValid(true);
                   setEmail(text);
                 }}
-                reset={resetEmailInput}
                 baseBorderColor={colors.light_secondary}
                 keyboardType="email-address"
                 disabled={loading}
@@ -357,10 +360,8 @@ const SignupScreen = () => {
             onPress={submit}
             style={[styles.btnBase, styles.submitBtn]}
             disabled={
-              authState === "Base" ||
-              (authState === "HiddenEmail" && email.length === 0) ||
-              authState === "VerifyingOtp" ||
-              (authState === "HiddenVerifyingOtp" && otp.length !== 6) ||
+              ((authState === "Base" || authState === "HiddenEmail") && email.length === 0) ||
+              ((authState === "VerifyingOtp" || authState === "HiddenVerifyingOtp") && otp.length !== 6) ||
               loading
             }
           />
@@ -416,14 +417,13 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "bold",
     color: "white",
-    marginTop: 0,
+    marginTop: -10,
     fontFamily: "Main-Font",
     fontStyle: "italic",
     width: "100%",
     textAlign: "center",
   },
   headerSubText: {
-    marginTop: "3%",
     color: colors.lighter_grey,
     textAlign: "center",
     fontSize: 16,

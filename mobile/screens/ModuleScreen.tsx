@@ -57,6 +57,7 @@ const ModuleScreen = () => {
           onPress={() => {
             setModalVisible(true);
           }}
+          style={{ opacity: blurActive ? 0 : 1 }}
         />
       </View>
 

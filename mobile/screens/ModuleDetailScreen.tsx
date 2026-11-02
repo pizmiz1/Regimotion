@@ -1,12 +1,11 @@
 import { ActivityIndicator, Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import colors from "../constants/colors";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useGlobalContext } from "../store/GlobalContext";
 import LottieView from "lottie-react-native";
 import { opacityLayout, scaleYLayout } from "../helpers/layouts";
-import { NestableDraggableFlatList } from "react-native-draggable-flatlist";
-import { ScrollView } from "react-native-gesture-handler";
+import { NestableDraggableFlatList, NestableScrollContainer } from "react-native-draggable-flatlist";
 
 // Custom Components
 import { MaterialIconButton } from "../components/shared/IconButton";
@@ -44,7 +43,7 @@ const ModuleDetailScreen = () => {
   const [saving, setSaving] = useState(false);
 
   const activeIndex = useRef(0);
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<any>(null);
   const lottieAnimRef = useRef<LottieView>(null);
   const firstRender = useRef(true);
   const moveAnim = useRef(new Animated.Value(0)).current;
@@ -71,6 +70,11 @@ const ModuleDetailScreen = () => {
   });
 
   const navigation = useNavigation();
+
+  // Have to do this because of a known react-native-draggable-list bug
+  const listOrderKey = useMemo(() => {
+    return reorderExercises.map((item) => item.id).join("|");
+  }, [reorderExercises]);
 
   const setMarkerStates = () => {
     const index = module.exercises.findIndex((item) => !item.completed);
@@ -100,71 +104,6 @@ const ModuleDetailScreen = () => {
       ]).start();
     }
   };
-
-  useEffect(() => {
-    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
-
-    switch (today) {
-      case "Monday":
-        setExerciseActive(module.days.mon);
-        break;
-      case "Tuesday":
-        setExerciseActive(module.days.tues);
-        break;
-      case "Wednesday":
-        setExerciseActive(module.days.wed);
-        break;
-      case "Thursday":
-        setExerciseActive(module.days.thur);
-        break;
-      case "Friday":
-        setExerciseActive(module.days.fri);
-        break;
-      case "Saturday":
-        setExerciseActive(module.days.sat);
-        break;
-      case "Sunday":
-        setExerciseActive(module.days.sun);
-        break;
-      default:
-        break;
-    }
-
-    setReorderExercises(module.exercises);
-    setMarkerStates();
-  }, [module.exercises.length, module]);
-
-  useEffect(() => {
-    setMarkerStates();
-  }, [exerciseActive]);
-
-  useEffect(() => {
-    Animated.timing(headerOpacity, {
-      toValue: blurActive ? 0 : 1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-  }, [blurActive]);
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(reorderHideOpacity, {
-        toValue: reordering ? 0 : 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(restartCancelButtonOpacity, {
-        toValue: reordering || (!adding && !(module.progress === 0) && exerciseActive) ? 1 : 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(finishSaveButtonOpacity, {
-        toValue: reordering || (!adding && !(module.progress === 100) && !(module.exercises.length === 0) && exerciseActive) ? 1 : 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [reordering, adding, module, exerciseActive]);
 
   const animateAll = (disable: boolean, refresh: boolean, finish: boolean) => {
     const animations: Animated.CompositeAnimation[] = [
@@ -357,6 +296,71 @@ const ModuleDetailScreen = () => {
     setSaving(false);
   };
 
+  useEffect(() => {
+    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+
+    switch (today) {
+      case "Monday":
+        setExerciseActive(module.days.mon);
+        break;
+      case "Tuesday":
+        setExerciseActive(module.days.tues);
+        break;
+      case "Wednesday":
+        setExerciseActive(module.days.wed);
+        break;
+      case "Thursday":
+        setExerciseActive(module.days.thur);
+        break;
+      case "Friday":
+        setExerciseActive(module.days.fri);
+        break;
+      case "Saturday":
+        setExerciseActive(module.days.sat);
+        break;
+      case "Sunday":
+        setExerciseActive(module.days.sun);
+        break;
+      default:
+        break;
+    }
+
+    setReorderExercises(module.exercises);
+    setMarkerStates();
+  }, [module.exercises.length, module]);
+
+  useEffect(() => {
+    setMarkerStates();
+  }, [exerciseActive]);
+
+  useEffect(() => {
+    Animated.timing(headerOpacity, {
+      toValue: blurActive ? 0 : 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [blurActive]);
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(reorderHideOpacity, {
+        toValue: reordering ? 0 : 1,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(restartCancelButtonOpacity, {
+        toValue: reordering || (!adding && !(module.progress === 0) && exerciseActive) ? 1 : 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(finishSaveButtonOpacity, {
+        toValue: reordering || (!adding && !(module.progress === 100) && !(module.exercises.length === 0) && exerciseActive) ? 1 : 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [reordering, adding, module, exerciseActive]);
+
   return (
     <PageContainer
       header={module.name}
@@ -473,8 +477,13 @@ const ModuleDetailScreen = () => {
       <View style={styles.exerciseContainer}>
         {reordering ? (
           <NestableDraggableFlatList
+            key={listOrderKey}
             data={reorderExercises}
-            onDragEnd={({ data }) => setReorderExercises(data)}
+            onDragEnd={({ data }) => {
+              requestAnimationFrame(() => {
+                setReorderExercises(data);
+              });
+            }}
             keyExtractor={(item) => item.id!}
             renderItem={(props) => <ReorderExercise item={props.item} drag={props.drag} isActive={props.isActive} saving={saving} />}
             style={styles.reorder}

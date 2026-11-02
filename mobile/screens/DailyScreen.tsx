@@ -69,17 +69,21 @@ const DailyScreen = () => {
     }
   };
 
-  useEffect(() => {
-    load();
-  }, []);
-
   const dayMapping = ["sun", "mon", "tues", "wed", "thur", "fri", "sat"] as const;
   const currentDayKey = dayMapping[date.getDay()];
   const todaysModules = modules.filter((curr) => curr.days[currentDayKey]);
   const anyModulesToday = todaysModules.length > 0;
 
-  if (anyModulesToday) {
-    Animated.loop(
+  useEffect(() => {
+    load();
+  }, []);
+
+  useEffect(() => {
+    if (anyModulesToday) {
+      return;
+    }
+
+    const pulse = Animated.loop(
       Animated.sequence([
         Animated.timing(iconOpacity, {
           toValue: 1,
@@ -92,14 +96,19 @@ const DailyScreen = () => {
           useNativeDriver: true,
         }),
       ]),
-    ).start();
-  }
+    );
+    pulse.start();
 
-  Animated.timing(headerOpacity, {
-    toValue: blurActive ? 0 : 1,
-    duration: 200,
-    useNativeDriver: true,
-  }).start();
+    return () => pulse.stop();
+  }, [anyModulesToday]);
+
+  useEffect(() => {
+    Animated.timing(headerOpacity, {
+      toValue: blurActive ? 0 : 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+  }, [blurActive]);
 
   if (loading)
     return (

@@ -2,7 +2,7 @@ import { ActivityIndicator, StyleSheet, TextInput, View } from "react-native";
 import colors from "../../constants/colors";
 import { useGlobalContext } from "../../store/GlobalContext";
 import { ExerciseDto } from "../../../shared/moduledto";
-import { useRef, useState } from "react";
+import { ComponentRef, useRef, useState } from "react";
 
 // Custom Components
 import Button from "../shared/Button";
@@ -21,7 +21,7 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
   const [text2, setText2] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const text1Ref = useRef<TextInput>(null);
+  const text1Ref = useRef<ComponentRef<typeof TextInput>>(null);
 
   const savePress = async () => {
     setSaving(true);
