@@ -360,6 +360,7 @@ const styles = StyleSheet.create({
   nameText: {
     color: "white",
     fontWeight: "bold",
+    width: "95%",
     fontSize: 20,
   },
   descriptionsContainer: {
@@ -368,7 +369,7 @@ const styles = StyleSheet.create({
   },
   text1Text: {
     color: colors.lightest_grey,
-    width: "40%",
+    width: "35%",
   },
   descriptionDivider: {
     width: StyleSheet.hairlineWidth,

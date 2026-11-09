@@ -1,17 +1,17 @@
 import { Animated, StyleSheet, View } from "react-native";
-import colors from "../constants/colors";
+import colors from "../../constants/colors";
 import { useEffect, useRef, useState } from "react";
-import { useGlobalContext } from "../store/GlobalContext";
-import { useNavigation } from "@react-navigation/native";
-import routeNames from "../constants/routeNames";
+import { useGlobalContext } from "../../store/GlobalContext";
+import routeNames from "../../constants/routeNames";
+import { MaterialIconButton } from "../../components/shared/IconButton";
+import { useRouter } from "expo-router";
 
 // Custom Components
-import Module from "../components/shared/Module";
-import DetailsModal from "../components/shared/DetailsModal";
-import PageContainer from "../components/shared/PageContainer";
-import { MaterialIconButton } from "../components/shared/IconButton";
+import Module from "../../components/shared/Module";
+import DetailsModal from "../../components/shared/DetailsModal";
+import PageContainer from "../../components/shared/PageContainer";
 
-const ModuleScreen = () => {
+const Modules = () => {
   const { modules } = useGlobalContext();
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -19,7 +19,7 @@ const ModuleScreen = () => {
 
   const headerOpacity = useRef(new Animated.Value(0)).current;
 
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const inactiveModules = modules.filter((curr) => {
     return Object.values(curr.days).every((val) => val === false);
@@ -42,7 +42,7 @@ const ModuleScreen = () => {
         visible={modalVisible}
         setVisible={(deleted: boolean) => {
           if (deleted) {
-            navigation.goBack();
+            router.back();
           }
           setModalVisible(false);
         }}
@@ -67,8 +67,10 @@ const ModuleScreen = () => {
             key={module.id}
             module={module}
             onPress={() => {
-              // @ts-ignore
-              navigation.navigate(routeNames.moduleDetail, { moduleId: module.id });
+              router.push({
+                pathname: "/" + routeNames.moduleDetail,
+                params: { moduleId: module.id },
+              });
             }}
             dailyMod={false}
           />
@@ -78,8 +80,10 @@ const ModuleScreen = () => {
             key={module.id}
             module={module}
             onPress={() => {
-              // @ts-ignore
-              navigation.navigate(routeNames.moduleDetail, { moduleId: module.id });
+              router.push({
+                pathname: "/" + routeNames.moduleDetail,
+                params: { moduleId: module.id },
+              });
             }}
             dailyMod={false}
           />
@@ -89,7 +93,7 @@ const ModuleScreen = () => {
   );
 };
 
-export default ModuleScreen;
+export default Modules;
 
 const styles = StyleSheet.create({
   headerContainer: {

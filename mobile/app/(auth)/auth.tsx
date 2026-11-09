@@ -1,26 +1,28 @@
 import { Animated, Image, Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from "react-native";
-import colors from "../constants/colors";
+import colors from "../../constants/colors";
 import { useEffect, useRef, useState } from "react";
-import { OtpDto } from "../../shared/otpdto";
-import { UserDto } from "../../shared/userdto";
-import { post } from "../helpers/fetch";
-import { errorAlert } from "../helpers/alert";
+import { OtpDto } from "../../../shared/otpdto";
+import { UserDto } from "../../../shared/userdto";
+import { post } from "../../helpers/fetch";
+import { errorAlert } from "../../helpers/alert";
 import * as SecureStore from "expo-secure-store";
-import storageKeys from "../constants/storageKeys";
-import { JsonDto } from "../../shared/jsondto";
-import { AccessDto } from "../../shared/accessdto";
-import { useGlobalContext } from "../store/GlobalContext";
+import storageKeys from "../../constants/storageKeys";
+import { JsonDto } from "../../../shared/jsondto";
+import { AccessDto } from "../../../shared/accessdto";
+import { useGlobalContext } from "../../store/GlobalContext";
 import { OTPInput, OTPInputRef } from "input-otp-native";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 import { FontAwesome5 } from "@expo/vector-icons";
 import * as AppleAuthentication from "expo-apple-authentication";
-import { OtherAuthDto } from "../../shared/otherauthdto";
+import { OtherAuthDto } from "../../../shared/otherauthdto";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { googleSignInHelper } from "../../helpers/googleAuth";
+import { useRouter } from "expo-router";
 
 // Custom Components
-import Button from "../components/shared/Button";
-import Input from "../components/shared/Input";
-import { googleSignInHelper } from "../helpers/googleAuth";
+import Button from "../../components/shared/Button";
+import Input from "../../components/shared/Input";
+import routeNames from "../../constants/routeNames";
 
 type Auth_State = "Base" | "VerifyingOtp" | "HiddenEmail" | "HiddenVerifyingOtp";
 
@@ -38,7 +40,7 @@ const headerSubText: Record<Auth_State, string> = {
   HiddenVerifyingOtp: "Enter your code.",
 };
 
-const SignupScreen = () => {
+const Auth = () => {
   const { updateAccessToken } = useGlobalContext();
 
   const [authState, setAuthState] = useState<Auth_State>("Base");
@@ -52,6 +54,8 @@ const SignupScreen = () => {
   const pulseAnim = useRef(new Animated.Value(0.5)).current;
   const errorHeight = useRef(new Animated.Value(0)).current;
   const contentOpacity = useRef(new Animated.Value(1)).current;
+
+  const router = useRouter();
 
   const resetState = () => {
     setEmail("");
@@ -82,7 +86,8 @@ const SignupScreen = () => {
     await SecureStore.setItemAsync(storageKeys.email, email);
     await SecureStore.setItemAsync(storageKeys.passkey, accessResponse.data.passkey);
     await SecureStore.setItemAsync(storageKeys.token, accessResponse.data.accessToken);
-    updateAccessToken(accessResponse.data?.accessToken!);
+    updateAccessToken(accessResponse.data.accessToken!);
+    router.replace("/" + routeNames.daily);
   };
 
   const submit = async (fullOtpValue?: string) => {
@@ -271,7 +276,7 @@ const SignupScreen = () => {
               <Rect x="0" y="0" width="200" height="200" fill="url(#tightGlow)" />
             </Svg>
           </Animated.View>
-          <Image style={styles.img} source={require("./../assets/logo-clear.png")} />
+          <Image style={styles.img} source={require("./../../assets/logo-clear.png")} />
         </View>
 
         <Animated.View
@@ -377,7 +382,7 @@ const SignupScreen = () => {
 
               <View style={styles.otherOptContainer}>
                 <TouchableOpacity style={[styles.otherOpt, { opacity: loading ? 0.4 : 1 }]} onPress={googleSignIn} disabled={loading}>
-                  <Image style={{ height: 32, aspectRatio: 1 }} source={require("./../assets/google.png")} />
+                  <Image style={{ height: 32, aspectRatio: 1 }} source={require("./../../assets/google.png")} />
                   <Text style={styles.otherOptText}>Google</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.otherOpt, { opacity: loading ? 0.4 : 1 }]} onPress={appleSignIn} disabled={loading}>
@@ -393,7 +398,7 @@ const SignupScreen = () => {
   );
 };
 
-export default SignupScreen;
+export default Auth;
 
 const styles = StyleSheet.create({
   container: {

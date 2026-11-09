@@ -1,22 +1,24 @@
 import { Animated, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useEffect, useRef, useState } from "react";
-import { useGlobalContext } from "../store/GlobalContext";
-import { deleteAlert, errorAlert } from "../helpers/alert";
+import { useGlobalContext } from "../../store/GlobalContext";
+import { deleteAlert, errorAlert } from "../../helpers/alert";
 import * as SecureStore from "expo-secure-store";
-import storageKeys from "../constants/storageKeys";
-import { AccessDto } from "../../shared/accessdto";
-import { JsonDto } from "../../shared/jsondto";
-import { post } from "../helpers/fetch";
-import colors from "../constants/colors";
-import { opacityLayout } from "../helpers/layouts";
-import { animalColors, animals } from "../constants/animals";
+import storageKeys from "../../constants/storageKeys";
+import { AccessDto } from "../../../shared/accessdto";
+import { JsonDto } from "../../../shared/jsondto";
+import { post } from "../../helpers/fetch";
+import colors from "../../constants/colors";
+import { opacityLayout } from "../../helpers/layouts";
+import { animalColors, animals } from "../../constants/animals";
 import { generateSlug } from "random-word-slugs";
 
 // Custom Components
-import Setting from "../components/account/Setting";
-import PageContainer from "../components/shared/PageContainer";
+import Setting from "../../components/account/Setting";
+import PageContainer from "../../components/shared/PageContainer";
+import { useRouter } from "expo-router";
+import routeNames from "../../constants/routeNames";
 
-const AccountScreen = () => {
+const Account = () => {
   const { userSettings, patchUserSettings, accessToken, updateAccessToken, updateModules } = useGlobalContext();
 
   const [blurActive, setBlurActive] = useState(false);
@@ -30,6 +32,8 @@ const AccountScreen = () => {
   const [localAnimalColor, setLocalAnimalColor] = useState(userSettings.userColor);
 
   const loadingOpacity = useRef(new Animated.Value(0)).current;
+
+  const router = useRouter();
 
   const animalPress = async () => {
     const animalNames = Object.keys(animals) as Array<keyof typeof animals>;
@@ -97,6 +101,7 @@ const AccountScreen = () => {
     await SecureStore.deleteItemAsync(storageKeys.token);
     updateAccessToken("");
     updateModules([]);
+    router.replace("/" + routeNames.auth);
   };
 
   const toggleEnableCompletionAnimation = async () => {
@@ -224,7 +229,7 @@ const AccountScreen = () => {
   );
 };
 
-export default AccountScreen;
+export default Account;
 
 const styles = StyleSheet.create({
   container: {

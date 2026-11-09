@@ -3,15 +3,14 @@ import { ActivityIndicator, Animated, FlatList, Modal, Pressable, StyleSheet, Te
 import { useGlobalContext } from "../../store/GlobalContext";
 import colors from "../../constants/colors";
 import { MaterialIcons } from "@expo/vector-icons";
-import { GlobalContextType } from "../../types/globalContextType";
 import { DaysDto } from "../../../shared/moduledto";
 import { ModuleDto } from "../../../shared/moduledto";
 import { deleteFetch, post } from "../../helpers/fetch";
 import { deleteAlert, errorAlert } from "../../helpers/alert";
 import { JsonDto } from "../../../shared/jsondto";
 import { MaterialIconButton } from "./IconButton";
-import { useNavigation } from "@react-navigation/native";
 import routeNames from "../../constants/routeNames";
+import { useRouter } from "expo-router";
 
 // Custom Components
 import Input from "./Input";
@@ -35,7 +34,7 @@ interface DetailsModalProps {
 }
 
 const DetailsModal = ({ visible, setVisible, module }: DetailsModalProps) => {
-  const { modules, updateModules, accessToken, updateAccessToken, patchModule }: GlobalContextType = useGlobalContext();
+  const { updateModules, accessToken, updateAccessToken, patchModule } = useGlobalContext();
 
   const [days, setDays] = useState(initialDays);
   const [resetInput, setResetInput] = useState(false);
@@ -47,7 +46,7 @@ const DetailsModal = ({ visible, setVisible, module }: DetailsModalProps) => {
 
   const { height: screenHeight } = useWindowDimensions();
 
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const flatListRef = useRef<FlatList<string>>(null);
   const opacityAnim1 = useRef(new Animated.Value(0.4)).current;
@@ -153,7 +152,6 @@ const DetailsModal = ({ visible, setVisible, module }: DetailsModalProps) => {
       exercises: module ? module.exercises : [],
     };
 
-    let newModules: ModuleDto[] = [];
     if (module) {
       moduleDto.id = module.id;
 
@@ -166,11 +164,20 @@ const DetailsModal = ({ visible, setVisible, module }: DetailsModalProps) => {
         return;
       }
 
-      newModules = [...modules, response.data!];
+      const responseData = response.data;
 
-      updateModules(newModules);
-      // @ts-ignore
-      navigation.navigate(routeNames.moduleDetail, { moduleId: response.data.id });
+      if (responseData === undefined) {
+        errorAlert("Bad Response");
+        setSaving(false);
+        return;
+      }
+
+      updateModules((prev) => [...prev, responseData]);
+
+      router.push({
+        pathname: "/" + routeNames.moduleDetail,
+        params: { moduleId: responseData.id },
+      });
     }
 
     closeModal(false);
@@ -184,8 +191,7 @@ const DetailsModal = ({ visible, setVisible, module }: DetailsModalProps) => {
       if (response.error) {
         errorAlert(response.error);
       } else {
-        const newModules = modules.filter((curr) => curr.id !== module!.id);
-        updateModules(newModules);
+        updateModules((prev) => prev.filter((curr) => curr.id !== module!.id));
       }
 
       closeModal(true);

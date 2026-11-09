@@ -3,11 +3,15 @@ import { JsonDto } from "../../shared/jsondto";
 import * as SecureStore from "expo-secure-store";
 import storageKeys from "../constants/storageKeys";
 import { AccessDto } from "../../shared/accessdto";
-import { AccessTokenType } from "../types/accessTokenType";
 import { ips } from "../constants/ips";
 
 const baseUrl = "https://twill.onrender.com";
 // const baseUrl = ips.Proxy;
+
+interface AccessTokenType {
+  accessToken: string;
+  updateAccessToken: (newVal: string) => void;
+}
 
 const silentAccess = async (
   accessToken: string,
@@ -29,14 +33,18 @@ const silentAccess = async (
       return false;
     }
 
-    if (!response.data?.accessToken) {
+    if (!response.data) {
       return;
     }
 
-    await SecureStore.setItemAsync(storageKeys.passkey, response.data!.passkey);
-    await SecureStore.setItemAsync(storageKeys.token, response.data!.accessToken);
-    updateAccessToken(response.data!.accessToken);
-    return response.data!.accessToken;
+    if (!response.data.accessToken) {
+      return;
+    }
+
+    await SecureStore.setItemAsync(storageKeys.passkey, response.data.passkey);
+    await SecureStore.setItemAsync(storageKeys.token, response.data.accessToken);
+    updateAccessToken(response.data.accessToken);
+    return response.data.accessToken;
   } else if (firstLoad) {
     updateAccessToken(accessToken);
   }

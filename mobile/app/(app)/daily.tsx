@@ -1,26 +1,26 @@
 import { ActivityIndicator, Animated, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import colors from "../constants/colors";
+import colors from "../../constants/colors";
 import { useEffect, useRef, useState } from "react";
-import { useGlobalContext } from "../store/GlobalContext";
-import { useNavigation } from "@react-navigation/native";
-import routeNames from "../constants/routeNames";
-import { ModuleDto } from "../../shared/moduledto";
-import { opacityLayout } from "../helpers/layouts";
-import { JsonDto } from "../../shared/jsondto";
-import { get } from "../helpers/fetch";
-import { errorAlert } from "../helpers/alert";
-import { UserSettingsDto } from "../../shared/usersettingsdto";
+import { useGlobalContext } from "../../store/GlobalContext";
+import routeNames from "../../constants/routeNames";
+import { ModuleDto } from "../../../shared/moduledto";
+import { opacityLayout } from "../../helpers/layouts";
+import { JsonDto } from "../../../shared/jsondto";
+import { get } from "../../helpers/fetch";
+import { errorAlert } from "../../helpers/alert";
+import { UserSettingsDto } from "../../../shared/usersettingsdto";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 // Custom Components
-import { MaterialIconButton } from "../components/shared/IconButton";
-import PageContainer from "../components/shared/PageContainer";
-import DetailsModal from "../components/shared/DetailsModal";
-import NoModules from "../components/daily/NoModules";
-import Module from "../components/shared/Module";
+import { MaterialIconButton } from "../../components/shared/IconButton";
+import PageContainer from "../../components/shared/PageContainer";
+import DetailsModal from "../../components/shared/DetailsModal";
+import NoModules from "../../components/daily/NoModules";
+import Module from "../../components/shared/Module";
+import { useRouter } from "expo-router";
 
-const DailyScreen = () => {
+const Daily = () => {
   const { modules, accessToken, updateAccessToken, updateModules, updateUserSettings } = useGlobalContext();
 
   const [blurActive, setBlurActive] = useState(false);
@@ -31,9 +31,9 @@ const DailyScreen = () => {
   const headerOpacity = useRef(new Animated.Value(0)).current;
   const iconOpacity = useRef(new Animated.Value(0)).current;
 
-  const date = new Date();
+  const router = useRouter();
 
-  const navigation = useNavigation();
+  const date = new Date();
 
   const load = async () => {
     const responseModule: JsonDto<ModuleDto[]> = await get("/module", { accessToken: accessToken, updateAccessToken: updateAccessToken });
@@ -149,7 +149,7 @@ const DailyScreen = () => {
               size={34}
               style={[styles.headerBtn, { opacity: blurActive ? 0 : 1 }]}
               onPress={() => {
-                navigation.navigate(routeNames.module);
+                router.push({ pathname: "/" + routeNames.modules });
               }}
             />
           </View>
@@ -160,8 +160,10 @@ const DailyScreen = () => {
                   key={module.id}
                   module={module}
                   onPress={() => {
-                    // @ts-ignore
-                    navigation.navigate(routeNames.moduleDetail, { moduleId: module.id });
+                    router.push({
+                      pathname: "/" + routeNames.moduleDetail,
+                      params: { moduleId: module.id },
+                    });
                   }}
                   progress={module.progress}
                   dailyMod={true}
@@ -190,7 +192,7 @@ const DailyScreen = () => {
   );
 };
 
-export default DailyScreen;
+export default Daily;
 
 const styles = StyleSheet.create({
   loadingContainer: {

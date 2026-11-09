@@ -82,7 +82,20 @@ const Text2Modal = ({ visible, setVisible, moduleId, exerciseId, onText2EditSave
                 style={[styles.headerBtn, { opacity: 0 }]}
                 disabled={true}
               />
-              <Text style={{ color: "white", fontFamily: "Main-Font", fontWeight: "bold", fontSize: 20 }}>{exercise.name}</Text>
+              <Text
+                style={{
+                  color: "white",
+                  fontFamily: "Main-Font",
+                  fontWeight: "bold",
+                  fontSize: 20,
+                  width: "75%",
+                  textAlign: "center",
+                }}
+                ellipsizeMode="tail"
+                numberOfLines={1}
+              >
+                {exercise.name}
+              </Text>
               <MaterialIconButton
                 name="close"
                 color={colors.light_grey}

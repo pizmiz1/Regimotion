@@ -1,8 +1,9 @@
 {
   "expo": {
     "name": "Regimotion",
+    "scheme": "regimotion",
     "slug": "Regimotion",
-    "version": "10.0",
+    "version": "11.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
@@ -26,7 +27,8 @@
         }
       ],
       "expo-asset",
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-router"
     ],
     "extra": {
       "eas": {

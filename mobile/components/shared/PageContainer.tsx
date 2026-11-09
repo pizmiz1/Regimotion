@@ -8,13 +8,13 @@ import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import MaskedViewComponent from "@react-native-masked-view/masked-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
 import { NestableScrollContainer } from "react-native-draggable-flatlist";
 import { ScrollView, RefreshControl } from "react-native-gesture-handler";
 import routeNames from "../../constants/routeNames";
 
 // Custom Components
 import { MaterialIconButton } from "./IconButton";
+import { useRouter } from "expo-router";
 
 interface PageContainerProps {
   children: React.ReactNode;
@@ -56,7 +56,7 @@ const PageContainer = ({
 
   const insets = useSafeAreaInsets();
 
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const HEADER_HEIGHT = 65 + insets.top;
 
@@ -76,9 +76,9 @@ const PageContainer = ({
 
   const headerButtonPress = () => {
     if (backButton) {
-      navigation.goBack();
+      router.back();
     } else if (userButton) {
-      navigation.navigate(routeNames.account as never);
+      router.push({ pathname: "/" + routeNames.account });
     }
   };
 

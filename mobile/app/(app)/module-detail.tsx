@@ -1,24 +1,22 @@
 import { ActivityIndicator, Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import colors from "../constants/colors";
+import colors from "../../constants/colors";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import { useGlobalContext } from "../store/GlobalContext";
+import { useGlobalContext } from "../../store/GlobalContext";
 import LottieView from "lottie-react-native";
-import { opacityLayout, scaleYLayout } from "../helpers/layouts";
-import { NestableDraggableFlatList, NestableScrollContainer } from "react-native-draggable-flatlist";
+import { opacityLayout, scaleYLayout } from "../../helpers/layouts";
+import { NestableDraggableFlatList } from "react-native-draggable-flatlist";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 // Custom Components
-import { MaterialIconButton } from "../components/shared/IconButton";
-import PageContainer from "../components/shared/PageContainer";
-import DetailsModal from "../components/shared/DetailsModal";
-import Exercise from "../components/moduleDetail/Exercise";
-import AddExercise from "../components/moduleDetail/AddExercise";
-import ReorderExercise from "../components/moduleDetail/ReorderExercise";
+import { MaterialIconButton } from "../../components/shared/IconButton";
+import PageContainer from "../../components/shared/PageContainer";
+import DetailsModal from "../../components/shared/DetailsModal";
+import Exercise from "../../components/moduleDetail/Exercise";
+import AddExercise from "../../components/moduleDetail/AddExercise";
+import ReorderExercise from "../../components/moduleDetail/ReorderExercise";
 
-const ModuleDetailScreen = () => {
-  const route = useRoute();
-  // @ts-ignore
-  const { moduleId }: { moduleId: string } = route.params;
+const ModuleDetail = () => {
+  const { moduleId } = useLocalSearchParams();
 
   const { modules, patchModule, userSettings } = useGlobalContext();
   const module = modules.find((x) => x.id === moduleId)!;
@@ -69,7 +67,7 @@ const ModuleDetailScreen = () => {
     outputRange: ["rgba(255, 255, 255, .2)", colors.border_grey],
   });
 
-  const navigation = useNavigation();
+  const router = useRouter();
 
   // Have to do this because of a known react-native-draggable-list bug
   const listOrderKey = useMemo(() => {
@@ -376,7 +374,7 @@ const ModuleDetailScreen = () => {
         <Animated.View style={[styles.animationContainer, StyleSheet.absoluteFill, { opacity: lottieAnim }]}>
           <LottieView
             ref={lottieAnimRef}
-            source={require("./../assets/Success.lottie")}
+            source={require("./../../assets/Success.lottie")}
             style={styles.animation}
             loop={false}
             onAnimationFinish={() => {
@@ -397,7 +395,7 @@ const ModuleDetailScreen = () => {
         visible={modalVisible}
         setVisible={(deleted: boolean) => {
           if (deleted) {
-            navigation.goBack();
+            router.back();
           } else {
             setEditing(false);
           }
@@ -550,7 +548,7 @@ const ModuleDetailScreen = () => {
   );
 };
 
-export default ModuleDetailScreen;
+export default ModuleDetail;
 
 const styles = StyleSheet.create({
   animationContainer: {

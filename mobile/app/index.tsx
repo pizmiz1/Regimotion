@@ -7,13 +7,14 @@ import { useGlobalContext } from "../store/GlobalContext";
 import { get } from "../helpers/fetch";
 import * as SecureStore from "expo-secure-store";
 import storageKeys from "../constants/storageKeys";
-import routeNames from "../constants/routeNames";
 import { errorAlert } from "../helpers/alert";
 import { JsonDto } from "../../shared/jsondto";
 import { LinearGradient } from "expo-linear-gradient";
+import { Redirect } from "expo-router";
+import routeNames from "../constants/routeNames";
 
-const SplashScreen = () => {
-  const { updateAccessToken, updateAppLoading } = useGlobalContext();
+const Splash = () => {
+  const { appLoading, accessToken, updateAccessToken, updateAppLoading } = useGlobalContext();
 
   const [initialAnim, setInitialAnim] = useState(true);
   const [dots, setDots] = useState("");
@@ -66,32 +67,32 @@ const SplashScreen = () => {
   );
 
   useEffect(() => {
-    const handleTimerEnd = () => {
-      setInitialAnim(false);
-    };
+    let timer1: number;
+    let timer2: number | undefined;
 
-    const timerId = setTimeout(handleTimerEnd, 8000);
+    firstAnim.start();
+
+    timer1 = setTimeout(() => {
+      setInitialAnim(false);
+
+      firstAnim.stop();
+      secondAnim.start();
+
+      timer2 = setInterval(() => {
+        setDots((prev) => (prev.length < 3 ? prev + "." : ""));
+      }, 1080);
+    }, 8000);
 
     return () => {
-      clearTimeout(timerId);
+      clearInterval(timer1);
+      if (timer2) {
+        clearInterval(timer2);
+      }
+
+      firstAnim.stop();
+      secondAnim.stop();
     };
   }, []);
-
-  useEffect(() => {
-    if (initialAnim) {
-      firstAnim.start();
-      return;
-    }
-
-    firstAnim.stop();
-    secondAnim.start();
-
-    const interval = setInterval(() => {
-      setDots((prev) => (prev.length < 3 ? prev + "." : ""));
-    }, 1080);
-
-    return () => clearInterval(interval);
-  }, [initialAnim]);
 
   useEffect(() => {
     if (!loaded) {
@@ -123,6 +124,10 @@ const SplashScreen = () => {
     load();
   }, [loaded]);
 
+  if (!appLoading) {
+    return <Redirect href={accessToken ? "/" + routeNames.daily : "/" + routeNames.auth} />;
+  }
+
   return (
     <LinearGradient style={styles.container} colors={[colors.primary_full_gradient_top, colors.primary_full_gradient_bottom]}>
       <StatusBar style="light" />
@@ -135,7 +140,7 @@ const SplashScreen = () => {
   );
 };
 
-export default SplashScreen;
+export default Splash;
 
 const styles = StyleSheet.create({
   container: {

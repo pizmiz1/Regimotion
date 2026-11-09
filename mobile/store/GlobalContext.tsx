@@ -1,11 +1,23 @@
 import { createContext, useContext } from "react";
-import { GlobalContextType } from "../types/globalContextType";
 import { ReactNode, useState } from "react";
 import { ModuleDto } from "../../shared/moduledto";
 import { JsonDto } from "../../shared/jsondto";
 import { patch } from "../helpers/fetch";
 import { errorAlert } from "../helpers/alert";
 import { UserSettingsDto } from "../../shared/usersettingsdto";
+
+interface GlobalContextType {
+  appLoading: boolean;
+  accessToken: string;
+  modules: ModuleDto[];
+  userSettings: UserSettingsDto;
+  updateAppLoading: (newAppLoading: boolean) => void;
+  updateAccessToken: (newAccessToken: string) => void;
+  updateModules: (newModules: ModuleDto[] | ((prev: ModuleDto[]) => ModuleDto[])) => void;
+  patchModule: (updatedModule: ModuleDto) => Promise<boolean>;
+  updateUserSettings: (newUserSettings: UserSettingsDto) => void;
+  patchUserSettings: (updatedUserSettings: UserSettingsDto) => Promise<boolean>;
+}
 
 interface GlobalProviderProps {
   children: ReactNode;
@@ -33,8 +45,12 @@ export const GlobalProvider = ({ children }: GlobalProviderProps) => {
     setAccessToken(newAccesstoken);
   };
 
-  const updateModules = (newModules: ModuleDto[]) => {
-    setModules(newModules);
+  const updateModules = (newModules: ModuleDto[] | ((prev: ModuleDto[]) => ModuleDto[])) => {
+    if (typeof newModules === "function") {
+      setModules((prev) => newModules(prev));
+    } else {
+      setModules(newModules);
+    }
   };
 
   const updateUserSettings = (newUserSettings: UserSettingsDto) => {
@@ -48,12 +64,14 @@ export const GlobalProvider = ({ children }: GlobalProviderProps) => {
       return false;
     }
 
-    const newModules = [...modules];
-    const index = newModules.findIndex((curr) => curr.id === updatedModule.id);
-    if (index !== -1) {
-      newModules[index] = response.data!;
-      setModules(newModules);
+    const responseData = response.data;
+
+    if (responseData === undefined) {
+      errorAlert("Bad Response");
+      return false;
     }
+
+    setModules((prev) => prev.map((curr) => (curr.id === updatedModule.id ? responseData : curr)));
 
     return true;
   };
