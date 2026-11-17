@@ -229,7 +229,7 @@ const LinkModal = ({ visible, setVisible, onFinish, exerciseId }: LinkModalProps
 
           <View style={styles.btnContainer}>
             <Button label="Reset" onPress={resetState} disabled={(search === "" && selectedIds.length === 1) || saving} style={styles.btn} />
-            <Button label={saving ? "Saving..." : "Save"} onPress={save} disabled={saving} />
+            <Button label={saving ? "Saving..." : "Save"} onPress={save} disabled={selectedIds.length === 1 || saving} />
           </View>
         </View>
       </View>

@@ -5,6 +5,7 @@ import { JsonDto } from "../../shared/jsondto";
 import { patch } from "../helpers/fetch";
 import { errorAlert } from "../helpers/alert";
 import { UserSettingsDto } from "../../shared/usersettingsdto";
+import { LayoutAnimation } from "react-native";
 
 interface GlobalContextType {
   appLoading: boolean;
@@ -71,7 +72,7 @@ export const GlobalProvider = ({ children }: GlobalProviderProps) => {
       return false;
     }
 
-    setModules((prev) => prev.map((curr) => (curr.id === updatedModule.id ? responseData : curr)));
+    setModules((prev) => prev.map((curr) => (curr.id === responseData.id ? responseData : curr)));
 
     return true;
   };

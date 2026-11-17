@@ -3,9 +3,9 @@ import colors from "../../constants/colors";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useGlobalContext } from "../../store/GlobalContext";
 import LottieView from "lottie-react-native";
-import { opacityLayout, scaleYLayout } from "../../helpers/layouts";
 import { NestableDraggableFlatList } from "react-native-draggable-flatlist";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import Reanimated, { LinearTransition } from "react-native-reanimated";
 
 // Custom Components
 import { MaterialIconButton } from "../../components/shared/IconButton";
@@ -34,7 +34,6 @@ const ModuleDetail = () => {
   const [editing, setEditing] = useState(false);
   const [disableScroll, setDisableScroll] = useState(false);
   const [adding, setAdding] = useState(false);
-  const [deleteTrigger, setDeleteTrigger] = useState(false);
   const [exerciseActive, setExerciseActive] = useState(false);
   const [reordering, setReordering] = useState(false);
   const [reorderExercises, setReorderExercises] = useState(module.exercises);
@@ -472,7 +471,7 @@ const ModuleDetail = () => {
 
       <View style={styles.divider} />
 
-      <View style={styles.exerciseContainer}>
+      <View>
         {reordering ? (
           <NestableDraggableFlatList
             key={listOrderKey}
@@ -500,8 +499,6 @@ const ModuleDetail = () => {
               deleteCallback={(index: number) => {
                 circleOpacities.splice(index, 1);
                 viewOpacities.splice(index, 1);
-                scaleYLayout();
-                setDeleteTrigger(!deleteTrigger);
               }}
             />
           ))
@@ -517,7 +514,6 @@ const ModuleDetail = () => {
                   circleOpacities.push(new Animated.Value(0));
                   viewOpacities.push(new Animated.Value(1));
                 }
-                scaleYLayout();
                 setAdding(false);
                 animateAll(false, false, false);
               }}
@@ -525,18 +521,19 @@ const ModuleDetail = () => {
           </>
         )}
 
-        <TouchableOpacity
-          style={[styles.addExerciseContainer, { opacity: adding || reordering ? 0 : 1 }]}
-          onPress={() => {
-            scrollViewRef.current?.scrollToEnd();
-            opacityLayout();
-            setAdding(true);
-            animateAll(true, false, false);
-          }}
-          disabled={adding || reordering}
-        >
-          <Text style={styles.addExerciseText}>Add Exercise</Text>
-        </TouchableOpacity>
+        <Reanimated.View layout={LinearTransition.duration(200)}>
+          <TouchableOpacity
+            style={[styles.addExerciseContainer, { opacity: adding || reordering ? 0 : 1 }]}
+            onPress={() => {
+              scrollViewRef.current?.scrollToEnd();
+              setAdding(true);
+              animateAll(true, false, false);
+            }}
+            disabled={adding || reordering}
+          >
+            <Text style={styles.addExerciseText}>Add Exercise</Text>
+          </TouchableOpacity>
+        </Reanimated.View>
 
         <Animated.View style={[styles.activeCircleContainer, { opacity: moveOpacity, transform: [{ translateY: moveAnim }, { scale: moveScale }] }]}>
           <TouchableOpacity onPress={completePress} disabled={activeIndex.current + 1 > module.exercises.length || adding || reordering}>
@@ -608,15 +605,12 @@ const styles = StyleSheet.create({
     width: "100%",
     marginTop: 5,
   },
-  exerciseContainer: {
-    paddingHorizontal: "5%",
-  },
   reorder: {
     overflow: "visible",
   },
   addExerciseDivider: {
     borderBottomColor: colors.border_grey,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: 0.55,
     width: "100%",
   },
   addExerciseContainer: {
@@ -631,7 +625,7 @@ const styles = StyleSheet.create({
   },
   activeCircleContainer: {
     position: "absolute",
-    left: 27,
+    left: 10,
     top: 27,
     zIndex: 10,
   },

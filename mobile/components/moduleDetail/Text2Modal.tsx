@@ -21,9 +21,9 @@ interface Text2ModalProps {
 const Text2Modal = ({ visible, setVisible, moduleId, exerciseId, onText2EditSave }: Text2ModalProps) => {
   const { modules, patchModule, updateModules, accessToken, updateAccessToken } = useGlobalContext();
   const module = modules.find((x) => x.id === moduleId)!;
-  const exercise = module.exercises.find((exercise) => exercise.id === exerciseId)!;
+  const exercise = module.exercises.find((exercise) => exercise.id === exerciseId);
 
-  const [text, setText] = useState(exercise.text2 ? exercise.text2 : "");
+  const [text, setText] = useState(exercise?.text2 ? exercise?.text2 : "");
   const [saving, setSaving] = useState(false);
 
   const save = async () => {
@@ -32,7 +32,7 @@ const Text2Modal = ({ visible, setVisible, moduleId, exerciseId, onText2EditSave
     let newExercise = exercise!;
     newExercise.text2 = text;
 
-    const index = module.exercises.findIndex((curr) => curr.id === exercise.id);
+    const index = module.exercises.findIndex((curr) => curr.id === exercise?.id);
     module.exercises[index] = newExercise;
 
     const success = await patchModule(module);
@@ -63,8 +63,8 @@ const Text2Modal = ({ visible, setVisible, moduleId, exerciseId, onText2EditSave
   };
 
   useEffect(() => {
-    setText(exercise.text2 ?? "");
-  }, [exercise.text2]);
+    setText(exercise?.text2 ?? "");
+  }, [exercise?.text2]);
 
   return (
     <Modal animationType="fade" visible={visible} transparent={true}>
@@ -94,7 +94,7 @@ const Text2Modal = ({ visible, setVisible, moduleId, exerciseId, onText2EditSave
                 ellipsizeMode="tail"
                 numberOfLines={1}
               >
-                {exercise.name}
+                {exercise?.name}
               </Text>
               <MaterialIconButton
                 name="close"

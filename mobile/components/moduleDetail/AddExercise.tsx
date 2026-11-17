@@ -3,6 +3,7 @@ import colors from "../../constants/colors";
 import { useGlobalContext } from "../../store/GlobalContext";
 import { ExerciseDto } from "../../../shared/moduledto";
 import { ComponentRef, useRef, useState } from "react";
+import Reanimated, { StretchInY } from "react-native-reanimated";
 
 // Custom Components
 import Button from "../shared/Button";
@@ -46,7 +47,7 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
   };
 
   return (
-    <>
+    <Reanimated.View entering={StretchInY.duration(200)}>
       <View style={styles.inputContainer}>
         <View>
           <View style={styles.topDivider}>
@@ -125,7 +126,7 @@ const AddExercise = ({ moduleId, done }: AddExerciseProps) => {
           </>
         )}
       </View>
-    </>
+    </Reanimated.View>
   );
 };
 

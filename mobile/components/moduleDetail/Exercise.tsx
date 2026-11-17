@@ -1,19 +1,19 @@
-import { ActivityIndicator, Animated, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ComponentRef, useEffect, useRef, useState } from "react";
 import colors from "../../constants/colors";
 import { useGlobalContext } from "../../store/GlobalContext";
 import ReanimatedSwipeable, { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import { opacityLayout } from "../../helpers/layouts";
-import Reanimated from "react-native-reanimated";
+import Reanimated, { createAnimatedComponent, LinearTransition, StretchOutY } from "react-native-reanimated";
 import { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated";
-
-// Custom Components
-import { MaterialIconButton } from "../shared/IconButton";
-import LinkModal from "./LinkModal";
 import { JsonDto } from "../../../shared/jsondto";
 import { ModuleDto } from "../../../shared/moduledto";
 import { get } from "../../helpers/fetch";
 import { errorAlert } from "../../helpers/alert";
+
+// Custom Components
+import { MaterialIconButton } from "../shared/IconButton";
+import LinkModal from "./LinkModal";
 import Text2Modal from "./Text2Modal";
 
 interface ExerciseProps {
@@ -27,18 +27,20 @@ interface ExerciseProps {
   deleteCallback: (index: number) => void;
 }
 
+const ReanimatedPressable = createAnimatedComponent(Pressable);
+
 const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hideActive, active, deleteCallback }: ExerciseProps) => {
   const { modules, patchModule, updateModules, accessToken, updateAccessToken } = useGlobalContext();
   const module = modules.find((x) => x.id === moduleId)!;
-  const exercise = module.exercises.find((exercise) => exercise.id === exerciseId)!;
+  const exercise = module.exercises.find((exercise) => exercise.id === exerciseId);
 
   const [text2ModalVisible, setText2ModalVisible] = useState(false);
   const [linkModalVisible, setLinkModalVisible] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [name, setName] = useState(exercise.name);
-  const [text1, setText1] = useState(exercise.text1);
-  const [text2, setText2] = useState(exercise.text2);
+  const [name, setName] = useState(exercise ? exercise.name : "");
+  const [text1, setText1] = useState(exercise ? exercise.text1 : "");
+  const [text2, setText2] = useState(exercise ? exercise.text2 : "");
   const [swiped, setSwiped] = useState(false);
 
   const swipeableRef = useRef<SwipeableMethods>(null);
@@ -48,10 +50,15 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
     setSaving(true);
 
     const oldIndex = module.exercises.findIndex((curr) => curr.id === exerciseId);
-    module.exercises = module.exercises.filter((curr) => curr.id !== exerciseId);
-    module.progress = module.progress - 100 / module.exercises.length;
+    const exercises = module.exercises.filter((curr) => curr.id !== exerciseId);
+    const completedCount = exercises.filter((curr) => curr.completed).length;
+    const updatedModule = {
+      ...module,
+      exercises,
+      progress: exercises.length === 0 ? 0 : (completedCount / exercises.length) * 100,
+    };
 
-    const success = await patchModule(module);
+    const success = await patchModule(updatedModule);
 
     if (success) {
       deleteCallback(oldIndex);
@@ -63,15 +70,12 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
   const updateExercise = async () => {
     setSaving(true);
 
-    let newExercise = exercise!;
-    newExercise.name = name!;
-    newExercise.text1 = text1!;
-    newExercise.text2 = text2;
+    const updatedModule = {
+      ...module,
+      exercises: module.exercises.map((curr) => (curr.id === exerciseId ? { ...curr, name: name, text1: text1, text2: text2 } : curr)),
+    };
 
-    const index = module.exercises.findIndex((curr) => curr.id === exercise.id);
-    module.exercises[index] = newExercise;
-
-    const success = await patchModule(module);
+    const success = await patchModule(updatedModule);
 
     if (success) {
       const linkedModule = module.exercises.some((curr) => curr.linkId !== undefined);
@@ -99,9 +103,21 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
     setSaving(false);
   };
 
+  const highlightExercise = async () => {
+    const newHighlighted = exercise?.highlighted === undefined ? true : !exercise.highlighted;
+
+    const updatedModule = {
+      ...module,
+      exercises: module.exercises.map((curr) => (curr.id === exerciseId ? { ...curr, highlighted: newHighlighted } : curr)),
+    };
+
+    opacityLayout();
+    await patchModule(updatedModule);
+  };
+
   useEffect(() => {
-    setText2(exercise.text2);
-  }, [exercise.text2]);
+    setText2(exercise?.text2);
+  }, [exercise?.text2]);
 
   const RightAction = (progress: SharedValue<number>) => {
     const animatedStyle = useAnimatedStyle(() => ({
@@ -156,161 +172,174 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
   };
 
   return (
-    <ReanimatedSwipeable
-      ref={swipeableRef}
-      renderRightActions={RightAction}
-      friction={2}
-      onSwipeableOpenStartDrag={() => {
-        opacityLayout();
-        setSwiped(true);
-        if (active) {
-          Animated.timing(hideActive, {
-            toValue: 0.5,
-            duration: 100,
-            useNativeDriver: true,
-          }).start();
-        }
-      }}
-      onSwipeableClose={() => {
-        setSwiped(false);
-        if (active && !editing) {
-          Animated.timing(hideActive, {
-            toValue: 0,
-            duration: 100,
-            useNativeDriver: true,
-          }).start();
-        }
-      }}
-      enabled={!saving && !editing}
-    >
-      <Text2Modal
-        visible={text2ModalVisible}
-        setVisible={setText2ModalVisible}
-        moduleId={moduleId}
-        exerciseId={exerciseId}
-        onText2EditSave={() => {
-          swipeableRef.current!.close();
+    <ReanimatedPressable exiting={StretchOutY.duration(200)} layout={LinearTransition.duration(200)} onLongPress={highlightExercise}>
+      <ReanimatedSwipeable
+        ref={swipeableRef}
+        renderRightActions={RightAction}
+        friction={2}
+        onSwipeableOpenStartDrag={() => {
+          opacityLayout();
+          setSwiped(true);
+          if (active) {
+            Animated.timing(hideActive, {
+              toValue: 0.5,
+              duration: 100,
+              useNativeDriver: true,
+            }).start();
+          }
         }}
-      />
-
-      <LinkModal
-        visible={linkModalVisible}
-        setVisible={setLinkModalVisible}
-        onFinish={() => {
-          swipeableRef.current!.close();
+        onSwipeableClose={() => {
+          setSwiped(false);
+          if (active && !editing) {
+            Animated.timing(hideActive, {
+              toValue: 0,
+              duration: 100,
+              useNativeDriver: true,
+            }).start();
+          }
         }}
-        exerciseId={exerciseId}
-      />
+        enabled={!saving && !editing}
+      >
+        <Text2Modal
+          visible={text2ModalVisible}
+          setVisible={setText2ModalVisible}
+          moduleId={moduleId}
+          exerciseId={exerciseId}
+          onText2EditSave={() => {
+            swipeableRef.current!.close();
+          }}
+        />
 
-      <Animated.View style={[styles.content, { opacity: viewOpacity }]}>
-        <View>
-          <View style={styles.topDividerContainer}>
-            <View style={styles.divider} />
+        <LinkModal
+          visible={linkModalVisible}
+          setVisible={setLinkModalVisible}
+          onFinish={() => {
+            swipeableRef.current!.close();
+          }}
+          exerciseId={exerciseId}
+        />
+
+        <Animated.View style={[styles.content, { opacity: viewOpacity }]}>
+          <View>
+            <View style={styles.topDividerContainer}>
+              <View style={styles.divider} />
+            </View>
+            <Animated.View style={[styles.completeCircleContainer, { opacity: circleOpacity }]}>
+              <MaterialIconButton name="circle" color={"white"} size={30} onPress={() => {}} style={styles.completeCircle} disabled={true} />
+            </Animated.View>
+            <View style={[styles.bottomDividerContainer, { opacity: last ? 0 : 1 }]}>
+              <View style={styles.divider} />
+            </View>
           </View>
-          <Animated.View style={[styles.completeCircleContainer, { opacity: circleOpacity }]}>
-            <MaterialIconButton name="circle" color={"white"} size={30} onPress={() => {}} style={styles.completeCircle} disabled={true} />
-          </Animated.View>
-          <View style={[styles.bottomDividerContainer, { opacity: last ? 0 : 1 }]}>
-            <View style={styles.divider} />
-          </View>
-        </View>
-        <View style={styles.infoContainer}>
-          <View style={styles.textContainer}>
-            {editing ? (
-              <TextInput
-                value={name}
-                onChangeText={setName}
-                style={styles.nameText}
-                placeholderTextColor="#6b6b6b"
-                placeholder="Name..."
-                editable={!saving}
-                autoFocus={true}
-                returnKeyType="next"
-                submitBehavior={text1!.length === 0 ? "submit" : "blurAndSubmit"}
-                onSubmitEditing={() => {
-                  if (text1!.length === 0) {
-                    text1Ref.current?.focus();
-                  }
-                }}
-              />
-            ) : (
-              <Text style={styles.nameText} numberOfLines={1}>
-                {exercise.name}
-              </Text>
-            )}
-            <View style={styles.descriptionsContainer}>
+          <View style={styles.infoContainer}>
+            {exercise?.highlighted && <View style={styles.highlight} />}
+
+            <View style={styles.textContainer}>
               {editing ? (
                 <TextInput
-                  ref={text1Ref}
-                  value={text1}
-                  onChangeText={setText1}
-                  style={styles.text1Text}
+                  value={name}
+                  onChangeText={setName}
+                  style={[
+                    styles.nameText,
+                    { width: exercise?.linkId !== undefined ? "97%" : "100%", color: exercise?.highlighted ? "#A799F7" : "white" },
+                  ]}
                   placeholderTextColor="#6b6b6b"
-                  placeholder="Text..."
+                  placeholder="Name..."
                   editable={!saving}
-                  returnKeyType="go"
-                  onSubmitEditing={updateExercise}
-                  enablesReturnKeyAutomatically={true}
+                  autoFocus={true}
+                  returnKeyType="next"
+                  submitBehavior={text1!.length === 0 ? "submit" : "blurAndSubmit"}
+                  onSubmitEditing={() => {
+                    if (text1!.length === 0) {
+                      text1Ref.current?.focus();
+                    }
+                  }}
                 />
               ) : (
-                <Text style={styles.text1Text} numberOfLines={1}>
-                  {exercise.text1}
+                <Text
+                  style={[
+                    styles.nameText,
+                    { width: exercise?.linkId !== undefined ? "97%" : "100%", color: exercise?.highlighted ? "#A799F7" : "white" },
+                  ]}
+                  numberOfLines={1}
+                >
+                  {exercise?.name}
                 </Text>
               )}
-              <View style={[styles.descriptionDivider, { opacity: exercise.text2 || editing ? 1 : 0 }]} />
-              {editing ? (
-                <>
+              <View style={styles.descriptionsContainer}>
+                {editing ? (
                   <TextInput
-                    value={text2}
-                    onChangeText={setText2}
-                    style={styles.text2Input}
+                    ref={text1Ref}
+                    value={text1}
+                    onChangeText={setText1}
+                    style={styles.text1Text}
                     placeholderTextColor="#6b6b6b"
-                    placeholder="Optional..."
+                    placeholder="Text..."
                     editable={!saving}
                     returnKeyType="go"
-                    submitBehavior={text1?.length === 0 || name?.length === 0 ? "submit" : "blurAndSubmit"}
-                    onSubmitEditing={() => {
-                      if (text1!.length > 0 && name!.length > 0) {
-                        updateExercise();
-                      }
-                    }}
+                    onSubmitEditing={updateExercise}
+                    enablesReturnKeyAutomatically={true}
                   />
-                </>
-              ) : (
-                exercise.text2 && (
+                ) : (
+                  <Text style={styles.text1Text} numberOfLines={1}>
+                    {exercise?.text1}
+                  </Text>
+                )}
+                <View style={[styles.descriptionDivider, { opacity: exercise?.text2 || editing ? 1 : 0 }]} />
+                {editing ? (
                   <>
-                    <Text style={styles.text1Text} numberOfLines={1}>
-                      {exercise.text2}
-                    </Text>
+                    <TextInput
+                      value={text2}
+                      onChangeText={setText2}
+                      style={styles.text2Input}
+                      placeholderTextColor="#6b6b6b"
+                      placeholder="Optional..."
+                      editable={!saving}
+                      returnKeyType="go"
+                      submitBehavior={text1?.length === 0 || name?.length === 0 ? "submit" : "blurAndSubmit"}
+                      onSubmitEditing={() => {
+                        if (text1!.length > 0 && name!.length > 0) {
+                          updateExercise();
+                        }
+                      }}
+                    />
                   </>
-                )
-              )}
+                ) : (
+                  exercise?.text2 && (
+                    <>
+                      <Text style={[styles.text1Text, { width: exercise?.linkId !== undefined ? "45%" : "65%" }]} numberOfLines={1}>
+                        {exercise.text2}
+                      </Text>
+                    </>
+                  )
+                )}
+              </View>
+            </View>
+
+            <View style={[styles.linkContainer, { opacity: !swiped && !editing && exercise?.linkId !== undefined ? 1 : 0 }]}>
+              <Text style={styles.linkText}>Link</Text>
             </View>
           </View>
 
-          <View style={[styles.linkContainer, { opacity: !swiped && !editing && exercise.linkId !== undefined ? 1 : 0 }]}>
-            <Text style={styles.linkText}>Link</Text>
-          </View>
-        </View>
-
-        {editing && (
-          <View style={styles.btnContainer}>
-            {saving ? (
-              <ActivityIndicator size="small" color={colors.lightest_grey} />
-            ) : (
-              <MaterialIconButton
-                name="check"
-                color={colors.primary}
-                size={30}
-                onPress={updateExercise}
-                style={{ opacity: name?.length === 0 || text1?.length === 0 ? 0.4 : 1 }}
-                disabled={name?.length === 0 || text1?.length === 0}
-              />
-            )}
-          </View>
-        )}
-      </Animated.View>
-    </ReanimatedSwipeable>
+          {editing && (
+            <View style={styles.btnContainer}>
+              {saving ? (
+                <ActivityIndicator size="small" color={colors.lightest_grey} />
+              ) : (
+                <MaterialIconButton
+                  name="check"
+                  color={colors.primary}
+                  size={30}
+                  onPress={updateExercise}
+                  style={{ opacity: name?.length === 0 || text1?.length === 0 ? 0.4 : 1 }}
+                  disabled={name?.length === 0 || text1?.length === 0}
+                />
+              )}
+            </View>
+          )}
+        </Animated.View>
+      </ReanimatedSwipeable>
+    </ReanimatedPressable>
   );
 };
 
@@ -351,6 +380,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
   },
+  highlight: {
+    position: "absolute",
+    left: 0,
+    height: "75%",
+    width: 3,
+    backgroundColor: "#8677dd",
+  },
   textContainer: {
     justifyContent: "center",
     flex: 1,
@@ -358,9 +394,7 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   nameText: {
-    color: "white",
     fontWeight: "bold",
-    width: "95%",
     fontSize: 20,
   },
   descriptionsContainer: {
@@ -379,7 +413,7 @@ const styles = StyleSheet.create({
   },
   text2Input: {
     color: colors.lightest_grey,
-    width: "30%",
+    width: "50%",
   },
   linkContainer: {
     borderWidth: 1,

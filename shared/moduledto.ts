@@ -25,6 +25,7 @@ export interface ExerciseDto {
   text1: string;
   text2?: string;
   linkId?: string;
+  highlighted?: boolean;
 }
 
 // Use this for icon
