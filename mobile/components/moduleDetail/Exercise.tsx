@@ -46,6 +46,10 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
   const swipeableRef = useRef<SwipeableMethods>(null);
   const text1Ref = useRef<ComponentRef<typeof TextInput>>(null);
 
+  const modalClose = () => {
+    swipeableRef.current!.close();
+  };
+
   const deleteExercise = async () => {
     setSaving(true);
 
@@ -200,24 +204,9 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
         }}
         enabled={!saving && !editing}
       >
-        <Text2Modal
-          visible={text2ModalVisible}
-          setVisible={setText2ModalVisible}
-          moduleId={moduleId}
-          exerciseId={exerciseId}
-          onText2EditSave={() => {
-            swipeableRef.current!.close();
-          }}
-        />
+        <Text2Modal visible={text2ModalVisible} setVisible={setText2ModalVisible} moduleId={moduleId} exerciseId={exerciseId} onClose={modalClose} />
 
-        <LinkModal
-          visible={linkModalVisible}
-          setVisible={setLinkModalVisible}
-          onFinish={() => {
-            swipeableRef.current!.close();
-          }}
-          exerciseId={exerciseId}
-        />
+        <LinkModal visible={linkModalVisible} setVisible={setLinkModalVisible} onClose={modalClose} exerciseId={exerciseId} />
 
         <Animated.View style={[styles.content, { opacity: viewOpacity }]}>
           <View>

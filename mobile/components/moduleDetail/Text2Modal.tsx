@@ -1,24 +1,26 @@
 import { Keyboard, Modal, StyleSheet, Text, TextInput, TouchableWithoutFeedback, View } from "react-native";
 import { ModuleDto } from "../../../shared/moduledto";
-import { MaterialIconButton } from "../shared/IconButton";
 import colors from "../../constants/colors";
 import { useEffect, useState } from "react";
 import { BlurView } from "expo-blur";
-import Button from "../shared/Button";
 import { useGlobalContext } from "../../store/GlobalContext";
 import { JsonDto } from "../../../shared/jsondto";
 import { get } from "../../helpers/fetch";
 import { errorAlert } from "../../helpers/alert";
+
+// Custom Components
+import Button from "../shared/Button";
+import { MaterialIconButton } from "../shared/IconButton";
 
 interface Text2ModalProps {
   visible: boolean;
   setVisible: (newVisible: boolean) => void;
   moduleId: string;
   exerciseId: string;
-  onText2EditSave: () => void;
+  onClose: () => void;
 }
 
-const Text2Modal = ({ visible, setVisible, moduleId, exerciseId, onText2EditSave }: Text2ModalProps) => {
+const Text2Modal = ({ visible, setVisible, moduleId, exerciseId, onClose }: Text2ModalProps) => {
   const { modules, patchModule, updateModules, accessToken, updateAccessToken } = useGlobalContext();
   const module = modules.find((x) => x.id === moduleId)!;
   const exercise = module.exercises.find((exercise) => exercise.id === exerciseId);
@@ -50,7 +52,6 @@ const Text2Modal = ({ visible, setVisible, moduleId, exerciseId, onText2EditSave
         updateModules(responseModule.data!);
       }
 
-      onText2EditSave();
       closeModal();
     } else {
       setSaving(false);
@@ -60,6 +61,7 @@ const Text2Modal = ({ visible, setVisible, moduleId, exerciseId, onText2EditSave
   const closeModal = () => {
     setSaving(false);
     setVisible(false);
+    onClose();
   };
 
   useEffect(() => {

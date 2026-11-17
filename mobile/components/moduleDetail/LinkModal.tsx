@@ -17,11 +17,11 @@ import Button from "../shared/Button";
 interface LinkModalProps {
   visible: boolean;
   setVisible: (newVisible: boolean) => void;
-  onFinish: () => void;
+  onClose: () => void;
   exerciseId: string;
 }
 
-const LinkModal = ({ visible, setVisible, onFinish, exerciseId }: LinkModalProps) => {
+const LinkModal = ({ visible, setVisible, onClose, exerciseId }: LinkModalProps) => {
   const { modules, accessToken, updateAccessToken, updateModules } = useGlobalContext();
   const allExercises = useMemo(() => modules.flatMap((module) => module.exercises), [modules]);
   const exercise = allExercises.find((item) => item.id === exerciseId);
@@ -108,7 +108,7 @@ const LinkModal = ({ visible, setVisible, onFinish, exerciseId }: LinkModalProps
   const closeModal = () => {
     setVisible(false);
     setSaving(false);
-    onFinish();
+    onClose();
     resetState();
   };
 
