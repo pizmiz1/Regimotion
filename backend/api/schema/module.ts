@@ -25,6 +25,7 @@ const exerciseSchema = new mongoose.Schema<ExerciseDto>(
     text1: { type: String, required: true },
     text2: { type: String },
     linkId: { type: String },
+    highlighted: { type: Boolean },
   },
   {
     toJSON: {
