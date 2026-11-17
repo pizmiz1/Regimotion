@@ -20,7 +20,10 @@ const ReorderExercise = ({ item, drag, isActive, saving }: ReorderExerciseProps)
         <MaterialIconButton name="reorder" color={colors.lightest_grey} size={25} onPress={() => {}} disabled={true} style={styles.icon} />
         <View style={styles.infoContainer}>
           <View style={styles.textContainer}>
-            <Text style={styles.nameText} numberOfLines={1}>
+            <Text
+              style={[styles.nameText, { width: item?.linkId !== undefined ? "97%" : "100%", color: item?.highlighted ? "#A799F7" : "white" }]}
+              numberOfLines={1}
+            >
               {item.name}
             </Text>
             <View style={styles.descriptionsContainer}>
@@ -29,14 +32,13 @@ const ReorderExercise = ({ item, drag, isActive, saving }: ReorderExerciseProps)
               </Text>
               <View style={[styles.descriptionDivider, { opacity: item?.text2 ? 1 : 0 }]} />
               {item?.text2 && (
-                <Text style={styles.descriptionText} numberOfLines={1}>
+                <Text style={[styles.descriptionText, { width: item?.linkId !== undefined ? "45%" : "66%" }]} numberOfLines={1}>
                   {item.text2}
                 </Text>
               )}
             </View>
           </View>
-
-          <View style={[styles.linkContainer, { opacity: true ? 1 : 0 }]}>
+          <View style={[styles.linkContainer, { opacity: item?.linkId !== undefined ? 1 : 0 }]}>
             <Text style={styles.linkText}>Link</Text>
           </View>
         </View>
@@ -49,7 +51,7 @@ export default ReorderExercise;
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 15,
+    paddingVertical: 14.5,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -70,7 +72,6 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   nameText: {
-    color: "white",
     fontWeight: "bold",
     fontSize: 20,
   },
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
   },
   descriptionText: {
     color: colors.lightest_grey,
-    width: "40%",
+    width: "35%",
   },
   descriptionDivider: {
     width: StyleSheet.hairlineWidth,

@@ -4,7 +4,7 @@ import colors from "../../constants/colors";
 import { useGlobalContext } from "../../store/GlobalContext";
 import ReanimatedSwipeable, { SwipeableMethods } from "react-native-gesture-handler/ReanimatedSwipeable";
 import { opacityLayout } from "../../helpers/layouts";
-import Reanimated, { createAnimatedComponent, LinearTransition, StretchOutY } from "react-native-reanimated";
+import Reanimated, { createAnimatedComponent, LinearTransition } from "react-native-reanimated";
 import { Extrapolation, interpolate, SharedValue, useAnimatedStyle } from "react-native-reanimated";
 import { JsonDto } from "../../../shared/jsondto";
 import { ModuleDto } from "../../../shared/moduledto";
@@ -176,7 +176,7 @@ const Exercise = ({ exerciseId, moduleId, viewOpacity, circleOpacity, last, hide
   };
 
   return (
-    <ReanimatedPressable exiting={StretchOutY.duration(200)} layout={LinearTransition.duration(200)} onLongPress={highlightExercise}>
+    <ReanimatedPressable layout={LinearTransition.duration(200)} onLongPress={highlightExercise}>
       <ReanimatedSwipeable
         ref={swipeableRef}
         renderRightActions={RightAction}
