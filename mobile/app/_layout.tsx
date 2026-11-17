@@ -1,10 +1,10 @@
 import { Stack } from "expo-router";
 import { GlobalProvider, useGlobalContext } from "../store/GlobalContext";
-import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import routeNames from "../constants/routeNames";
 import colors from "../constants/colors";
+import { StatusBar } from "react-native";
 
 const RootLayoutContent = () => {
   const { appLoading, accessToken } = useGlobalContext();
@@ -14,7 +14,7 @@ const RootLayoutContent = () => {
 
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar barStyle="light-content" />
       <Stack
         screenOptions={{
           headerShown: false,

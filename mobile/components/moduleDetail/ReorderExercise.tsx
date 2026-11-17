@@ -32,7 +32,7 @@ const ReorderExercise = ({ item, drag, isActive, saving }: ReorderExerciseProps)
               </Text>
               <View style={[styles.descriptionDivider, { opacity: item?.text2 ? 1 : 0 }]} />
               {item?.text2 && (
-                <Text style={[styles.descriptionText, { width: item?.linkId !== undefined ? "45%" : "66%" }]} numberOfLines={1}>
+                <Text style={[styles.descriptionText, { width: item?.linkId !== undefined ? "45%" : "65.5%" }]} numberOfLines={1}>
                   {item.text2}
                 </Text>
               )}
