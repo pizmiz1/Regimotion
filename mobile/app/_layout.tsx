@@ -20,6 +20,7 @@ const RootLayoutContent = () => {
           headerShown: false,
           gestureEnabled: false,
           contentStyle: { backgroundColor: colors.secondary },
+          statusBarStyle: "light",
         }}
       >
         <Stack.Screen name={routeNames.index} />
